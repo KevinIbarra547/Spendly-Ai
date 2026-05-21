@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendly — Expense Log</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+  <!-- ============ DEV PREVIEW BANNER — REMOVE BEFORE DEMO ============ -->
+  <div id="dev-banner" class="fixed top-2 right-2 z-50 bg-white border border-slate-300 rounded-lg shadow-lg px-3 py-2 text-xs font-mono flex items-center gap-2">
+    <span id="tw-dot" class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+    <span class="text-slate-700">expenses.html</span>
+    <span class="text-slate-400">|</span>
+    <span id="boot-time" class="text-slate-500">…</span>
+    <button id="ping-btn" class="ml-1 px-2 py-0.5 rounded bg-slate-900 text-white hover:bg-slate-700">ping</button>
+    <span id="ping-result" class="text-slate-500">·</span>
+  </div>
+  <!-- ============ END DEV PREVIEW BANNER ============ -->
+
+  <main class="p-8 pt-16">
+    <h1 class="text-3xl font-bold mb-2">Spendly — Expense Log</h1>
+    <p class="text-slate-600">Placeholder page. Expense Log UI will be built in later checkpoints.</p>
+  </main>
+
+  <script>
+    (async () => {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        document.getElementById('boot-time').textContent = 'boot ' + new Date(data.startedAt).toLocaleTimeString();
+      } catch (e) {
+        document.getElementById('boot-time').textContent = 'boot ?';
+      }
+      document.getElementById('ping-btn').addEventListener('click', async () => {
+        const el = document.getElementById('ping-result');
+        el.textContent = '…';
+        try {
+          const r = await fetch('/api/health');
+          el.textContent = r.ok ? '✅' : '❌';
+        } catch {
+          el.textContent = '❌';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

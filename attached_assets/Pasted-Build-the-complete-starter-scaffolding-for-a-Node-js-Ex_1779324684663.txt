@@ -1,0 +1,242 @@
+Build the complete starter scaffolding for a Node.js + Express web app called "Spendly" — a personal finance app for students. This is the CP01 architecture milestone for a school project. Build exactly what's specified below. No TypeScript anywhere — plain JavaScript only.
+
+═══════════════════════════════════════════════════
+1. PACKAGE.JSON
+═══════════════════════════════════════════════════
+
+Create package.json with:
+- name: "spendly"
+- version: "1.0.0"
+- main: "server.js"
+- scripts: { "start": "node server.js" }
+- type: "commonjs" (we are NOT using ES modules)
+
+Dependencies (use these exact versions or latest stable):
+- express ^4.19.2
+- express-session ^1.18.0
+- bcryptjs ^2.4.3
+- multer ^1.4.5-lts.1
+- groq-sdk ^0.3.0
+
+═══════════════════════════════════════════════════
+2. .GITIGNORE
+═══════════════════════════════════════════════════
+
+Create .gitignore blocking:
+node_modules/
+.env
+.replit
+.config/
+data/users.json
+data/expenses.json
+data/goals.json
+public/uploads/pfps/*
+public/uploads/receipts/*
+!public/uploads/pfps/.gitkeep
+!public/uploads/receipts/.gitkeep
+
+═══════════════════════════════════════════════════
+3. DIRECTORY STRUCTURE (create exactly this — no extras, no omissions)
+═══════════════════════════════════════════════════
+
+spendly/
+├── data/
+│   ├── expenses.json          (initialize as [])
+│   ├── goals.json             (initialize as [])
+│   ├── site_config.json       (initialize with object below)
+│   └── users.json             (initialize as [])
+├── middleware/
+│   └── auth.js                (placeholder — see section 6)
+├── public/
+│   ├── css/
+│   │   └── style.css          (blank file, just a comment header)
+│   ├── js/
+│   │   ├── admin.js
+│   │   ├── analytics.js
+│   │   ├── coach.js
+│   │   ├── dashboard.js
+│   │   ├── expenses.js
+│   │   ├── goals.js
+│   │   ├── profile.js
+│   │   └── scanner.js
+│   ├── uploads/
+│   │   ├── pfps/
+│   │   │   └── .gitkeep
+│   │   └── receipts/
+│   │       └── .gitkeep
+│   ├── index.html
+│   ├── dashboard.html
+│   ├── expenses.html
+│   ├── goals.html
+│   ├── coach.html
+│   ├── analytics.html
+│   ├── profile.html
+│   ├── admin.html
+│   └── checkpoints.html
+├── routes/
+│   ├── admin.js               (placeholder router)
+│   ├── ai.js                  (placeholder router)
+│   ├── auth.js                (placeholder router)
+│   └── expenses.js            (placeholder router)
+├── .gitignore
+├── package.json
+└── server.js
+
+The data/ files listed in .gitignore still need to be created on disk with their starting content — gitignore prevents them from being committed, but they need to exist for the app to run.
+
+═══════════════════════════════════════════════════
+4. JSON FILE INITIAL CONTENTS
+═══════════════════════════════════════════════════
+
+data/users.json        → []
+data/expenses.json     → []
+data/goals.json        → []
+data/site_config.json  → {
+  "maintenanceMode": false,
+  "aiCoachEnabled": true,
+  "receiptScannerEnabled": true,
+  "tipOfTheDay": "Hey Spendly fam! Track your daily coffee — it adds up fast ☕"
+}
+
+═══════════════════════════════════════════════════
+5. SERVER.JS
+═══════════════════════════════════════════════════
+
+Build server.js with:
+- require express, express-session, and path (CommonJS — use require, not import)
+- Create the express app
+- Body parsing: express.json() and express.urlencoded({ extended: true })
+- Serve /public statically with express.static(path.join(__dirname, 'public'))
+- Session middleware configuration:
+    - secret: process.env.SESSION_SECRET
+    - If SESSION_SECRET is missing, console.error("FATAL: SESSION_SECRET is not set in Replit Secrets") and process.exit(1)
+    - resave: false
+    - saveUninitialized: false
+    - cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, secure: false }
+- Record a SERVER_START_ISO constant on boot (new Date().toISOString())
+- GET /api/health → returns 200 with { ok: true, startedAt: SERVER_START_ISO }
+- Mount these routers (placeholders for now, but wire them up so the team can fill them in):
+    app.use('/api/auth', require('./routes/auth'))
+    app.use('/api/expenses', require('./routes/expenses'))
+    app.use('/api/admin', require('./routes/admin'))
+    app.use('/api/ai', require('./routes/ai'))
+- Also expose GET /api/site/config that reads and returns data/site_config.json (this is a public read the frontend hits on every page load)
+- Global error handler middleware: console.error the stack, return 500 with { error: "Something broke internally!" }
+- Listen on process.env.PORT || 3000, log "🚀 Spendly running on port <port>"
+
+═══════════════════════════════════════════════════
+6. PLACEHOLDER ROUTE FILES
+═══════════════════════════════════════════════════
+
+routes/auth.js, routes/expenses.js, routes/admin.js, routes/ai.js:
+Each one: const router = express.Router(); add a single GET '/' that returns { route: '<name>', status: 'not implemented yet' }; module.exports = router;
+
+middleware/auth.js:
+Export stubs: module.exports = { requireAuth: (req, res, next) => next(), requireAdmin: (req, res, next) => next() };
+Add a comment block at the top explaining: "requireAuth will check req.session.userId and return 401 if missing. requireAdmin will additionally check that the user is flagged isAdmin in users.json. Both get fleshed out in CP02 and CP09."
+
+═══════════════════════════════════════════════════
+7. HTML PAGES (all 9)
+═══════════════════════════════════════════════════
+
+Every HTML file uses this structure. Use Tailwind v4 via the browser CDN — not v3.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendly — <PAGE_NAME></title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+  <!-- ============ DEV PREVIEW BANNER — REMOVE BEFORE DEMO ============ -->
+  <div id="dev-banner" class="fixed top-2 right-2 z-50 bg-white border border-slate-300 rounded-lg shadow-lg px-3 py-2 text-xs font-mono flex items-center gap-2">
+    <span id="tw-dot" class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+    <span class="text-slate-700"><PAGE_FILENAME></span>
+    <span class="text-slate-400">|</span>
+    <span id="boot-time" class="text-slate-500">…</span>
+    <button id="ping-btn" class="ml-1 px-2 py-0.5 rounded bg-slate-900 text-white hover:bg-slate-700">ping</button>
+    <span id="ping-result" class="text-slate-500">·</span>
+  </div>
+  <!-- ============ END DEV PREVIEW BANNER ============ -->
+
+  <main class="p-8 pt-16">
+    <h1 class="text-3xl font-bold mb-2">Spendly — <PAGE_NAME></h1>
+    <p class="text-slate-600">Placeholder page. <PAGE_NAME> UI will be built in later checkpoints.</p>
+  </main>
+
+  <script>
+    // Dev banner logic — Tailwind verification + backend ping + boot time
+    (async () => {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        document.getElementById('boot-time').textContent = 'boot ' + new Date(data.startedAt).toLocaleTimeString();
+      } catch (e) {
+        document.getElementById('boot-time').textContent = 'boot ?';
+      }
+      document.getElementById('ping-btn').addEventListener('click', async () => {
+        const el = document.getElementById('ping-result');
+        el.textContent = '…';
+        try {
+          const r = await fetch('/api/health');
+          el.textContent = r.ok ? '✅' : '❌';
+        } catch {
+          el.textContent = '❌';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
+For each of the 9 pages, replace <PAGE_NAME> and <PAGE_FILENAME>:
+- index.html       → "Landing"            / "index.html"
+- dashboard.html   → "Dashboard"          / "dashboard.html"
+- expenses.html    → "Expense Log"        / "expenses.html"
+- goals.html       → "Goals & Wishlist"   / "goals.html"
+- coach.html       → "AI Coach"           / "coach.html"
+- analytics.html   → "Analytics"          / "analytics.html"
+- profile.html     → "Profile"            / "profile.html"
+- admin.html       → "Admin"              / "admin.html"
+- checkpoints.html → "Checkpoints"        / "checkpoints.html"
+
+The dev banner in the top-right is critical — it lets us verify three things at a glance in the Replit preview:
+  1. The green dot proves Tailwind v4 loaded (otherwise no styling, no green circle).
+  2. The "boot <time>" proves the backend started and /api/health works.
+  3. The "ping" button hitting it again proves the API stays reachable.
+If any of those three fail, the preview is broken. Add a clear comment in each HTML file saying this banner should be removed before the final demo.
+
+═══════════════════════════════════════════════════
+8. PLACEHOLDER FRONTEND JS FILES
+═══════════════════════════════════════════════════
+
+Each file in public/js/ should just be a one-line comment header like:
+// admin.js — admin dashboard logic. Owner: <see PRD>. Implemented in later checkpoints.
+
+Same pattern for: analytics.js, coach.js, dashboard.js, expenses.js, goals.js, profile.js, scanner.js
+public/css/style.css gets one comment line too.
+
+═══════════════════════════════════════════════════
+9. REPLIT SECRETS REQUIRED
+═══════════════════════════════════════════════════
+
+Before the server can start, two secrets must be set in Replit (the 🔒 icon in the sidebar):
+- SESSION_SECRET — any long random string (the server will refuse to boot without this)
+- GROQ_API_KEY — needed later for AI features, not for boot
+
+After building, remind the user to set SESSION_SECRET in Replit Secrets or `npm start` will exit immediately.
+
+═══════════════════════════════════════════════════
+10. AFTER BUILDING
+═══════════════════════════════════════════════════
+
+- Run npm install
+- Confirm `npm start` boots without errors and logs "🚀 Spendly running on port 3000" (will require SESSION_SECRET to be set first)
+- Confirm GET /api/health returns 200
+- Confirm visiting / in the Replit preview shows the landing page WITH the dev banner in the top-right showing a green dot, a boot timestamp, and a working ping button
+- Do NOT initialize git, commit, or push — the team will handle git themselves
+- After everything is built, print a short summary of what was created and a checklist of the three preview-banner verifications above

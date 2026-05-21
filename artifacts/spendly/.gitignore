@@ -1,0 +1,11 @@
+node_modules/
+.env
+.replit
+.config/
+data/users.json
+data/expenses.json
+data/goals.json
+public/uploads/pfps/*
+public/uploads/receipts/*
+!public/uploads/pfps/.gitkeep
+!public/uploads/receipts/.gitkeep

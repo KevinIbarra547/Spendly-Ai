@@ -1,45 +1,55 @@
-# [Project name]
+# Spendly
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A personal finance app for students — track expenses, set goals, get AI coaching, and scan receipts.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `cd artifacts/spendly && node server.js` — run the Spendly server (port 3000)
+- Required env secret: `SESSION_SECRET` — server will refuse to boot without it
+- Optional env secret: `GROQ_API_KEY` — needed for AI coach features (CP later)
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Plain JavaScript (no TypeScript) — CommonJS (`require`)
+- Node.js + Express 4
+- express-session for auth sessions
+- bcryptjs for password hashing (CP02+)
+- multer for file uploads (profile pics, receipts)
+- groq-sdk for AI coach (later checkpoint)
+- Tailwind v4 via browser CDN in HTML pages
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/spendly/server.js` — entry point, session config, route mounts
+- `artifacts/spendly/routes/` — placeholder routers (auth, expenses, admin, ai)
+- `artifacts/spendly/middleware/auth.js` — requireAuth / requireAdmin stubs
+- `artifacts/spendly/public/` — static HTML pages + CSS + JS stubs
+- `artifacts/spendly/data/` — JSON flat-file storage (users, expenses, goals, site_config)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Flat-file JSON storage for simplicity in early checkpoints; no database until later CPs
+- `SESSION_SECRET` required at boot — server exits immediately if missing
+- `SERVER_START_ISO` recorded at startup and exposed via `/api/health` for the dev banner boot time
+- `/api/site/config` is a public GET (no auth) — frontend hits it on every page load
+- Dev banner in top-right of every HTML page verifies Tailwind v4 load, backend health, and API ping
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+9 pages: Landing, Dashboard, Expense Log, Goals & Wishlist, AI Coach, Analytics, Profile, Admin, Checkpoints. All placeholder UIs for CP01 — built out in later checkpoints.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Plain JavaScript only — no TypeScript anywhere in this project
+- CommonJS (`require`, `module.exports`) — not ES modules
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- `SESSION_SECRET` must be set in Replit Secrets before `node server.js` will start
+- `GROQ_API_KEY` is optional for boot but needed for AI features
+- Dev banner must be removed from all HTML files before the final demo
+- Do NOT init git / commit / push — the team handles git themselves
 
 ## Pointers
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- See the `pnpm-workspace` skill for workspace structure details
