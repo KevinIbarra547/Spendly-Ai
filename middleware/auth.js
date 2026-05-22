@@ -1,16 +1,40 @@
-/**
- * Auth middleware stubs — fleshed out in CP02 and CP09.
- *
- * requireAuth: will check req.session.userId and return 401 if missing.
- *   Once implemented, any route that requires a logged-in user should use this.
- *
- * requireAdmin: will additionally check that the user flagged as isAdmin
- *   exists in users.json. Any admin-only route should use this after requireAuth.
- *
- * For now both stubs simply call next() so placeholder routes work immediately.
- */
+const fs = require('fs');
+const path = require('path');
 
-module.exports = {
-  requireAuth: (req, res, next) => next(),
-  requireAdmin: (req, res, next) => next()
-};
+const USERS_PATH = path.join(__dirname, '..', 'data', 'users.json');
+
+function readUsers() {
+  try {
+    const raw = fs.readFileSync(USERS_PATH, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    return [];
+  }
+}
+
+function requireAuth(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const users = readUsers();
+    const user = users.find(u => u.id === req.session.userId);
+    if (!user || user.isAdmin !== true) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    next();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+module.exports = { requireAuth, requireAdmin };
