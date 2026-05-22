@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spendly — Auth Test</title>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    .status-message {
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .status-message.show {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen">
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -42,11 +51,31 @@
         <button onclick="logout()" class="w-full p-2 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
       </div>
 
+      <!-- Status Message -->
+      <div id="status-message" class="status-message mt-4 p-3 rounded hidden"></div>
+
       <button onclick="closeAuth()" class="mt-4 w-full p-2 bg-gray-100 rounded hover:bg-gray-200">Close</button>
     </div>
   </div>
 
   <script>
+    const statusMessage = document.getElementById('status-message');
+
+    function showStatus(message, isSuccess) {
+      statusMessage.textContent = message;
+      statusMessage.className = 'status-message mt-4 p-3 rounded';
+      if (isSuccess) {
+        statusMessage.classList.add('bg-green-50', 'text-green-700');
+      } else {
+        statusMessage.classList.add('bg-red-50', 'text-red-700');
+      }
+      statusMessage.classList.add('show');
+      
+      setTimeout(() => {
+        statusMessage.classList.remove('show');
+      }, 4000);
+    }
+
     function showRegister() {
       document.getElementById('register-form').style.display = 'block';
       document.getElementById('login-form').style.display = 'none';
@@ -68,6 +97,10 @@
       document.getElementById('auth-title').textContent = 'Logout';
     }
 
+    function closeAuth() {
+      document.getElementById('auth-overlay').style.display = 'none';
+    }
+
     document.getElementById('register-form-element').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -81,13 +114,13 @@
         });
         const result = await response.json();
         if (response.ok) {
-          alert('Registration successful!');
+          showStatus('Registration successful!', true);
           showLogin();
         } else {
-          alert(result.error || 'Registration failed');
+          showStatus(result.error || 'Registration failed', false);
         }
       } catch (err) {
-        alert('Error: ' + err.message);
+        showStatus('Error: ' + err.message, false);
       }
     });
 
@@ -104,13 +137,13 @@
         });
         const result = await response.json();
         if (response.ok) {
-          alert('Login successful!');
+          showStatus('Login successful!', true);
           showLogout();
         } else {
-          alert(result.error || 'Login failed');
+          showStatus(result.error || 'Login failed', false);
         }
       } catch (err) {
-        alert('Error: ' + err.message);
+        showStatus('Error: ' + err.message, false);
       }
     });
 
@@ -119,13 +152,13 @@
         const response = await fetch('/api/auth/logout', { method: 'POST' });
         const result = await response.json();
         if (response.ok) {
-          alert('Logged out successfully!');
+          showStatus('Logged out successfully!', true);
           showLogin();
         } else {
-          alert(result.error || 'Logout failed');
+          showStatus(result.error || 'Logout failed', false);
         }
       } catch (err) {
-        alert('Error: ' + err.message);
+        showStatus('Error: ' + err.message, false);
       }
     }
 
