@@ -5,11 +5,11 @@ const requireAuth = (req, res, next) => {
   next();
 };
 
-const isAdmin = (req, res, next) => {
+const requireAdmin = (req, res, next) => {
   if (!req.session.user || !req.session.user.isAdmin) {
     return res.status(403).json({ error: 'Forbidden' });
   }
   next();
 };
 
-module.exports = { requireAuth, isAdmin };
+module.exports = { requireAuth, requireAdmin };
