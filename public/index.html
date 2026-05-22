@@ -25,6 +25,151 @@
     <p class="text-slate-600">Placeholder page. Landing UI will be built in later checkpoints.</p>
   </main>
 
+
+<!-- ========================================================================
+   TEMPORARY AUTH TESTING UI — REMOVE THIS BLOCK BEFORE FINAL DEPLOYMENT
+   ======================================================================== -->
+
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="auth-overlay" style="display: none;">
+  <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+    <h2 class="text-2xl font-bold mb-4" id="auth-title">Auth Test</h2>
+    
+    <!-- Register Form -->
+    <div id="register-form" style="display: none;">
+      <form id="register-form-element">
+        <input type="text" name="username" placeholder="Username" class="w-full p-2 mb-2 border rounded" required>
+        <input type="password" name="password" placeholder="Password" class="w-full p-2 mb-2 border rounded" required>
+        <input type="email" name="email" placeholder="Email" class="w-full p-2 mb-2 border rounded" required>
+        <input type="text" name="schoolName" placeholder="School Name" class="w-full p-2 mb-2 border rounded" required>
+        <input type="number" name="graduationYear" placeholder="Graduation Year" class="w-full p-2 mb-2 border rounded" required>
+        <input type="text" name="studentStatus" placeholder="Student Status" class="w-full p-2 mb-2 border rounded" required>
+        <input type="text" name="primaryFinancialGoal" placeholder="Primary Financial Goal" class="w-full p-2 mb-2 border rounded" required>
+        <button type="submit" class="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600">Register</button>
+      </form>
+      <button onclick="showLogin()" class="mt-2 w-full p-2 bg-gray-200 rounded hover:bg-gray-300">Switch to Login</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" style="display: none;">
+      <form id="login-form-element">
+        <input type="text" name="username" placeholder="Username or Email" class="w-full p-2 mb-2 border rounded" required>
+        <input type="password" name="password" placeholder="Password" class="w-full p-2 mb-2 border rounded" required>
+        <button type="submit" class="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600">Login</button>
+      </form>
+      <button onclick="showRegister()" class="mt-2 w-full p-2 bg-gray-200 rounded hover:bg-gray-300">Switch to Register</button>
+    </div>
+
+    <!-- Logout Button -->
+    <div id="logout-section" style="display: none;">
+      <p class="mb-4">You are logged in!</p>
+      <button onclick="logout()" class="w-full p-2 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
+    </div>
+
+    <button onclick="closeAuth()" class="mt-4 w-full p-2 bg-gray-100 rounded hover:bg-gray-200">Close</button>
+  </div>
+</div>
+
+<button onclick="showAuth()" class="fixed bottom-4 right-4 p-3 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 z-40">
+  Test Auth
+</button>
+
+<script>
+  function showAuth() {
+    document.getElementById('auth-overlay').style.display = 'flex';
+    showRegister();
+  }
+
+  function closeAuth() {
+    document.getElementById('auth-overlay').style.display = 'none';
+  }
+
+  function showRegister() {
+    document.getElementById('register-form').style.display = 'block';
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('logout-section').style.display = 'none';
+    document.getElementById('auth-title').textContent = 'Register';
+  }
+
+  function showLogin() {
+    document.getElementById('register-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('logout-section').style.display = 'none';
+    document.getElementById('auth-title').textContent = 'Login';
+  }
+
+  function showLogout() {
+    document.getElementById('register-form').style.display = 'none';
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('logout-section').style.display = 'block';
+    document.getElementById('auth-title').textContent = 'Logout';
+  }
+
+  document.getElementById('register-form-element').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (response.ok) {
+        alert('Registration successful!');
+        showLogin();
+      } else {
+        alert(result.error || 'Registration failed');
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  });
+
+  document.getElementById('login-form-element').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const { username, password } = Object.fromEntries(formData.entries());
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        alert('Login successful!');
+        showLogout();
+      } else {
+        alert(result.error || 'Login failed');
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  });
+
+  async function logout() {
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      const result = await response.json();
+      if (response.ok) {
+        alert('Logged out successfully!');
+        showLogin();
+      } else {
+        alert(result.error || 'Logout failed');
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+</script>
+
+<!-- ========================================================================
+   END TEMPORARY AUTH TESTING UI — REMOVE THIS BLOCK BEFORE FINAL DEPLOYMENT
+   ======================================================================== -->
+
   <script>
     (async () => {
       try {
