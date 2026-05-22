@@ -12,17 +12,29 @@ if (!process.env.SESSION_SECRET) {
 
 const SERVER_START_ISO = new Date().toISOString();
 
+// 1. BODY PARSERS FIRST (so req.body is defined inside session + routes)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
+// 2. SESSION MIDDLEWARE SECOND (so req.session exists inside routes)
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, secure: false }
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: false
+  }
 }));
 
+// 3. API ROUTES THIRD (BEFORE static, so /api/* doesn't fall through)
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/expenses', require('./routes/expenses'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/ai', require('./routes/ai'));
+
+// 4. Built-in health and config endpoints
 app.get('/api/health', (req, res) => {
   res.status(200).json({ ok: true, startedAt: SERVER_START_ISO });
 });
@@ -36,11 +48,10 @@ app.get('/api/site/config', (req, res) => {
   }
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/expenses', require('./routes/expenses'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/ai', require('./routes/ai'));
+// 5. STATIC FILES LAST (so it's a fallback after API routes)
+app.use(express.static(path.join(__dirname, 'public')));
 
+// 6. Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something broke internally!' });
