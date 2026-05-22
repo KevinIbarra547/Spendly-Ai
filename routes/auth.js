@@ -66,13 +66,13 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { password, username, email } = req.body;
-    if (!password || (!username && !email)) {
+    const { password, identifier } = req.body;
+    if (!password || !identifier) {
       return res.status(400).json({ error: 'Password and username/email are required' });
     }
 
     const users = readUsers();
-    const user = users.find(u => u.username === username || u.email === email);
+    const user = users.find(u => u.username === identifier || u.email === identifier);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
