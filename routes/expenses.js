@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const router = express.Router();
-const requireAuth = require('../middleware/auth');
+const { requireAuth } = require('../middleware/auth');
 
 // Helper functions for reading and writing JSON files
 function readJSON(filePath) {
@@ -25,6 +25,36 @@ function writeJSON(filePath, data) {
   }
 }
 
+// Validation helpers
+function isValidExpense(body) {
+  if (typeof body.amount !== 'number' || body.amount <= 0) {
+    return { valid: false, error: 'Amount must be a positive number' };
+  }
+  if (!body.category || typeof body.category !== 'string' || body.category.trim() === '') {
+    return { valid: false, error: 'Category must be a non-empty string' };
+  }
+  if (body.date && isNaN(new Date(body.date).getTime())) {
+    return { valid: false, error: 'Date must be a valid ISO date string' };
+  }
+  return { valid: true };
+}
+
+function isValidGoal(body) {
+  if (!body.title || typeof body.title !== 'string' || body.title.trim() === '') {
+    return { valid: false, error: 'Title must be a non-empty string' };
+  }
+  if (typeof body.targetAmount !== 'number' || body.targetAmount <= 0) {
+    return { valid: false, error: 'Target amount must be a positive number' };
+  }
+  if (typeof body.currentSaved !== 'number' || body.currentSaved < 0) {
+    return { valid: false, error: 'Current saved must be a non-negative number' };
+  }
+  if (body.deadline && isNaN(new Date(body.deadline).getTime())) {
+    return { valid: false, error: 'Deadline must be a valid ISO date string' };
+  }
+  return { valid: true };
+}
+
 // Paths for JSON files
 const expensesPath = path.join(__dirname, '../data/expenses.json');
 const goalsPath = path.join(__dirname, '../data/goals.json');
@@ -45,6 +75,10 @@ router.get('/', requireAuth, (req, res) => {
 // POST /api/expenses — create a new expense
 router.post('/', requireAuth, (req, res) => {
   try {
+    const validation = isValidExpense(req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
+    }
     const expenses = readJSON(expensesPath);
     const newExpense = {
       id: `exp_${Date.now()}`,
@@ -66,6 +100,12 @@ router.post('/', requireAuth, (req, res) => {
 // PUT /api/expenses/:id — partially update an expense
 router.put('/:id', requireAuth, (req, res) => {
   try {
+    if (req.body.amount !== undefined || req.body.category !== undefined || req.body.date !== undefined) {
+      const validation = isValidExpense(req.body);
+      if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
+      }
+    }
     const expenses = readJSON(expensesPath);
     const index = expenses.findIndex(exp => exp.id === req.params.id);
     if (index === -1) {
@@ -120,6 +160,10 @@ router.get('/goals', requireAuth, (req, res) => {
 // POST /api/expenses/goals — create a new goal
 router.post('/goals', requireAuth, (req, res) => {
   try {
+    const validation = isValidGoal(req.body);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
+    }
     const goals = readJSON(goalsPath);
     const newGoal = {
       id: `goal_${Date.now()}`,
@@ -140,6 +184,12 @@ router.post('/goals', requireAuth, (req, res) => {
 // PUT /api/expenses/goals/:id — partially update a goal
 router.put('/goals/:id', requireAuth, (req, res) => {
   try {
+    if (req.body.title !== undefined || req.body.targetAmount !== undefined || req.body.currentSaved !== undefined || req.body.deadline !== undefined) {
+      const validation = isValidGoal(req.body);
+      if (!validation.valid) {
+        return res.status(400).json({ error: validation.error });
+      }
+    }
     const goals = readJSON(goalsPath);
     const index = goals.findIndex(goal => goal.id === req.params.id);
     if (index === -1) {
@@ -160,22 +210,5 @@ router.put('/goals/:id', requireAuth, (req, res) => {
 });
 
 // DELETE /api/expenses/goals/:id — delete a goal
-router.delete('/goals/:id', requireAuth, (req, res) => {
-  try {
-    const goals = readJSON(goalsPath);
-    const index = goals.findIndex(goal => goal.id === req.params.id);
-    if (index === -1) {
-      return res.status(404).json({ error: 'Goal not found' });
-    }
-    if (goals[index].userId !== req.session.userId) {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
-    goals.splice(index, 1);
-    writeJSON(goalsPath, goals);
-    res.status(204).end();
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete goal' });
-  }
-});
-
-module.exports = router;
+router.delete('/goals/:id', requireLine 108
+router.DEL
