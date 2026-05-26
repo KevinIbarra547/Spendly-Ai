@@ -1,4 +1,4 @@
-/* ===== CP04 TEST UI - SAFE TO DELETE FOR CP06 =====
+/* ===== CP04 TEST UI - REMOVE IN CP06 =====
 
 // Goals CRUD Testing UI
 const goalListDiv = document.getElementById('goal-list');
@@ -180,4 +180,4 @@ if (goalListDiv) {
   console.error('Could not find #goal-list div');
 }
 
-===== END CP04 TEST UI ===== */
+===== */
