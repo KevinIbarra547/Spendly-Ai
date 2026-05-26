@@ -33,7 +33,10 @@ function isValidExpense(body) {
   if (!body.category || typeof body.category !== 'string' || body.category.trim() === '') {
     return { valid: false, error: 'Category must be a non-empty string' };
   }
-  if (body.date && isNaN(new Date(body.date).getTime())) {
+  if (!body.merchant || typeof body.merchant !== 'string' || body.merchant.trim() === '') {
+    return { valid: false, error: 'Merchant must be a non-empty string' };
+  }
+  if (!body.date || isNaN(new Date(body.date).getTime())) {
     return { valid: false, error: 'Date must be a valid ISO date string' };
   }
   return { valid: true };
@@ -49,7 +52,10 @@ function isValidGoal(body) {
   if (typeof body.currentSaved !== 'number' || body.currentSaved < 0) {
     return { valid: false, error: 'Current saved must be a non-negative number' };
   }
-  if (body.deadline && isNaN(new Date(body.deadline).getTime())) {
+  if (body.currentSaved > body.targetAmount) {
+    return { valid: false, error: 'Current saved cannot exceed target amount' };
+  }
+  if (!body.deadline || isNaN(new Date(body.deadline).getTime())) {
     return { valid: false, error: 'Deadline must be a valid ISO date string' };
   }
   return { valid: true };
@@ -87,7 +93,7 @@ router.post('/', requireAuth, (req, res) => {
       category: req.body.category,
       merchant: req.body.merchant,
       date: req.body.date,
-      notes: req.body.notes,
+      notes: req.body.notes || '',
     };
     expenses.push(newExpense);
     writeJSON(expensesPath, expenses);
@@ -100,7 +106,7 @@ router.post('/', requireAuth, (req, res) => {
 // PUT /api/expenses/:id — partially update an expense
 router.put('/:id', requireAuth, (req, res) => {
   try {
-    if (req.body.amount !== undefined || req.body.category !== undefined || req.body.date !== undefined) {
+    if (req.body.amount !== undefined || req.body.category !== undefined || req.body.merchant !== undefined || req.body.date !== undefined) {
       const validation = isValidExpense(req.body);
       if (!validation.valid) {
         return res.status(400).json({ error: validation.error });
@@ -210,5 +216,22 @@ router.put('/goals/:id', requireAuth, (req, res) => {
 });
 
 // DELETE /api/expenses/goals/:id — delete a goal
-router.delete('/goals/:id', requireLine 108
-router.DEL
+router.delete('/goals/:id', requireAuth, (req, res) => {
+  try {
+    const goals = readJSON(goalsPath);
+    const index = goals.findIndex(goal => goal.id === req.params.id);
+    if (index === -1) {
+      return res.status(404).json({ error: 'Goal not found' });
+    }
+    if (goals[index].userId !== req.session.userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    goals.splice(index, 1);
+    writeJSON(goalsPath, goals);
+    res.status(204).end();
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete goal' });
+  }
+});
+
+module.exports = router;
