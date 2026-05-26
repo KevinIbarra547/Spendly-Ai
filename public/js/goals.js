@@ -1,3 +1,5 @@
+/* ===== CP04 TEST UI - SAFE TO DELETE FOR CP06 =====
+
 // Goals CRUD Testing UI
 const goalListDiv = document.getElementById('goal-list');
 
@@ -177,3 +179,5 @@ if (goalListDiv) {
 } else {
   console.error('Could not find #goal-list div');
 }
+
+===== END CP04 TEST UI ===== */
