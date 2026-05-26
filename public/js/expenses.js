@@ -1,4 +1,4 @@
-/* ===== CP04 TEST UI - REMOVE IN CP06 =====
+// ===== CP04 TEST UI START - REMOVE IN CP06 =====
 
 // Expenses CRUD Testing UI
 const expenseListDiv = document.getElementById('expense-list');
