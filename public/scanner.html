@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendly — Receipt Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+  <!-- ============ DEV PREVIEW BANNER — REMOVE BEFORE DEMO ============ -->
+  <div id="dev-banner" class="fixed top-2 right-2 z-50 bg-white border border-slate-300 rounded-lg shadow-lg px-3 py-2 text-xs font-mono flex items-center gap-2">
+    <span id="tw-dot" class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+    <span class="text-slate-700">scanner.html</span>
+    <span class="text-slate-400">|</span>
+    <span id="boot-time" class="text-slate-500">…</span>
+    <button id="ping-btn" class="ml-1 px-2 py-0.5 rounded bg-slate-900 text-white hover:bg-slate-700">ping</button>
+    <span id="ping-result" class="text-slate-500">·</span>
+  </div>
+  <!-- ============ END DEV PREVIEW BANNER ============ -->
+
+  <main class="flex flex-col items-center px-4 pt-16 pb-8 min-h-screen">
+
+    <!-- Auth banner (shown by scanner.js if not logged in) -->
+    <div id="auth-banner" style="display:none"
+         class="w-full max-w-2xl mb-4 bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-3 text-sm text-yellow-800">
+      You must <a href="/" class="underline font-semibold">log in</a> to use the Scanner.
+    </div>
+
+    <!-- Scanner card -->
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-md px-6 py-8">
+
+      <!-- Card header -->
+      <div class="mb-6">
+        <h1 class="text-xl font-bold text-slate-900">Spendly Receipt Scanner</h1>
+        <p class="text-sm text-slate-500 mt-1">Snap, scan, save. No typing.</p>
+      </div>
+
+      <!-- Drop zone -->
+      <div id="drop-zone"
+           class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors px-6 py-12">
+        <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+        </svg>
+        <p class="text-sm text-slate-600 text-center">Drop a receipt photo here or click to choose</p>
+        <p class="text-xs text-slate-400">JPEG, PNG, WebP, HEIC — max 5 MB</p>
+        <input type="file" id="file-input" accept="image/*" class="hidden" />
+      </div>
+
+      <!-- Preview area (hidden until file selected) -->
+      <div id="preview" style="display:none" class="mt-6 flex flex-col items-center gap-4">
+        <img id="preview-img" src="" alt="Receipt preview"
+             class="max-h-48 rounded-lg border border-slate-200 shadow-sm object-contain" />
+        <div class="flex items-center gap-4">
+          <button id="scan-btn"
+                  class="bg-indigo-500 hover:bg-indigo-600 disabled:opacity-40 text-white text-sm font-semibold rounded-xl px-6 py-2 transition-colors">
+            Scan Receipt
+          </button>
+          <button id="reset-btn" class="text-sm text-slate-500 hover:text-slate-700 underline">
+            Choose different photo
+          </button>
+        </div>
+      </div>
+
+      <!-- Result form (hidden until scan completes) -->
+      <div id="result-form" style="display:none" class="mt-6">
+        <h2 class="text-sm font-semibold text-slate-700 mb-4">Review &amp; edit before saving</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+          <div class="flex flex-col gap-1">
+            <label for="result-amount" class="text-xs font-medium text-slate-600">Amount ($)</label>
+            <input type="number" id="result-amount" step="0.01" min="0"
+                   class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="result-merchant" class="text-xs font-medium text-slate-600">Merchant</label>
+            <input type="text" id="result-merchant"
+                   class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="result-date" class="text-xs font-medium text-slate-600">Date</label>
+            <input type="date" id="result-date"
+                   class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="result-category" class="text-xs font-medium text-slate-600">Category</label>
+            <select id="result-category"
+                    class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+              <option value="Food">Food</option>
+              <option value="Groceries">Groceries</option>
+              <option value="Coffee">Coffee</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Subscriptions">Subscriptions</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1 sm:col-span-2">
+            <label for="result-notes" class="text-xs font-medium text-slate-600">Notes (optional)</label>
+            <input type="text" id="result-notes"
+                   class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          </div>
+
+        </div>
+
+        <div class="flex items-center gap-4 mt-6">
+          <button id="save-btn"
+                  class="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-white text-sm font-semibold rounded-xl px-6 py-2 transition-colors">
+            Save Expense
+          </button>
+          <button id="rescan-btn" class="text-sm text-slate-500 hover:text-slate-700 underline">
+            Scan another
+          </button>
+        </div>
+      </div>
+
+      <!-- Status feedback -->
+      <div id="status" style="display:none"
+           class="mt-4 p-3 rounded transition-opacity duration-200 text-sm">
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/js/scanner.js"></script>
+
+  <script>
+    (async () => {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        document.getElementById('boot-time').textContent = 'boot ' + new Date(data.startedAt).toLocaleTimeString();
+      } catch (e) {
+        document.getElementById('boot-time').textContent = 'boot ?';
+      }
+      document.getElementById('ping-btn').addEventListener('click', async () => {
+        const el = document.getElementById('ping-result');
+        el.textContent = '…';
+        try {
+          const r = await fetch('/api/health');
+          el.textContent = r.ok ? '✅' : '❌';
+        } catch {
+          el.textContent = '❌';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -3,7 +3,18 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const Groq = require('groq-sdk');
+const multer = require('multer');
 const { requireAuth } = require('../middleware/auth');
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image files allowed (jpeg, png, webp, heic)'));
+  }
+});
 
 const groq = new Groq.default({ apiKey: process.env.GROQ_API_KEY });
 
@@ -127,6 +138,97 @@ router.post('/coach', requireAuth, async (req, res) => {
       res.status(500).json({ error: 'Coach unavailable: ' + err.message });
     }
   }
+});
+
+const ALLOWED_CATEGORIES = ['Food', 'Groceries', 'Coffee', 'Transportation', 'Entertainment', 'Shopping', 'Subscriptions', 'Other'];
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// POST /api/ai/scanner
+// Accepts: multipart/form-data with field "receipt" (image). Returns parsed receipt JSON.
+router.post('/scanner', requireAuth, upload.single('receipt'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded' });
+    }
+
+    const base64Image = req.file.buffer.toString('base64');
+    const mimeType = req.file.mimetype;
+    const imageDataUrl = `data:${mimeType};base64,${base64Image}`;
+
+    const response = await groq.chat.completions.create({
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `You are a receipt parser. Extract the following fields from this receipt image and respond with ONLY a valid JSON object (no markdown, no code fences, no explanation):
+
+{
+  "amount": <number, the total amount in dollars>,
+  "merchant": "<string, the store or restaurant name>",
+  "date": "<string, in YYYY-MM-DD format>",
+  "category": "<one of: Food, Groceries, Coffee, Transportation, Entertainment, Shopping, Subscriptions, Other>"
+}
+
+Choose the category that best matches the merchant. If the receipt is unreadable or not a receipt, respond with:
+{ "error": "Could not parse receipt" }
+
+Today's date is ${new Date().toISOString().split('T')[0]} — use it if the receipt date is missing or unclear.`
+            },
+            {
+              type: 'image_url',
+              image_url: { url: imageDataUrl }
+            }
+          ]
+        }
+      ],
+      temperature: 0.2,
+      max_tokens: 300
+    });
+
+    const raw = response.choices[0]?.message?.content || '';
+    const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      return res.status(502).json({ error: 'Scanner returned invalid response', raw: cleaned });
+    }
+
+    if (parsed.error) {
+      return res.status(422).json({ error: parsed.error, raw: cleaned });
+    }
+
+    if (
+      typeof parsed.amount !== 'number' ||
+      !parsed.merchant || typeof parsed.merchant !== 'string' ||
+      !DATE_RE.test(parsed.date) ||
+      !ALLOWED_CATEGORIES.includes(parsed.category)
+    ) {
+      return res.status(502).json({ error: 'Scanner returned malformed data', data: parsed });
+    }
+
+    return res.json({
+      amount: parsed.amount,
+      merchant: parsed.merchant,
+      date: parsed.date,
+      category: parsed.category
+    });
+  } catch (err) {
+    console.error('Scanner error:', err);
+    return res.status(500).json({ error: 'Scanner unavailable: ' + err.message });
+  }
+});
+
+// Multer error handler for scanner route
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError || err.message === 'Only image files allowed (jpeg, png, webp, heic)') {
+    return res.status(400).json({ error: err.message });
+  }
+  next(err);
 });
 
 module.exports = router;
