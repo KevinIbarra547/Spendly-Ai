@@ -36,7 +36,13 @@
         <input type="email" name="email" placeholder="Email" class="w-full p-2 mb-2 border rounded" required>
         <input type="text" name="schoolName" placeholder="School Name" class="w-full p-2 mb-2 border rounded" required>
         <input type="number" name="graduationYear" placeholder="Graduation Year" min="2024" max="2035" class="w-full p-2 mb-2 border rounded" required>
-        <input type="text" name="studentStatus" placeholder="Student Status (e.g., freshman)" class="w-full p-2 mb-2 border rounded" required>
+        <select name="studentStatus" class="w-full p-2 mb-2 border rounded" required>
+          <option value="" disabled selected>Student Status</option>
+          <option value="Freshman">Freshman</option>
+          <option value="Sophomore">Sophomore</option>
+          <option value="Junior">Junior</option>
+          <option value="Senior">Senior</option>
+        </select>
         <input type="text" name="primaryFinancialGoal" placeholder="Primary Financial Goal (e.g., savings)" class="w-full p-2 mb-2 border rounded" required>
         <button type="submit" class="w-full p-2 bg-blue-500 text-white rounded">Register</button>
       </form>
@@ -58,23 +64,11 @@
       </p>
     </div>
 
-    <!-- View C: Logged-in view -->
-    <div id="logged-in-view" style="display: none;">
-      <p class="text-xl">Currently logged in as <span id="username-display"></span></p>
-      <button id="logout-btn" class="w-full p-2 bg-red-500 text-white rounded mt-4">Logout</button>
-    </div>
-
     <!-- Status message -->
     <div id="status-message" style="display: none; opacity: 0; transition: opacity 0.2s ease-in-out;"></div>
-    <nav style="background: #f0f0f0; padding: 10px; margin-top: 20px;">
-      <h3>Kayden's Dev Navigation</h3>
-      <a href="/expenses.html">Go to Expenses Test View</a> | 
-      <a href="/goals.html">Go to Goals Test View</a>
-    </nav>
   </div>
 
   <script>
-    // Helper function to show status message
     function showStatus(message, isError) {
       const statusDiv = document.getElementById('status-message');
       statusDiv.textContent = message;
@@ -91,32 +85,25 @@
       }, 4000);
     }
 
-    // Helper function to switch views
     function showView(viewId) {
       document.getElementById('register-view').style.display = 'none';
       document.getElementById('login-view').style.display = 'none';
-      document.getElementById('logged-in-view').style.display = 'none';
       document.getElementById(viewId).style.display = 'block';
     }
 
-    // Check auth status on page load
     async function checkAuth() {
       try {
         const response = await fetch('/api/auth/me');
         if (response.ok) {
-          const user = await response.json();
-          document.getElementById('username-display').textContent = user.username;
-          showView('logged-in-view');
+          window.location.href = 'dashboard.html';
         } else {
           showView('register-view');
         }
       } catch (err) {
-        showStatus('Error: ' + err.message, true);
         showView('register-view');
       }
     }
 
-    // Register form submission
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -139,8 +126,7 @@
 
         const result = await response.json();
         if (response.ok) {
-          showStatus('Registration successful!', false);
-          setTimeout(() => showView('login-view'), 1000);
+          window.location.href = 'dashboard.html';
         } else {
           showStatus(result.error || 'Registration failed', true);
         }
@@ -149,7 +135,6 @@
       }
     });
 
-    // Login form submission
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -167,8 +152,7 @@
 
         const result = await response.json();
         if (response.ok) {
-          showStatus('Login successful!', false);
-          setTimeout(() => checkAuth(), 1000);
+          window.location.href = 'dashboard.html';
         } else {
           showStatus(result.error || 'Login failed', true);
         }
@@ -177,35 +161,16 @@
       }
     });
 
-    // Logout button
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-      try {
-        const response = await fetch('/api/auth/logout', { method: 'POST' });
-        const result = await response.json();
-        if (response.ok) {
-          showStatus('Logged out successfully!', false);
-          setTimeout(() => showView('register-view'), 1000);
-        } else {
-          showStatus(result.error || 'Logout failed', true);
-        }
-      } catch (err) {
-        showStatus('Error: ' + err.message, true);
-      }
-    });
-
-    // Switch to login
     document.getElementById('show-login').addEventListener('click', (e) => {
       e.preventDefault();
       showView('login-view');
     });
 
-    // Switch to register
     document.getElementById('show-register').addEventListener('click', (e) => {
       e.preventDefault();
       showView('register-view');
     });
 
-    // Initialize on page load
     document.addEventListener('DOMContentLoaded', checkAuth);
   </script>
   <!-- CP02 TEST UI END -->
