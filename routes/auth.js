@@ -146,5 +146,48 @@ router.get('/me', (req, res) => {
   const { passwordHash, ...safeUser } = user;
   return res.status(200).json(safeUser);
 });
+// PATCH /api/auth/profile
+router.patch('/profile', async (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'Not logged in' });
+  }
 
+  const { username, email, schoolName, graduationYear, monthlyBudgetCap, studentStatus, primaryFinancialGoal, pfp } = req.body;
+
+  // Block password changes
+  if (req.body.passwordHash || req.body.password) {
+    return res.status(400).json({ error: 'Password cannot be updated via this endpoint' });
+  }
+
+  try {
+    const users = readUsers();
+    const index = users.findIndex(u => u.id === req.session.userId);
+
+    if (index === -1) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check username/email not taken by another user
+    if (username && users.some(u => u.username === username && u.id !== req.session.userId)) {
+      return res.status(400).json({ error: 'Username already taken' });
+    }
+    if (email && users.some(u => u.email === email && u.id !== req.session.userId)) {
+      return res.status(400).json({ error: 'Email already taken' });
+    }
+
+    // Only update fields that were actually sent
+    const updatable = { username, email, schoolName, graduationYear, monthlyBudgetCap, studentStatus, primaryFinancialGoal, pfp };
+    Object.entries(updatable).forEach(([key, value]) => {
+      if (value !== undefined) users[index][key] = value;
+    });
+
+    writeUsers(users);
+
+    const { passwordHash, ...safeUser } = users[index];
+    return res.status(200).json(safeUser);
+  } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+    });
 module.exports = router;
