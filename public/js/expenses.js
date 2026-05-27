@@ -177,5 +177,3 @@ if (expenseListDiv) {
 } else {
   console.error('Could not find #expense-list div');
 }
-
-===== */
