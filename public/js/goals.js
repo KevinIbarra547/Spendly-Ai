@@ -179,5 +179,3 @@ if (goalListDiv) {
 } else {
   console.error('Could not find #goal-list div');
 }
-
-===== */

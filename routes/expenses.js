@@ -190,11 +190,18 @@ router.post('/goals', requireAuth, (req, res) => {
 // PUT /api/expenses/goals/:id — partially update a goal
 router.put('/goals/:id', requireAuth, (req, res) => {
   try {
-    if (req.body.title !== undefined || req.body.targetAmount !== undefined || req.body.currentSaved !== undefined || req.body.deadline !== undefined) {
-      const validation = isValidGoal(req.body);
-      if (!validation.valid) {
-        return res.status(400).json({ error: validation.error });
-      }
+    const { title, targetAmount, currentSaved, deadline } = req.body;
+    if (title !== undefined && (typeof title !== 'string' || title.trim() === '')) {
+      return res.status(400).json({ error: 'Title must be a non-empty string' });
+    }
+    if (targetAmount !== undefined && (typeof targetAmount !== 'number' || targetAmount <= 0)) {
+      return res.status(400).json({ error: 'Target amount must be a positive number' });
+    }
+    if (currentSaved !== undefined && (typeof currentSaved !== 'number' || currentSaved < 0)) {
+      return res.status(400).json({ error: 'Current saved must be a non-negative number' });
+    }
+    if (deadline !== undefined && isNaN(new Date(deadline).getTime())) {
+      return res.status(400).json({ error: 'Deadline must be a valid ISO date string' });
     }
     const goals = readJSON(goalsPath);
     const index = goals.findIndex(goal => goal.id === req.params.id);
