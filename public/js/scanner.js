@@ -21,12 +21,15 @@
   let currentFile = null;
 
   function showStatus(msg, kind) {
-    status.className = kind === 'error'
-      ? 'bg-red-50 text-red-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm'
-      : 'bg-green-50 text-green-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm';
+    const classes = {
+      error:   'bg-red-50 text-red-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm',
+      success: 'bg-green-50 text-green-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm',
+      info:    'bg-blue-50 text-blue-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm'
+    };
+    status.className = classes[kind] || classes.success;
     status.textContent = msg;
     status.style.display = 'block';
-    setTimeout(() => { status.style.display = 'none'; }, 4000);
+    if (kind !== 'info') setTimeout(() => { status.style.display = 'none'; }, 4000);
   }
 
   function selectFile(file) {
@@ -66,6 +69,32 @@
     selectFile(e.dataTransfer.files[0]);
   });
 
+  function resizeImage(file) {
+    return new Promise((resolve, reject) => {
+      const MAX = 1280;
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        if (Math.max(img.naturalWidth, img.naturalHeight) <= MAX) {
+          resolve(file);
+          return;
+        }
+        const scale = MAX / Math.max(img.naturalWidth, img.naturalHeight);
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.naturalWidth  * scale);
+        canvas.height = Math.round(img.naturalHeight * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (!blob) { reject(new Error('Canvas resize failed')); return; }
+          resolve(blob);
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Failed to load image')); };
+      img.src = url;
+    });
+  }
+
   function reset() {
     currentFile = null;
     fileInput.value = '';
@@ -81,8 +110,10 @@
     scanBtn.disabled = true;
     scanBtn.textContent = 'Scanning…';
     try {
+      showStatus('Optimizing image…', 'info');
+      const blob = await resizeImage(currentFile);
       const formData = new FormData();
-      formData.append('receipt', currentFile);
+      formData.append('receipt', blob, 'receipt.jpg');
       const res = await fetch('/api/ai/scanner', {
         method: 'POST',
         body: formData
