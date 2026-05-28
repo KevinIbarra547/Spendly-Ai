@@ -1,181 +1,252 @@
-// ===== CP04 TEST UI START - REMOVE IN CP06 =====
+// Savings Goals — full CRUD wired to /api/expenses/goals
 
-// Goals CRUD Testing UI
-const goalListDiv = document.getElementById('goal-list');
+const listEl = document.getElementById('goal-list');
+const errorBanner = document.getElementById('error-banner');
 
-// Sample goal data for testing
-const sampleGoal = {
-  title: "Concert Tickets",
-  targetAmount: 150.00,
-  currentSaved: 45.00,
-  deadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-};
+const goalModal = document.getElementById('goal-modal');
+const goalModalTitle = document.getElementById('goal-modal-title');
+const goalForm = document.getElementById('goal-form');
+const goalIdField = document.getElementById('goal-id');
+const titleField = document.getElementById('field-title');
+const targetField = document.getElementById('field-target');
+const savedField = document.getElementById('field-saved');
+const deadlineField = document.getElementById('field-deadline');
 
-// DOM elements
-let statusBox;
-let jsonPre;
+const savingsModal = document.getElementById('savings-modal');
+const savingsModalTitle = document.getElementById('savings-modal-title');
+const savingsForm = document.getElementById('savings-form');
+const savingsGoalIdField = document.getElementById('savings-goal-id');
+const addAmountField = document.getElementById('field-add-amount');
 
-// Initialize the UI
-function initUI() {
-  goalListDiv.innerHTML = `
-    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
-      <h2 style="margin-top: 0;">Goals Testing Panel</h2>
-      
-      <button id="create-goal-btn" style="background: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; margin-bottom: 20px;">
-        Create Sample Goal
-      </button>
-      
-      <div id="status-box" style="padding: 10px; margin: 10px 0; border-radius: 4px; background: #e7f3fe; border: 1px solid #2196F3; color: #1976D2;">
-        Status: Ready
-      </div>
-      
-      <h3>Live Data:</h3>
-      <pre id="json-view" style="background: white; padding: 15px; border-radius: 4px; border: 1px solid #ddd; overflow-x: auto; max-height: 300px; overflow-y: auto;">Loading...</pre>
-      
-      <div id="goal-items" style="margin-top: 20px;"></div>
-    </div>
-  `;
+const API = '/api/expenses/goals';
 
-  statusBox = document.getElementById('status-box');
-  jsonPre = document.getElementById('json-view');
+let goals = [];
+let errorTimer = null;
 
-  // Attach event listeners
-  document.getElementById('create-goal-btn').addEventListener('click', () => createItem(sampleGoal));
-
-  // Load initial data
-  loadData();
+function showError(message) {
+  errorBanner.textContent = message;
+  errorBanner.classList.remove('hidden');
+  if (errorTimer) clearTimeout(errorTimer);
+  errorTimer = setTimeout(() => errorBanner.classList.add('hidden'), 4000);
 }
 
-// Load all goals for the current user
-async function loadData() {
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+async function populateSidebar() {
   try {
-    const response = await fetch('/api/expenses/goals', {
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!res.ok) return;
+    const user = await res.json();
+    document.getElementById('sidebar-username').textContent = user.username;
+    const avatarEl = document.getElementById('sidebar-avatar');
+    const initialsEl = document.getElementById('sidebar-initials');
+    const isDefaultPfp = !user.pfp || user.pfp === '/uploads/pfps/default.png';
+    if (!isDefaultPfp) {
+      avatarEl.innerHTML = `<img src="${user.pfp}" class="w-full h-full object-cover" alt="">`;
+    } else {
+      initialsEl.textContent = user.username.slice(0, 2).toUpperCase();
     }
-    
-    const goals = await response.json();
-    updateStatus(`Loaded ${goals.length} goals`);
-    renderItems(goals);
-    jsonPre.textContent = JSON.stringify(goals, null, 2);
-  } catch (error) {
-    updateStatus(`Error loading goals: ${error.message}`);
-    jsonPre.textContent = `Error: ${error.message}`;
+  } catch (e) { /* ignore */ }
+}
+
+async function loadGoals() {
+  listEl.innerHTML = '<p class="text-slate-400 col-span-full text-center py-10">Loading…</p>';
+  try {
+    const res = await fetch(API, { credentials: 'include' });
+    if (res.status === 401) {
+      window.location.href = 'index.html';
+      return;
+    }
+    if (!res.ok) throw new Error('Failed to load goals');
+    goals = await res.json();
+    render();
+  } catch (err) {
+    listEl.innerHTML = '';
+    showError(err.message);
   }
 }
 
-// Create a new goal
-async function createItem(goalData) {
-  try {
-    const response = await fetch('/api/expenses/goals', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(goalData),
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const newGoal = await response.json();
-    updateStatus(`Created goal: ${newGoal.id}`);
-    loadData();
-  } catch (error) {
-    updateStatus(`Error creating goal: ${error.message}`);
-  }
-}
-
-// Update a goal
-async function updateItem(id) {
-  try {
-    const response = await fetch(`/api/expenses/goals/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ currentSaved: 50.00 }),
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const updatedGoal = await response.json();
-    updateStatus(`Updated goal: ${updatedGoal.id}`);
-    loadData();
-  } catch (error) {
-    updateStatus(`Error updating goal: ${error.message}`);
-  }
-}
-
-// Delete a goal
-async function deleteItem(id) {
-  try {
-    const response = await fetch(`/api/expenses/goals/${id}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    updateStatus(`Deleted goal: ${id}`);
-    loadData();
-  } catch (error) {
-    updateStatus(`Error deleting goal: ${error.message}`);
-  }
-}
-
-// Render goal items with action buttons
-function renderItems(goals) {
-  const itemsDiv = document.getElementById('goal-items');
-  
+function render() {
   if (goals.length === 0) {
-    itemsDiv.innerHTML = '<p>No goals found. Create one to get started!</p>';
+    listEl.innerHTML = '<p class="text-slate-400 col-span-full text-center py-10">No goals yet. Create your first one!</p>';
     return;
   }
-  
-  let html = '<h4>Your Goals:</h4>';
-  goals.forEach(goal => {
-    const progress = goal.currentSaved && goal.targetAmount 
-      ? ((goal.currentSaved / goal.targetAmount) * 100).toFixed(1) 
-      : 0;
-    html += `
-      <div style="padding: 10px; margin: 5px 0; border: 1px solid #eee; border-radius: 4px; background: white;">
-        <strong>${goal.title}</strong> - $${goal.currentSaved} / $${goal.targetAmount} (${progress}%)<br>
-        <small>Deadline: ${goal.deadline}</small><br>
-        <button onclick="updateItem('${goal.id}')" style="background: #2196F3; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px;">
-          Test Update
-        </button>
-        <button onclick="deleteItem('${goal.id}')" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px; margin-left: 5px;">
-          Test Delete
-        </button>
+
+  listEl.innerHTML = goals.map((g) => {
+    const target = Number(g.targetAmount) || 0;
+    const saved = Number(g.currentSaved) || 0;
+    const pct = target > 0 ? Math.min((saved / target) * 100, 100) : 0;
+    const reached = saved >= target && target > 0;
+    return `
+      <div class="bg-slate-800 rounded-2xl p-5">
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="text-white font-bold">${escapeHtml(g.title)}</h3>
+          ${reached ? '<span class="bg-green-700 text-green-100 text-xs px-2 py-0.5 rounded-full flex-shrink-0">🎉 Goal Reached!</span>' : ''}
+        </div>
+        <p class="text-slate-400 text-sm mt-1">$${saved.toFixed(2)} of $${target.toFixed(2)}</p>
+        <div class="bg-slate-700 rounded-full h-2 mt-3">
+          <div class="bg-indigo-500 rounded-full h-2" style="width: ${pct}%"></div>
+        </div>
+        <div class="flex items-center justify-between mt-2">
+          <span class="text-indigo-400 text-xs font-semibold">${pct.toFixed(0)}%</span>
+          ${g.deadline ? `<span class="text-slate-500 text-xs">Due ${escapeHtml(g.deadline)}</span>` : ''}
+        </div>
+        <div class="flex items-center gap-2 mt-4">
+          <button data-savings="${escapeHtml(g.id)}" class="bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-1.5 rounded-lg">Add Savings</button>
+          <button data-edit="${escapeHtml(g.id)}" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg">Edit</button>
+          <button data-delete="${escapeHtml(g.id)}" class="bg-slate-700 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-lg">Delete</button>
+        </div>
       </div>
     `;
+  }).join('');
+
+  listEl.querySelectorAll('[data-savings]').forEach((btn) => {
+    btn.addEventListener('click', () => openSavings(btn.dataset.savings));
   });
-  
-  itemsDiv.innerHTML = html;
+  listEl.querySelectorAll('[data-edit]').forEach((btn) => {
+    btn.addEventListener('click', () => openEdit(btn.dataset.edit));
+  });
+  listEl.querySelectorAll('[data-delete]').forEach((btn) => {
+    btn.addEventListener('click', () => deleteGoal(btn.dataset.delete));
+  });
 }
 
-// Update status message
-function updateStatus(message) {
-  statusBox.textContent = `Status: ${message}`;
-  statusBox.style.background = message.includes('Error') ? '#ffebee' : '#e7f3fe';
-  statusBox.style.color = message.includes('Error') ? '#d32f2f' : '#1976D2';
-  statusBox.style.borderColor = message.includes('Error') ? '#ef9a9a' : '#2196F3';
+function openAdd() {
+  goalModalTitle.textContent = 'Add Goal';
+  goalIdField.value = '';
+  titleField.value = '';
+  targetField.value = '';
+  savedField.value = '';
+  deadlineField.value = '';
+  goalModal.classList.remove('hidden');
 }
 
-// Initialize when DOM is loaded
-if (goalListDiv) {
-  initUI();
-} else {
-  console.error('Could not find #goal-list div');
+function openEdit(id) {
+  const g = goals.find((x) => x.id === id);
+  if (!g) return;
+  goalModalTitle.textContent = 'Edit Goal';
+  goalIdField.value = g.id;
+  titleField.value = g.title;
+  targetField.value = g.targetAmount;
+  savedField.value = g.currentSaved;
+  deadlineField.value = g.deadline || '';
+  goalModal.classList.remove('hidden');
 }
+
+function closeGoalModal() {
+  goalModal.classList.add('hidden');
+}
+
+function openSavings(id) {
+  const g = goals.find((x) => x.id === id);
+  if (!g) return;
+  savingsModalTitle.textContent = `Add Savings to ${g.title}`;
+  savingsGoalIdField.value = g.id;
+  addAmountField.value = '';
+  savingsModal.classList.remove('hidden');
+}
+
+function closeSavingsModal() {
+  savingsModal.classList.add('hidden');
+}
+
+async function submitGoal(ev) {
+  ev.preventDefault();
+  const id = goalIdField.value;
+  const payload = {
+    title: titleField.value.trim(),
+    targetAmount: parseFloat(targetField.value),
+    currentSaved: savedField.value === '' ? 0 : parseFloat(savedField.value),
+    deadline: deadlineField.value,
+  };
+  const url = id ? `${API}/${id}` : API;
+  const method = id ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'include',
+    });
+    if (res.status === 401) {
+      window.location.href = 'index.html';
+      return;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to save goal');
+    }
+    closeGoalModal();
+    await loadGoals();
+  } catch (err) {
+    showError(err.message);
+  }
+}
+
+async function submitSavings(ev) {
+  ev.preventDefault();
+  const id = savingsGoalIdField.value;
+  const g = goals.find((x) => x.id === id);
+  if (!g) return;
+  const addAmount = parseFloat(addAmountField.value);
+  if (isNaN(addAmount) || addAmount <= 0) {
+    showError('Enter a valid amount to add');
+    return;
+  }
+  const newSaved = (Number(g.currentSaved) || 0) + addAmount;
+
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentSaved: newSaved }),
+      credentials: 'include',
+    });
+    if (res.status === 401) {
+      window.location.href = 'index.html';
+      return;
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to add savings');
+    }
+    closeSavingsModal();
+    await loadGoals();
+  } catch (err) {
+    showError(err.message);
+  }
+}
+
+async function deleteGoal(id) {
+  if (!window.confirm('Delete this goal?')) return;
+  try {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (res.status === 401) {
+      window.location.href = 'index.html';
+      return;
+    }
+    if (!res.ok) throw new Error('Failed to delete goal');
+    await loadGoals();
+  } catch (err) {
+    showError(err.message);
+  }
+}
+
+document.getElementById('add-goal-btn').addEventListener('click', openAdd);
+document.getElementById('goal-cancel-btn').addEventListener('click', closeGoalModal);
+document.getElementById('savings-cancel-btn').addEventListener('click', closeSavingsModal);
+goalModal.addEventListener('click', (e) => { if (e.target === goalModal) closeGoalModal(); });
+savingsModal.addEventListener('click', (e) => { if (e.target === savingsModal) closeSavingsModal(); });
+goalForm.addEventListener('submit', submitGoal);
+savingsForm.addEventListener('submit', submitSavings);
+
+populateSidebar();
+loadGoals();
