@@ -8,4 +8,5 @@ data/goals.json
 public/uploads/pfps/*
 public/uploads/receipts/*
 !public/uploads/pfps/.gitkeep
+!public/uploads/pfps/default.png
 !public/uploads/receipts/.gitkeep

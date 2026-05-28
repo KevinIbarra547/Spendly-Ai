@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
+const { requireAuth } = require('../middleware/auth');
 
 const USERS_PATH = path.join(__dirname, '..', 'data', 'users.json');
 
@@ -19,6 +21,25 @@ function readUsers() {
 function writeUsers(users) {
   fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2), 'utf8');
 }
+
+const pfpStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '..', 'public', 'uploads', 'pfps'));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, crypto.randomUUID() + ext);
+  }
+});
+const pfpUpload = multer({
+  storage: pfpStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only JPEG, PNG, or WebP images allowed'));
+  }
+});
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
@@ -146,6 +167,28 @@ router.get('/me', (req, res) => {
   const { passwordHash, ...safeUser } = user;
   return res.status(200).json(safeUser);
 });
+
+// POST /api/auth/pfp
+router.post('/pfp', requireAuth, pfpUpload.single('pfp'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const pfpUrl = '/uploads/pfps/' + req.file.filename;
+    const users = readUsers();
+    const idx = users.findIndex(u => u.id === req.session.userId);
+    if (idx === -1) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    users[idx].pfp = pfpUrl;
+    writeUsers(users);
+    res.json({ pfp: pfpUrl });
+  } catch (err) {
+    console.error('Pfp upload error:', err);
+    res.status(500).json({ error: 'Failed to upload profile picture' });
+  }
+});
+
 // PATCH /api/auth/profile
 router.patch('/profile', async (req, res) => {
   if (!req.session || !req.session.userId) {

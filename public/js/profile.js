@@ -100,7 +100,21 @@ document.getElementById('save-btn').addEventListener('click', async () => {
   if (monthlyBudgetCap !== originalData.monthlyBudgetCap) patch.monthlyBudgetCap = monthlyBudgetCap;
   if (studentStatus !== originalData.studentStatus) patch.studentStatus = studentStatus;
   if (primaryFinancialGoal !== originalData.primaryFinancialGoal) patch.primaryFinancialGoal = primaryFinancialGoal;
-  if (selectedFile) patch.pfp = '/uploads/pfps/' + selectedFile.name;
+  if (selectedFile) {
+    const formData = new FormData();
+    formData.append('pfp', selectedFile);
+    const uploadRes = await fetch('/api/auth/pfp', {
+      method: 'POST',
+      body: formData
+    });
+    if (!uploadRes.ok) {
+      const err = await uploadRes.json().catch(() => ({ error: 'Upload failed' }));
+      showStatus(err.error || 'Upload failed', true);
+      return;
+    }
+    const { pfp } = await uploadRes.json();
+    patch.pfp = pfp;
+  }
 
   if (Object.keys(patch).length === 0) {
     showStatus('No changes to save.', false);
