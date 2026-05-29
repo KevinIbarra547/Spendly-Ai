@@ -26,4 +26,21 @@
       link.classList.add('text-white', 'bg-indigo-600');
     }
   });
+
+  // Message of the Day banner.
+  try {
+    const cfgRes = await fetch('/api/site/config');
+    if (cfgRes.ok) {
+      const config = await cfgRes.json();
+      let banner = document.getElementById('motd-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'motd-banner';
+        banner.className = 'bg-indigo-600/20 border border-indigo-500/40 text-indigo-200 rounded-xl px-4 py-3 mb-6 text-sm';
+        const main = document.querySelector('main') || document.body;
+        main.prepend(banner);
+      }
+      banner.textContent = config.tipOfTheDay || '';
+    }
+  } catch (e) { /* no banner if config can't be read */ }
 })();

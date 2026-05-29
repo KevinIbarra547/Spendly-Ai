@@ -1,4 +1,21 @@
 (async function () {
+  // Respect the admin feature toggle before doing anything else.
+  try {
+    const cfgRes = await fetch('/api/site/config');
+    if (cfgRes.ok) {
+      const config = await cfgRes.json();
+      if (config.receiptScannerEnabled === false) {
+        document.body.innerHTML = `
+          <div class="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-slate-950 text-white">
+            <h1 class="text-2xl font-bold mb-3">This feature is currently disabled</h1>
+            <p class="text-slate-400 mb-6">The Receipt Scanner has been turned off by an administrator.</p>
+            <a href="/dashboard.html" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition-colors">Back to Dashboard</a>
+          </div>`;
+        return;
+      }
+    }
+  } catch (e) { /* if the config can't be read, fail open */ }
+
   const meRes = await fetch('/api/auth/me');
   if (!meRes.ok) {
     document.getElementById('auth-banner').style.display = 'block';

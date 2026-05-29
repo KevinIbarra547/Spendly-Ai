@@ -41,6 +41,8 @@
             <option value="Senior">Senior</option>
           </select>
           <input type="text" name="primaryFinancialGoal" placeholder="Primary Financial Goal (e.g., savings)" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required>
+          <label id="admin-code-label" for="admin-code" class="block text-indigo-400 text-sm font-medium mb-1.5" style="display:none">🔐 Super Duper Secret Admin Mode</label>
+          <input type="password" id="admin-code" name="adminCode" placeholder="Admin Code" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" style="display:none">
           <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg py-2.5 text-sm transition-colors">Register</button>
         </form>
         <p class="mt-3 text-center text-sm text-slate-400">
@@ -112,7 +114,8 @@
         schoolName: formData.get('schoolName'),
         graduationYear: parseInt(formData.get('graduationYear')),
         studentStatus: formData.get('studentStatus'),
-        primaryFinancialGoal: formData.get('primaryFinancialGoal')
+        primaryFinancialGoal: formData.get('primaryFinancialGoal'),
+        adminCode: formData.get('adminCode') || ''
       };
 
       try {
@@ -170,6 +173,21 @@
     });
 
     document.addEventListener('DOMContentLoaded', checkAuth);
+
+    // Secret keystroke: type "spend" anywhere to reveal the admin code field.
+    const SECRET = ['s', 'p', 'e', 'n', 'd'];
+    let keyBuffer = [];
+    document.addEventListener('keydown', (e) => {
+      keyBuffer.push(e.key.toLowerCase());
+      if (keyBuffer.length > 5) keyBuffer.shift();
+      if (keyBuffer.join('') === SECRET.join('')) {
+        const label = document.getElementById('admin-code-label');
+        const field = document.getElementById('admin-code');
+        if (label) label.style.display = 'block';
+        if (field) field.style.display = 'block';
+        keyBuffer = [];
+      }
+    });
   </script>
 </body>
 </html>
