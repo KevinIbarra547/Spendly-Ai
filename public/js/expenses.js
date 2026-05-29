@@ -15,6 +15,15 @@ const dateField = document.getElementById('field-date');
 const categoryField = document.getElementById('field-category');
 const notesField = document.getElementById('field-notes');
 
+const openScannerBtn = document.getElementById('open-scanner-btn');
+const scannerPanel = document.getElementById('scanner-panel');
+const expenseFormFields = document.getElementById('expense-form-fields');
+const inlineDropZone = document.getElementById('inline-drop-zone');
+const inlineFileInput = document.getElementById('inline-file-input');
+const inlineScanBtn = document.getElementById('inline-scan-btn');
+const inlineScanStatus = document.getElementById('inline-scan-status');
+const inlineBackBtn = document.getElementById('inline-back-btn');
+
 let expenses = [];
 let errorTimer = null;
 
@@ -152,6 +161,8 @@ function openEdit(id) {
 
 function closeModal() {
   modal.classList.add('hidden');
+  scannerPanel.classList.add('hidden');
+  expenseFormFields.classList.remove('hidden');
 }
 
 async function submitForm(ev) {
@@ -206,6 +217,119 @@ async function deleteExpense(id) {
     showError(err.message);
   }
 }
+
+function resizeImage(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 1280;
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
+        else { width = Math.round(width * MAX / height); height = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.85);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+}
+
+function mapCategory(aiCategory) {
+  const map = {
+    'Coffee': 'Coffee',
+    'Groceries': 'Groceries',
+    'Food': 'Food',
+    'Transportation': 'Transport',
+    'Entertainment': 'Entertainment',
+    'Shopping': 'Shopping',
+    'Subscriptions': 'Other',
+    'Health': 'Health',
+    'Other': 'Other'
+  };
+  return map[aiCategory] || 'Other';
+}
+
+openScannerBtn.addEventListener('click', () => {
+  expenseFormFields.classList.add('hidden');
+  scannerPanel.classList.remove('hidden');
+});
+
+inlineBackBtn.addEventListener('click', () => {
+  scannerPanel.classList.add('hidden');
+  expenseFormFields.classList.remove('hidden');
+  inlineFileInput.value = '';
+  inlineScanStatus.classList.add('hidden');
+});
+
+inlineDropZone.addEventListener('click', () => inlineFileInput.click());
+
+inlineDropZone.addEventListener('dragover', (e) => e.preventDefault());
+inlineDropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (e.dataTransfer.files[0]) {
+    inlineFileInput.files = e.dataTransfer.files;
+    inlineDropZone.textContent = e.dataTransfer.files[0].name;
+  }
+});
+
+inlineFileInput.addEventListener('change', () => {
+  if (inlineFileInput.files[0]) {
+    inlineDropZone.textContent = inlineFileInput.files[0].name;
+  }
+});
+
+inlineScanBtn.addEventListener('click', async () => {
+  const file = inlineFileInput.files[0];
+  if (!file) {
+    alert('Please select a receipt image first.');
+    return;
+  }
+
+  inlineScanStatus.classList.remove('hidden');
+  inlineScanBtn.disabled = true;
+
+  try {
+    const blob = await resizeImage(file);
+    const formData = new FormData();
+    formData.append('receipt', blob, 'receipt.jpg');
+
+    const res = await fetch('/api/ai/scanner', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.error || 'Could not read receipt. Please try a clearer image.');
+      return;
+    }
+
+    const data = await res.json();
+
+    // Populate the form fields
+    if (data.amount) amountField.value = data.amount;
+    if (data.merchant) merchantField.value = data.merchant;
+    if (data.date) dateField.value = data.date;
+    if (data.category) categoryField.value = mapCategory(data.category);
+    notesField.value = 'Scanned receipt';
+
+    // Switch back to the form so the user can review and submit
+    scannerPanel.classList.add('hidden');
+    expenseFormFields.classList.remove('hidden');
+
+  } catch (err) {
+    alert('Something went wrong. Please try again.');
+  } finally {
+    inlineScanStatus.classList.add('hidden');
+    inlineScanBtn.disabled = false;
+    inlineFileInput.value = '';
+  }
+});
 
 document.getElementById('add-expense-btn').addEventListener('click', openAdd);
 document.getElementById('cancel-btn').addEventListener('click', closeModal);
