@@ -20,6 +20,7 @@ const groq = new Groq.default({ apiKey: process.env.GROQ_API_KEY });
 
 const USERS_PATH = path.join(__dirname, '..', 'data', 'users.json');
 const EXPENSES_PATH = path.join(__dirname, '..', 'data', 'expenses.json');
+const GOALS_PATH = path.join(__dirname, '..', 'data', 'goals.json');
 
 function safeRead(filePath, fallback) {
   try {
@@ -30,7 +31,7 @@ function safeRead(filePath, fallback) {
   }
 }
 
-function buildSystemPrompt(user, expenses) {
+function buildSystemPrompt(user, expenses, userGoals) {
   const userExpenses = expenses.filter(e => e.userId === user.id);
   const byCategory = {};
   let totalSpent = 0;
@@ -50,6 +51,20 @@ function buildSystemPrompt(user, expenses) {
     ? `Their monthly budget cap is $${user.monthlyBudgetCap}.`
     : `They have not set a monthly budget cap yet.`;
 
+  let goalsBlock;
+  if (!userGoals || userGoals.length === 0) {
+    goalsBlock = 'They have not created any specific savings goals yet.';
+  } else {
+    const goalLines = userGoals.slice(0, 8).map(g => {
+      const target = Number(g.targetAmount) || 0;
+      const saved = Number(g.currentSaved) || 0;
+      const pct = target > 0 ? Math.round((saved / target) * 100) : 0;
+      const deadline = g.deadline ? ` (deadline: ${g.deadline})` : '';
+      return `  - "${g.title}": $${saved.toFixed(2)} saved of $${target.toFixed(2)} (${pct}%)${deadline}`;
+    }).join('\n');
+    goalsBlock = `Their active savings goals:\n${goalLines}`;
+  }
+
   return `You are Spendly's AI Coach — a warm, encouraging friend who \
 helps a student named ${user.username} manage their money. You talk like \
 a slightly older sibling or a good RA: supportive, casual, never preachy, \
@@ -61,6 +76,7 @@ About this student:
 - ${budgetLine}
 - Top spending categories this period: ${topCategories}
 - Total spent this period: $${totalSpent.toFixed(2)}
+- ${goalsBlock}
 
 Your style:
 - Keep responses to 2–3 sentences typically.
@@ -100,8 +116,10 @@ router.post('/coach', requireAuth, async (req, res) => {
       return res.status(401).json({ error: 'User not found' });
     }
     const expenses = safeRead(EXPENSES_PATH, []);
+    const goals = safeRead(GOALS_PATH, []);
+    const userGoals = goals.filter(g => g.userId === user.id);
 
-    const systemPrompt = buildSystemPrompt(user, expenses);
+    const systemPrompt = buildSystemPrompt(user, expenses, userGoals);
     const fullMessages = [
       { role: 'system', content: systemPrompt },
       ...messages
