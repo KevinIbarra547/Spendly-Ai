@@ -77,10 +77,9 @@ router.post('/register', async (req, res) => {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Grant admin if the secret admin code matches, or to the very first user
-    // (bootstrap so the instance always has at least one admin).
+    // Grant admin only when the secret admin code matches.
     const ADMIN_CODE = process.env.ADMIN_CODE || 'NollanisaBUM';
-    const isAdmin = adminCode === ADMIN_CODE || users.length === 0;
+    const isAdmin = adminCode === ADMIN_CODE;
 
     // Build user object with all 11 fields
     const newUser = {
