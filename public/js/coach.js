@@ -6,9 +6,9 @@
       const config = await cfgRes.json();
       if (config.aiCoachEnabled === false) {
         document.body.innerHTML = `
-          <div class="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-slate-950 text-white">
+          <div class="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-zinc-950 text-white">
             <h1 class="text-2xl font-bold mb-3">This feature is currently disabled</h1>
-            <p class="text-slate-400 mb-6">The AI Coach has been turned off by an administrator.</p>
+            <p class="text-zinc-400 mb-6">The AI Coach has been turned off by an administrator.</p>
             <a href="/dashboard.html" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition-colors">Back to Dashboard</a>
           </div>`;
         return;
@@ -38,8 +38,8 @@
     wrap.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
     const bubble = document.createElement('div');
     bubble.className = role === 'user'
-      ? 'bg-indigo-500 text-white rounded-2xl px-4 py-2 max-w-[80%] mb-2'
-      : 'bg-slate-100 text-slate-900 rounded-2xl px-4 py-2 max-w-[80%] mb-2';
+      ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm max-w-[80%] mb-2'
+      : 'bg-zinc-800 text-white rounded-2xl rounded-tl-sm px-4 py-3 text-sm max-w-[80%] mb-2';
     bubble.textContent = content;
     wrap.appendChild(bubble);
     thread.appendChild(wrap);

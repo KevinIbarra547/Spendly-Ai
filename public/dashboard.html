@@ -16,9 +16,7 @@
     <!-- HEADER ROW: Greeting on left, log-expense CTA on right -->
     <div class="flex items-start justify-between mb-8">
       <div>
-        <h1 class="text-3xl font-bold text-white mb-1" id="greeting-heading">
-          Hey there 👋
-        </h1>
+        <h1 class="text-3xl font-bold text-white mb-1" id="greeting-heading"></h1>
         <p class="text-zinc-400 text-sm" id="greeting-subtitle">
           Welcome back to Spendly.
         </p>
@@ -30,6 +28,12 @@
         Log expense
       </a>
     </div>
+
+    <!--
+      MOTD banner: when the admin sets a "Message of the Day" (tipOfTheDay),
+      it is injected here by JS. Inject it as a banner using these classes:
+      bg-indigo-600/20 border border-indigo-500/40 text-indigo-200
+    -->
 
     <!-- TOP CARDS ROW: This Month spending + Top Goal -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -75,8 +79,8 @@
     <!-- BUDDY SAYS card -->
     <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 mb-6">
       <div class="flex items-start gap-3">
-        <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <div class="w-8 h-8 rounded-full bg-indigo-600/20 flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
           </svg>
         </div>

@@ -7,27 +7,27 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex">
+<body class="bg-zinc-950 text-white min-h-screen flex">
 
   <div id="sidebar-container"></div>
 
   <!-- Main content -->
-  <div class="ml-64 flex-1 min-h-screen bg-slate-950">
+  <div class="ml-64 flex-1 min-h-screen bg-zinc-950">
     <main class="p-8 pt-10 max-w-3xl">
 
       <h1 class="text-3xl font-bold mb-1 text-white">Profile Settings</h1>
-      <p class="text-slate-400 mb-8">Manage your account information</p>
+      <p class="text-zinc-400 mb-8">Manage your account information</p>
 
       <!-- Status message -->
       <div id="status-message" class="hidden mb-6 p-4 rounded-xl text-sm font-medium"></div>
 
       <!-- Profile picture card -->
-      <div class="bg-slate-800 rounded-2xl p-6 mb-6 flex items-center gap-6 border border-slate-700">
+      <div class="bg-zinc-900 rounded-2xl p-6 mb-6 flex items-center gap-6 border border-zinc-800">
         <div class="relative flex-shrink-0">
-          <div id="pfp-preview" class="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+          <div id="pfp-preview" class="w-24 h-24 rounded-full bg-zinc-800 ring-2 ring-indigo-500 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
             <span id="pfp-initials"></span>
           </div>
-          <label for="pfp-input" class="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-lg">
+          <label for="pfp-input" class="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center cursor-pointer transition-colors shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
             </svg>
@@ -36,45 +36,41 @@
         </div>
         <div>
           <p class="text-white font-semibold text-lg" id="header-username"></p>
-          <p class="text-slate-400 text-sm" id="header-email"></p>
-          <p class="text-slate-500 text-xs mt-1">Click the pencil icon to change your photo</p>
+          <p class="text-zinc-400 text-sm" id="header-email"></p>
+          <p class="text-zinc-500 text-xs mt-1">Click the pencil icon to change your photo</p>
         </div>
       </div>
 
       <!-- Account info card -->
-      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
         <h2 class="text-white font-semibold text-lg mb-5">Account Information</h2>
 
+        <h3 class="text-xs uppercase tracking-wide text-zinc-500 font-medium mb-3">Personal</h3>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Username</label>
-            <input type="text" id="field-username" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Username</label>
+            <input type="text" id="field-username" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Email</label>
-            <input type="email" id="field-email" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Email</label>
+            <input type="email" id="field-email" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">School Name</label>
-            <input type="text" id="field-schoolName" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">School Name</label>
+            <input type="text" id="field-schoolName" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Graduation Year</label>
-            <input type="number" id="field-graduationYear" min="2024" max="2035" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Graduation Year</label>
+            <input type="number" id="field-graduationYear" min="2024" max="2035" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Monthly Budget Cap ($)</label>
-            <input type="number" id="field-monthlyBudgetCap" min="0" step="0.01" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
-          </div>
-
-          <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Student Status</label>
-            <select id="field-studentStatus" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Student Status</label>
+            <select id="field-studentStatus" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
               <option value="Freshman">Freshman</option>
               <option value="Sophomore">Sophomore</option>
               <option value="Junior">Junior</option>
@@ -82,15 +78,25 @@
             </select>
           </div>
 
+        </div>
+
+        <h3 class="text-xs uppercase tracking-wide text-zinc-500 font-medium mb-3 mt-6">Money Preferences</h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+          <div>
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Monthly Budget Cap ($)</label>
+            <input type="number" id="field-monthlyBudgetCap" min="0" step="0.01" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
+          </div>
+
           <div class="sm:col-span-2">
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Primary Financial Goal</label>
-            <input type="text" id="field-primaryFinancialGoal" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Primary Financial Goal</label>
+            <input type="text" id="field-primaryFinancialGoal" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
           </div>
 
         </div>
 
         <div class="mt-6 flex justify-end">
-          <button id="save-btn" class="px-6 py-2.5 bg-green-600 hover:bg-green-500 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
+          <button id="save-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-xl px-5 py-2.5 text-sm transition-colors shadow-sm">
             Save Changes
           </button>
         </div>

@@ -7,16 +7,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex">
+<body class="bg-zinc-950 text-white min-h-screen flex">
 
   <div id="sidebar-container"></div>
 
   <!-- Main content -->
-  <div class="ml-64 flex-1 min-h-screen bg-slate-950">
+  <div class="ml-64 flex-1 min-h-screen bg-zinc-950">
     <main class="p-8 pt-10 max-w-3xl">
 
       <h1 class="text-2xl font-bold text-white mb-1">Project Checkpoints</h1>
-      <p class="text-slate-400 mb-8">Spendly development milestones</p>
+      <p class="text-zinc-400 mb-8">Spendly development milestones</p>
 
       <div id="checkpoint-list"></div>
 
@@ -25,28 +25,30 @@
 
   <script>
     const checkpoints = [
-      { cp: 'CP01', name: 'Project Setup & Tooling', owner: 'TBD' },
-      { cp: 'CP02', name: 'Authentication & Sessions', owner: 'TBD' },
-      { cp: 'CP03', name: 'User Profiles', owner: 'TBD' },
-      { cp: 'CP04', name: 'Expenses & Goals API', owner: 'TBD' },
-      { cp: 'CP05', name: 'UI Shell & Navigation', owner: 'TBD' },
-      { cp: 'CP06', name: 'Dashboard & Charts', owner: 'TBD' },
-      { cp: 'CP07', name: 'AI Coach', owner: 'TBD' },
-      { cp: 'CP08', name: 'Receipt Scanner', owner: 'TBD' },
-      { cp: 'CP09', name: 'Admin Controls', owner: 'TBD' },
-      { cp: 'CP10', name: 'Analytics', owner: 'TBD' },
-      { cp: 'CP11', name: 'Polish & Testing', owner: 'TBD' },
-      { cp: 'CP12', name: 'Deployment', owner: 'TBD' },
+      { cp: 'CP01', name: 'Project Architecture', owner: 'Kayden', date: 'Week 1', reflection: 'Set up Express server, JSON schemas, and Replit configuration. Established the foundation for the entire app.' },
+      { cp: 'CP02', name: 'Core Authentication', owner: 'Kayden', date: 'Week 1', reflection: 'Built register and login with bcrypt password hashing and session management. Users can securely sign in.' },
+      { cp: 'CP03', name: 'Extended Profile', owner: 'Nolan', date: 'Week 2', reflection: 'Created the profile page UI with all 9 fields, profile picture upload, and PATCH endpoint.' },
+      { cp: 'CP04', name: 'Expense & Goals CRUD', owner: 'Kayden', date: 'Week 2', reflection: 'All backend routes for expenses and goals — POST, GET, PUT, DELETE fully working with session auth.' },
+      { cp: 'CP05', name: 'UI Shell & Navigation', owner: 'Nolan', date: 'Week 2', reflection: 'Built all 9 HTML pages, responsive Tailwind layout, and the shared sidebar navigation component.' },
+      { cp: 'CP06', name: 'Data Analytics', owner: 'Nolan', date: 'Week 3', reflection: 'Integrated Chart.js for pie charts, line charts, weekly comparison, and goal progress bars.' },
+      { cp: 'CP07', name: 'AI Coach', owner: 'Kevin', date: 'Week 3', reflection: 'Groq SDK integration with context injection from user expense data and streaming chat responses.' },
+      { cp: 'CP08', name: 'AI Receipt Scanner', owner: 'Kevin', date: 'Week 3', reflection: 'Multer image uploads with Groq Vision — scans receipts and auto-populates the expense form.' },
+      { cp: 'CP09', name: 'Admin Dashboard', owner: 'Kayden', date: 'Week 4', reflection: 'God mode admin panel with feature toggles, message of the day, and secret keystroke admin registration.' },
+      { cp: 'CP10', name: 'Checkpoints Page', owner: 'Nolan', date: 'Week 4', reflection: 'This page — public reflection page listing all 12 checkpoints with owners, dates, and reflections.' },
+      { cp: 'CP11', name: 'Final Polish', owner: 'Kevin', date: 'Week 4', reflection: 'Full UI consistency pass — unified zinc color palette, category pills, improved card layouts, and bug fixes.' },
+      { cp: 'CP12', name: 'Demo & README', owner: 'Kevin', date: 'Week 4', reflection: 'Final README with setup instructions, screenshots, and demo walkthrough video.' },
     ];
 
     document.getElementById('checkpoint-list').innerHTML = checkpoints.map((c) => `
-      <div class="bg-slate-800 rounded-2xl p-5 mb-4 flex items-start gap-4">
+      <div class="bg-zinc-900 rounded-2xl p-5 mb-4 flex items-start gap-4 border border-zinc-800">
         <span class="bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded-lg w-12 text-center flex-shrink-0">${c.cp}</span>
         <div class="min-w-0">
-          <div class="text-white font-semibold">${c.name}</div>
-          <div class="text-indigo-400 text-sm">${c.owner}</div>
-          <div class="text-slate-500 text-xs mt-1">Date: TBD</div>
-          <div class="text-slate-400 text-sm mt-1">Reflection: TBD</div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-white font-semibold">${c.name}</span>
+            <span class="bg-indigo-600/20 text-indigo-400 text-xs font-medium px-2 py-0.5 rounded-full">${c.owner}</span>
+          </div>
+          <div class="text-zinc-500 text-xs mt-1">${c.date}</div>
+          <div class="text-zinc-400 text-sm mt-2 leading-relaxed">${c.reflection}</div>
         </div>
       </div>
     `).join('');
