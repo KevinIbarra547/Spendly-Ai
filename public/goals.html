@@ -7,18 +7,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex">
+<body class="bg-zinc-950 text-white min-h-screen flex">
 
   <div id="sidebar-container"></div>
 
   <!-- Main content -->
-  <div class="ml-64 flex-1 min-h-screen bg-slate-950">
+  <div class="ml-64 flex-1 min-h-screen bg-zinc-950">
     <main class="p-8 pt-10">
 
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-white">Savings Goals</h1>
-        <button id="add-goal-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Savings Goals</h1>
+          <p class="text-zinc-400 text-sm">Set targets and track your progress.</p>
+        </div>
+        <button id="add-goal-btn" class="bg-white text-zinc-950 hover:bg-zinc-200 font-semibold rounded-xl px-5 py-2.5 text-sm transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
           Add Goal
         </button>
       </div>
@@ -34,37 +40,37 @@
 
   <!-- Add / Edit Goal Modal -->
   <div id="goal-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-    <div class="bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+    <div class="bg-zinc-900 rounded-2xl p-6 w-full max-w-md border border-zinc-800">
       <h2 id="goal-modal-title" class="text-white font-bold text-lg mb-4">Add Goal</h2>
       <form id="goal-form" class="space-y-4">
         <input type="hidden" id="goal-id" />
 
         <div>
-          <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Title</label>
+          <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Title</label>
           <input type="text" id="field-title" required
-                 class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                 class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
         </div>
 
         <div>
-          <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Target Amount</label>
+          <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Target Amount</label>
           <input type="number" id="field-target" step="0.01" min="0" required
-                 class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                 class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
         </div>
 
         <div>
-          <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Current Saved</label>
+          <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Current Saved</label>
           <input type="number" id="field-saved" step="0.01" min="0" placeholder="0"
-                 class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                 class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
         </div>
 
         <div>
-          <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Deadline</label>
+          <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Deadline</label>
           <input type="date" id="field-deadline"
-                 class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                 class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <button type="button" id="goal-cancel-btn" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Cancel</button>
+          <button type="button" id="goal-cancel-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Cancel</button>
           <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Save</button>
         </div>
       </form>
@@ -73,17 +79,17 @@
 
   <!-- Add Savings Modal -->
   <div id="savings-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-    <div class="bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+    <div class="bg-zinc-900 rounded-2xl p-6 w-full max-w-md border border-zinc-800">
       <h2 id="savings-modal-title" class="text-white font-bold text-lg mb-4">Add Savings</h2>
       <form id="savings-form" class="space-y-4">
         <input type="hidden" id="savings-goal-id" />
         <div>
-          <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Amount to add</label>
+          <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Amount to add</label>
           <input type="number" id="field-add-amount" step="0.01" min="0" required
-                 class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                 class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
         </div>
         <div class="flex justify-end gap-3 pt-2">
-          <button type="button" id="savings-cancel-btn" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Cancel</button>
+          <button type="button" id="savings-cancel-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Cancel</button>
           <button type="submit" class="bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Save</button>
         </div>
       </form>

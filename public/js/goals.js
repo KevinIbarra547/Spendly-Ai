@@ -54,7 +54,7 @@ async function populateSidebar() {
 }
 
 async function loadGoals() {
-  listEl.innerHTML = '<p class="text-slate-400 col-span-full text-center py-10">Loading…</p>';
+  listEl.innerHTML = '<p class="text-zinc-400 col-span-full text-center py-10">Loading…</p>';
   try {
     const res = await fetch(API, { credentials: 'include' });
     if (res.status === 401) {
@@ -72,7 +72,7 @@ async function loadGoals() {
 
 function render() {
   if (goals.length === 0) {
-    listEl.innerHTML = '<p class="text-slate-400 col-span-full text-center py-10">No goals yet. Create your first one!</p>';
+    listEl.innerHTML = '<p class="text-zinc-400 col-span-full text-center py-10">No goals yet. Create your first one!</p>';
     return;
   }
 
@@ -82,23 +82,23 @@ function render() {
     const pct = target > 0 ? Math.min((saved / target) * 100, 100) : 0;
     const reached = saved >= target && target > 0;
     return `
-      <div class="bg-slate-800 rounded-2xl p-5">
+      <div class="bg-zinc-900 rounded-2xl p-5 border border-zinc-800">
         <div class="flex items-start justify-between gap-2">
           <h3 class="text-white font-bold">${escapeHtml(g.title)}</h3>
           ${reached ? '<span class="bg-green-700 text-green-100 text-xs px-2 py-0.5 rounded-full flex-shrink-0">🎉 Goal Reached!</span>' : ''}
         </div>
-        <p class="text-slate-400 text-sm mt-1">$${saved.toFixed(2)} of $${target.toFixed(2)}</p>
-        <div class="bg-slate-700 rounded-full h-2 mt-3">
+        <p class="text-zinc-400 text-sm mt-1">$${saved.toFixed(2)} of $${target.toFixed(2)}</p>
+        <div class="bg-zinc-800 rounded-full h-2 mt-3">
           <div class="bg-indigo-500 rounded-full h-2" style="width: ${pct}%"></div>
         </div>
         <div class="flex items-center justify-between mt-2">
           <span class="text-indigo-400 text-xs font-semibold">${pct.toFixed(0)}%</span>
-          ${g.deadline ? `<span class="text-slate-500 text-xs">Due ${escapeHtml(g.deadline)}</span>` : ''}
+          ${g.deadline ? `<span class="text-zinc-500 text-xs">Due ${escapeHtml(g.deadline)}</span>` : ''}
         </div>
         <div class="flex items-center gap-2 mt-4">
           <button data-savings="${escapeHtml(g.id)}" class="bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-1.5 rounded-lg">Add Savings</button>
-          <button data-edit="${escapeHtml(g.id)}" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg">Edit</button>
-          <button data-delete="${escapeHtml(g.id)}" class="bg-slate-700 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-lg">Delete</button>
+          <button data-edit="${escapeHtml(g.id)}" class="bg-zinc-800 hover:bg-zinc-700 text-white text-xs px-3 py-1.5 rounded-lg">Edit</button>
+          <button data-delete="${escapeHtml(g.id)}" class="bg-zinc-800 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-lg">Delete</button>
         </div>
       </div>
     `;

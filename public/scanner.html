@@ -7,12 +7,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex">
+<body class="bg-zinc-950 text-white min-h-screen flex">
 
   <div id="sidebar-container"></div>
 
   <!-- Main content -->
-  <div class="ml-64 flex-1 min-h-screen bg-slate-950">
+  <div class="ml-64 flex-1 min-h-screen bg-zinc-950">
     <main class="flex flex-col items-center px-4 pt-10 pb-8 min-h-screen">
 
       <!-- Auth banner (shown by scanner.js if not logged in) -->
@@ -22,35 +22,35 @@
       </div>
 
       <!-- Scanner card -->
-      <div class="w-full max-w-2xl bg-slate-900 rounded-2xl shadow-md px-6 py-8 border border-slate-800">
+      <div class="w-full max-w-2xl bg-zinc-900 rounded-2xl shadow-md px-6 py-8 border border-zinc-800">
 
         <!-- Card header -->
         <div class="mb-6">
           <h1 class="text-xl font-bold text-white">Spendly Receipt Scanner</h1>
-          <p class="text-sm text-slate-400 mt-1">Snap, scan, save. No typing.</p>
+          <p class="text-sm text-zinc-400 mt-1">Snap, scan, save. No typing.</p>
         </div>
 
         <!-- Drop zone -->
         <div id="drop-zone"
-             class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-600 rounded-xl bg-slate-800 hover:bg-slate-700 cursor-pointer transition-colors px-6 py-12 text-slate-400">
-          <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+             class="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-zinc-700 rounded-xl bg-zinc-800/40 hover:border-indigo-500 cursor-pointer transition-colors px-6 py-12 text-zinc-400">
+          <svg class="w-10 h-10 text-zinc-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
           </svg>
-          <p class="text-sm text-slate-300 text-center">Drop a receipt photo here or click to choose</p>
-          <p class="text-xs text-slate-500">JPEG, PNG, WebP, HEIC — max 5 MB</p>
+          <p class="text-sm text-zinc-300 text-center">Drop a receipt photo here or click to choose</p>
+          <p class="text-xs text-zinc-500">JPEG, PNG, WebP, HEIC — max 5 MB</p>
           <input type="file" id="file-input" accept="image/*" class="hidden" />
         </div>
 
         <!-- Preview area (hidden until file selected) -->
         <div id="preview" style="display:none" class="mt-6 flex flex-col items-center gap-4">
           <img id="preview-img" src="" alt="Receipt preview"
-               class="max-h-48 rounded-lg border border-slate-700 shadow-sm object-contain" />
+               class="max-h-48 rounded-lg border border-zinc-700 shadow-sm object-contain" />
           <div class="flex items-center gap-4">
             <button id="scan-btn"
                     class="bg-indigo-500 hover:bg-indigo-600 disabled:opacity-40 text-white text-sm font-semibold rounded-xl px-6 py-2 transition-colors">
               Scan Receipt
             </button>
-            <button id="reset-btn" class="text-sm text-slate-400 hover:text-white underline">
+            <button id="reset-btn" class="text-sm text-zinc-400 hover:text-white underline">
               Choose different photo
             </button>
           </div>
@@ -58,31 +58,31 @@
 
         <!-- Result form (hidden until scan completes) -->
         <div id="result-form" style="display:none" class="mt-6">
-          <h2 class="text-sm font-semibold text-slate-300 mb-4">Review &amp; edit before saving</h2>
+          <h2 class="text-sm font-semibold text-zinc-300 mb-4">Review &amp; edit before saving</h2>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
             <div>
-              <label for="result-amount" class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Amount ($)</label>
+              <label for="result-amount" class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Amount ($)</label>
               <input type="number" id="result-amount" step="0.01" min="0"
-                     class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                     class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" />
             </div>
 
             <div>
-              <label for="result-merchant" class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Merchant</label>
+              <label for="result-merchant" class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Merchant</label>
               <input type="text" id="result-merchant"
-                     class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                     class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" />
             </div>
 
             <div>
-              <label for="result-date" class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Date</label>
+              <label for="result-date" class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Date</label>
               <input type="date" id="result-date"
-                     class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                     class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" />
             </div>
 
             <div>
-              <label for="result-category" class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Category</label>
+              <label for="result-category" class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Category</label>
               <select id="result-category"
-                      class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                      class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors">
                 <option value="Food">Food</option>
                 <option value="Groceries">Groceries</option>
                 <option value="Coffee">Coffee</option>
@@ -95,9 +95,9 @@
             </div>
 
             <div class="sm:col-span-2">
-              <label for="result-notes" class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Notes (optional)</label>
+              <label for="result-notes" class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Notes (optional)</label>
               <input type="text" id="result-notes"
-                     class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+                     class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors" />
             </div>
 
           </div>
@@ -107,7 +107,7 @@
                     class="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-white text-sm font-semibold rounded-xl px-6 py-2 transition-colors">
               Save Expense
             </button>
-            <button id="rescan-btn" class="text-sm text-slate-400 hover:text-white underline">
+            <button id="rescan-btn" class="text-sm text-zinc-400 hover:text-white underline">
               Scan another
             </button>
           </div>

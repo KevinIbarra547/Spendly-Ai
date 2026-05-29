@@ -243,20 +243,20 @@ function renderGoalProgress(goals) {
     const barColor = pct >= 100 ? 'bg-green-500' : pct >= 50 ? 'bg-indigo-500' : 'bg-indigo-400';
 
     const card = document.createElement('div');
-    card.className = 'bg-slate-800 rounded-2xl p-5 border border-slate-700';
+    card.className = 'bg-zinc-900 rounded-2xl p-5 border border-zinc-800';
     card.innerHTML = `
       <div class="flex items-start justify-between mb-3">
         <h3 class="text-white font-semibold text-sm leading-tight">${escapeHtml(goal.title)}</h3>
         <span class="text-xs font-bold ml-3 flex-shrink-0 ${pct >= 100 ? 'text-green-400' : 'text-indigo-400'}">${pct}%</span>
       </div>
-      <div class="w-full bg-slate-700 rounded-full h-2 mb-3">
+      <div class="w-full bg-zinc-800 rounded-full h-2 mb-3">
         <div class="${barColor} h-2 rounded-full" style="width:${pct}%"></div>
       </div>
-      <div class="flex justify-between text-xs text-slate-400">
+      <div class="flex justify-between text-xs text-zinc-400">
         <span>${fmt(saved)} saved</span>
         <span>${fmt(target)} goal</span>
       </div>
-      ${deadlineText ? `<p class="mt-2 text-xs text-slate-500">Deadline: ${deadlineText}</p>` : ''}
+      ${deadlineText ? `<p class="mt-2 text-xs text-zinc-500">Deadline: ${deadlineText}</p>` : ''}
       ${pct >= 100 ? '<p class="mt-2 text-xs font-medium text-green-400">Goal reached!</p>' : ''}
     `;
     listEl.appendChild(card);

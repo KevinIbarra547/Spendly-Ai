@@ -7,18 +7,21 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex">
+<body class="bg-zinc-950 text-white min-h-screen flex">
 
   <div id="sidebar-container"></div>
 
   <!-- Main content -->
-  <div class="ml-64 flex-1 min-h-screen bg-slate-950">
+  <div class="ml-64 flex-1 min-h-screen bg-zinc-950">
     <main class="p-8 pt-10">
 
       <!-- Header -->
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-white">Expense Log</h1>
-        <button id="add-expense-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+        <button id="add-expense-btn" class="bg-white text-zinc-950 hover:bg-zinc-200 font-semibold rounded-xl px-5 py-2.5 text-sm transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
           Add Expense
         </button>
       </div>
@@ -27,11 +30,11 @@
       <div id="error-banner" class="hidden bg-red-900 text-red-200 rounded-lg p-3 mb-4 text-sm"></div>
 
       <!-- Filter row -->
-      <div class="flex flex-col sm:flex-row gap-3 mb-6">
+      <div class="flex flex-col sm:flex-row gap-3 mb-4">
         <input type="text" id="search-input" placeholder="Search by merchant or notes…"
-               class="flex-1 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+               class="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
         <select id="category-filter"
-                class="bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm sm:w-56">
+                class="bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm sm:w-56">
           <option value="">All Categories</option>
           <option value="Food">Food</option>
           <option value="Transport">Transport</option>
@@ -43,6 +46,19 @@
         </select>
       </div>
 
+      <!-- Category color pills -->
+      <div id="category-pills" class="flex flex-wrap gap-2 mb-6">
+        <button type="button" data-category="" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-zinc-800 text-zinc-300 hover:bg-zinc-700">All</button>
+        <button type="button" data-category="Food" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-orange-500/20 text-orange-300 hover:bg-orange-500/30">Food</button>
+        <button type="button" data-category="Transport" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-blue-500/20 text-blue-300 hover:bg-blue-500/30">Transport</button>
+        <button type="button" data-category="Entertainment" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-purple-500/20 text-purple-300 hover:bg-purple-500/30">Entertainment</button>
+        <button type="button" data-category="Shopping" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-pink-500/20 text-pink-300 hover:bg-pink-500/30">Shopping</button>
+        <button type="button" data-category="Health" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-green-500/20 text-green-300 hover:bg-green-500/30">Health</button>
+        <button type="button" data-category="Coffee" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30">Coffee</button>
+        <button type="button" data-category="Groceries" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30">Groceries</button>
+        <button type="button" data-category="Other" class="category-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-colors bg-zinc-500/20 text-zinc-300 hover:bg-zinc-500/30">Other</button>
+      </div>
+
       <!-- Expense list -->
       <div id="expense-list"></div>
 
@@ -51,34 +67,34 @@
 
   <!-- Add / Edit Expense Modal -->
   <div id="expense-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-    <div class="bg-slate-800 rounded-2xl p-6 w-full max-w-md">
+    <div class="bg-zinc-900 rounded-2xl p-6 w-full max-w-md border border-zinc-800">
       <h2 id="modal-title" class="text-white font-bold text-lg mb-4">Add Expense</h2>
       <form id="expense-form" class="space-y-4">
         <input type="hidden" id="expense-id" />
 
         <div id="expense-form-fields" class="space-y-4">
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Amount</label>
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Amount</label>
             <input type="number" id="field-amount" step="0.01" min="0" required
-                   class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                   class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Merchant</label>
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Merchant</label>
             <input type="text" id="field-merchant" required
-                   class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                   class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Date</label>
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Date</label>
             <input type="date" id="field-date" required
-                   class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm" />
+                   class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm" />
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Category</label>
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Category</label>
             <select id="field-category"
-                    class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm">
+                    class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm">
               <option value="Food">Food</option>
               <option value="Transport">Transport</option>
               <option value="Entertainment">Entertainment</option>
@@ -92,28 +108,28 @@
           </div>
 
           <div>
-            <label class="block text-slate-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Notes</label>
+            <label class="block text-zinc-400 text-xs font-medium mb-1.5 uppercase tracking-wide">Notes</label>
             <textarea id="field-notes" rows="2"
-                      class="w-full bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 px-3 py-2.5 text-sm"></textarea>
+                      class="w-full bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 px-3 py-2.5 text-sm"></textarea>
           </div>
         </div>
 
         <div id="scanner-panel" class="hidden space-y-4">
           <div id="inline-drop-zone"
-               class="border-2 border-dashed border-slate-600 rounded-lg bg-slate-700/40 text-slate-400 text-sm text-center px-4 py-10 cursor-pointer hover:border-blue-500 hover:text-slate-300 transition-colors">
+               class="border-2 border-dashed border-zinc-700 rounded-lg bg-zinc-800/40 text-zinc-400 text-sm text-center px-4 py-10 cursor-pointer hover:border-indigo-500 hover:text-zinc-300 transition-colors">
             Click or drag a receipt image here
           </div>
           <input type="file" id="inline-file-input" accept="image/*" class="hidden" />
           <button type="button" id="inline-scan-btn"
                   class="w-full bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Scan Receipt</button>
-          <p id="inline-scan-status" class="hidden text-slate-400 text-sm text-center">Scanning...</p>
+          <p id="inline-scan-status" class="hidden text-zinc-400 text-sm text-center">Scanning...</p>
           <button type="button" id="inline-back-btn"
-                  class="w-full text-slate-400 hover:text-white text-sm font-medium px-4 py-2 transition-colors">← Back to Form</button>
+                  class="w-full text-zinc-400 hover:text-white text-sm font-medium px-4 py-2 transition-colors">← Back to Form</button>
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <button type="button" id="cancel-btn" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Cancel</button>
-          <button type="button" id="open-scanner-btn" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">📷 Scan Receipt</button>
+          <button type="button" id="cancel-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Cancel</button>
+          <button type="button" id="open-scanner-btn" class="bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">📷 Scan Receipt</button>
           <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Save</button>
         </div>
       </form>
@@ -121,6 +137,31 @@
   </div>
 
   <script src="/js/expenses.js"></script>
+  <script>
+    // Category pills: clicking a pill sets the category-filter value, fires the
+    // events expenses.js already listens for, and highlights the active pill.
+    (function () {
+      var categoryFilter = document.getElementById('category-filter');
+      var pills = document.querySelectorAll('.category-pill');
+      if (!categoryFilter || !pills.length) return;
+
+      function setActive(activePill) {
+        pills.forEach(function (p) {
+          p.classList.toggle('ring-2', p === activePill);
+          p.classList.toggle('ring-white/40', p === activePill);
+        });
+      }
+
+      pills.forEach(function (pill) {
+        pill.addEventListener('click', function () {
+          categoryFilter.value = pill.dataset.category;
+          categoryFilter.dispatchEvent(new Event('input', { bubbles: true }));
+          categoryFilter.dispatchEvent(new Event('change', { bubbles: true }));
+          setActive(pill);
+        });
+      });
+    })();
+  </script>
   <script src="/js/sidebar.js"></script>
 </body>
 </html>

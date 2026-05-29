@@ -6,9 +6,9 @@
       const config = await cfgRes.json();
       if (config.receiptScannerEnabled === false) {
         document.body.innerHTML = `
-          <div class="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-slate-950 text-white">
+          <div class="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-zinc-950 text-white">
             <h1 class="text-2xl font-bold mb-3">This feature is currently disabled</h1>
-            <p class="text-slate-400 mb-6">The Receipt Scanner has been turned off by an administrator.</p>
+            <p class="text-zinc-400 mb-6">The Receipt Scanner has been turned off by an administrator.</p>
             <a href="/dashboard.html" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition-colors">Back to Dashboard</a>
           </div>`;
         return;
