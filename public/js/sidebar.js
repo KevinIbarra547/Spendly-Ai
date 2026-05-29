@@ -95,6 +95,11 @@
           initialsEl.textContent = user.username.slice(0, 2).toUpperCase();
         }
       }
+      // Hide admin nav link if user isn't admin
+      if (!user || user.isAdmin !== true) {
+        var adminLink = document.getElementById('admin-nav-link');
+        if (adminLink) adminLink.style.display = 'none';
+      }
     } catch (e) {
       var card = document.getElementById('sidebar-user-card');
       if (card) card.style.display = 'none';
