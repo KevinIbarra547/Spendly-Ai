@@ -2,7 +2,7 @@
 // Runs on every page that has a sidebar. The backend admin routes are
 // independently protected by requireAdmin, so this is purely cosmetic —
 // but non-admins should never see the link under any circumstance.
-(async function () {
+document.addEventListener('sidebar:ready', async function () {
   function hideAdminLink() {
     const link = document.getElementById('admin-nav-link');
     if (link) link.style.display = 'none';
@@ -22,4 +22,4 @@
   } catch (err) {
     hideAdminLink();
   }
-})();
+});
