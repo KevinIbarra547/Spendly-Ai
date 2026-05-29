@@ -33,7 +33,7 @@ function highlightNav() {
   document.querySelectorAll('.nav-link').forEach(link => {
     if (link.getAttribute('data-page') === currentPage) {
       link.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
-      link.classList.add('text-white', 'bg-indigo-600');
+      link.classList.add('text-white', 'bg-indigo-500');
     }
   });
 }
