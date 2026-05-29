@@ -1,150 +1,163 @@
 (async () => {
-  const res = await fetch('/api/auth/me');
-  if (!res.ok) {
-    window.location.href = 'index.html';
-    return;
-  }
-  const user = await res.json();
-
-  // Populate sidebar user info
-  const avatarEl = document.getElementById('sidebar-avatar');
-  const initialsEl = document.getElementById('sidebar-initials');
-  document.getElementById('sidebar-username').textContent = user.username;
-
-  const isDefaultPfp = !user.pfp || user.pfp === '/uploads/pfps/default.png';
-  if (!isDefaultPfp) {
-    avatarEl.innerHTML = `<img src="${user.pfp}" class="w-full h-full object-cover" alt="">`;
-  } else {
-    initialsEl.textContent = user.username.slice(0, 2).toUpperCase();
-  }
-
-  // Highlight the active nav link
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-link').forEach(link => {
-    if (link.getAttribute('data-page') === currentPage) {
-      link.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
-      link.classList.add('text-white', 'bg-indigo-500');
-    }
-  });
-
-  // Message of the Day banner.
+  // Auth check
+  let user;
   try {
-    const cfgRes = await fetch('/api/site/config');
-    if (cfgRes.ok) {
-      const config = await cfgRes.json();
-      let banner = document.getElementById('motd-banner');
-      if (!banner) {
-        banner = document.createElement('div');
-        banner.id = 'motd-banner';
-        banner.className = 'bg-indigo-600/20 border border-indigo-500/40 text-indigo-200 rounded-xl px-4 py-3 mb-6 text-sm';
-        const main = document.querySelector('main') || document.body;
-        main.prepend(banner);
-      }
-      banner.textContent = config.tipOfTheDay || '';
-    }
-  } catch (e) { /* no banner if config can't be read */ }
+    const res = await fetch('/api/auth/me');
+    if (!res.ok) { window.location.href = 'index.html'; return; }
+    user = await res.json();
+  } catch (e) { window.location.href = 'index.html'; return; }
 
-  // Greeting and student status
-  const greetingEl = document.getElementById('greeting-text');
-  const statusEl = document.getElementById('student-status-text');
+  // Greeting
+  const greetingEl = document.getElementById('greeting-heading');
+  const subtitleEl = document.getElementById('greeting-subtitle');
+  if (greetingEl) greetingEl.textContent = `Hey ${user.username} 👋`;
+  if (subtitleEl) subtitleEl.textContent = 'Welcome back to Spendly.';
 
-  if (greetingEl) greetingEl.textContent = `Hello, ${user.username}! 👋`;
-  if (statusEl) {
-    const status = user.studentStatus || '';
-    const year = user.graduationYear ? ` · Class of ${user.graduationYear}` : '';
-    statusEl.textContent = `🎓 ${status}${year}`;
+  // Helpers
+  function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const todayStr = now.toDateString();
+    const yest = new Date(now); yest.setDate(now.getDate() - 1);
+    const timeStr = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    if (d.toDateString() === todayStr) return 'Today, ' + timeStr;
+    if (d.toDateString() === yest.toDateString()) return 'Yesterday, ' + timeStr;
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + timeStr;
   }
 
-  // Fetch expenses and populate Top Category and Recent Transactions
+  function categoryIcon() {
+    return `<svg class="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+    </svg>`;
+  }
+
+  // Days remaining in current month
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const daysLeft = lastDay.getDate() - now.getDate();
+
+  // Fetch expenses
+  let expenses = [];
   try {
     const expRes = await fetch('/api/expenses');
-    if (expRes.ok) {
-      const expenses = await expRes.json();
+    if (expRes.ok) expenses = await expRes.json();
+  } catch (e) { /* leave empty */ }
 
-      // Recent transactions — last 3, newest first
-      const recent = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3);
-      const listEl = document.getElementById('recent-transactions-list');
-      if (listEl) {
-        if (recent.length === 0) {
-          listEl.innerHTML = `<li class="text-slate-400 text-sm">No transactions yet.</li>`;
-        } else {
-          listEl.innerHTML = recent.map(exp => `
-            <li class="flex justify-between items-center py-3 border-b border-slate-700 last:border-0">
-              <div>
-                <p class="text-white text-sm font-medium">${exp.merchant || 'Unknown'}</p>
-                <p class="text-slate-400 text-xs">${exp.category} · ${exp.date}</p>
-              </div>
-              <span class="text-white font-semibold text-sm">$${parseFloat(exp.amount).toFixed(2)}</span>
-            </li>`).join('');
-        }
-      }
+  // This Month calculations
+  const thisMonthExpenses = expenses.filter(e => {
+    const d = new Date(e.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const prevMonthExpenses = expenses.filter(e => {
+    const d = new Date(e.date);
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return d.getMonth() === prev.getMonth() && d.getFullYear() === prev.getFullYear();
+  });
 
-      // Top spending category this month
-      const now = new Date();
-      const thisMonth = expenses.filter(e => {
-        const d = new Date(e.date);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      });
-      const categoryTotals = {};
-      thisMonth.forEach(e => {
-        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + parseFloat(e.amount);
-      });
-      const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
-      const topCatEl = document.getElementById('top-category-value');
-      const topAmtEl = document.getElementById('top-category-amount');
-      if (topCatEl && topAmtEl) {
-        if (topCategory) {
-          topCatEl.textContent = topCategory[0];
-          topAmtEl.textContent = `$${topCategory[1].toFixed(2)} this month`;
-        } else {
-          topCatEl.textContent = '—';
-          topAmtEl.textContent = 'No expenses this month';
-        }
-      }
-    }
-  } catch (e) { console.error('Expenses fetch failed', e); }
+  const monthSpent = thisMonthExpenses.reduce((s, e) => s + parseFloat(e.amount), 0);
+  const prevSpent  = prevMonthExpenses.reduce((s, e) => s + parseFloat(e.amount), 0);
+  const cap = parseFloat(user.monthlyBudgetCap) || 0;
 
-  // Fetch goals and populate the Urgent Goal card
+  const monthSpentEl    = document.getElementById('month-spent');
+  const monthCapLabel   = document.getElementById('month-cap-label');
+  const monthProgressBar = document.getElementById('month-progress-bar');
+  const monthRemaining  = document.getElementById('month-remaining');
+  const monthDaysLeft   = document.getElementById('month-days-left');
+  const monthDelta      = document.getElementById('month-delta');
+
+  if (monthSpentEl) monthSpentEl.textContent = fmt(monthSpent);
+
+  if (cap > 0) {
+    if (monthCapLabel) monthCapLabel.textContent = `of ${fmt(cap)}`;
+    const pct = Math.min(100, (monthSpent / cap) * 100);
+    if (monthProgressBar) monthProgressBar.style.width = pct + '%';
+    const remaining = Math.max(0, cap - monthSpent);
+    if (monthRemaining) monthRemaining.textContent = fmt(remaining) + ' left to spend';
+  } else {
+    if (monthCapLabel) monthCapLabel.textContent = 'no cap set';
+    if (monthProgressBar) monthProgressBar.parentElement.classList.add('hidden');
+    if (monthRemaining) monthRemaining.textContent = '';
+  }
+
+  if (monthDaysLeft) monthDaysLeft.textContent = daysLeft + ' days remaining';
+
+  if (monthDelta && prevSpent > 0) {
+    const delta = ((monthSpent - prevSpent) / prevSpent) * 100;
+    const sign = delta >= 0 ? '+' : '';
+    monthDelta.textContent = sign + delta.toFixed(0) + '% vs last month';
+  }
+
+  // Fetch goals
+  let goals = [];
   try {
     const goalsRes = await fetch('/api/expenses/goals');
-    if (goalsRes.ok) {
-      const goals = await goalsRes.json();
-      const now = new Date();
+    if (goalsRes.ok) goals = await goalsRes.json();
+  } catch (e) { /* leave empty */ }
 
-      // Find the goal with the nearest future deadline
-      const upcoming = goals
-        .filter(g => new Date(g.deadline) >= now)
-        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-
-      const goalNameEl = document.getElementById('goal-name');
-      const goalDaysEl = document.getElementById('goal-days');
-      const goalBarEl = document.getElementById('goal-progress-bar');
-      const goalRemainingEl = document.getElementById('goal-remaining');
-      const goalSavedEl = document.getElementById('goal-saved');
-      const goalTargetEl = document.getElementById('goal-target');
-
-      if (upcoming.length > 0) {
-        const g = upcoming[0];
-        const daysLeft = Math.ceil((new Date(g.deadline) - now) / (1000 * 60 * 60 * 24));
-        const remaining = Math.max(0, g.targetAmount - g.currentSaved);
-        const pct = Math.min(100, Math.round((g.currentSaved / g.targetAmount) * 100));
-
-        if (goalNameEl) goalNameEl.textContent = g.title;
-        if (goalDaysEl) goalDaysEl.textContent = `🎯 ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left`;
-        if (goalBarEl) {
-          goalBarEl.style.width = `${pct}%`;
-          goalBarEl.className = 'h-2 rounded-full bg-indigo-500 transition-all';
-        }
-        if (goalRemainingEl) goalRemainingEl.textContent = `$${remaining.toFixed(2)} still needed`;
-        if (goalSavedEl) goalSavedEl.textContent = `$${parseFloat(g.currentSaved).toFixed(2)}`;
-        if (goalTargetEl) goalTargetEl.textContent = `$${parseFloat(g.targetAmount).toFixed(2)}`;
-      } else {
-        if (goalNameEl) goalNameEl.textContent = 'No upcoming goals';
-        if (goalDaysEl) goalDaysEl.textContent = '—';
-        if (goalRemainingEl) goalRemainingEl.textContent = '';
-        if (goalSavedEl) goalSavedEl.textContent = '—';
-        if (goalTargetEl) goalTargetEl.textContent = '—';
-      }
+  // Top Goal card
+  const topGoalContent = document.getElementById('top-goal-content');
+  if (topGoalContent && goals.length > 0) {
+    const incomplete = goals.filter(g => g.targetAmount > 0 && g.currentSaved < g.targetAmount);
+    if (incomplete.length > 0) {
+      const topGoal = incomplete.sort((a, b) => (b.currentSaved / b.targetAmount) - (a.currentSaved / a.targetAmount))[0];
+      const gPct = Math.min(100, Math.round((topGoal.currentSaved / topGoal.targetAmount) * 100));
+      topGoalContent.innerHTML = `
+        <p class="text-white font-semibold text-lg mb-1">${topGoal.title}</p>
+        <p class="text-zinc-400 text-sm mb-3">${fmt(topGoal.currentSaved)} saved of ${fmt(topGoal.targetAmount)}</p>
+        <div class="w-full bg-zinc-800 rounded-full h-2">
+          <div class="bg-white h-2 rounded-full transition-all" style="width: ${gPct}%"></div>
+        </div>
+        <p class="text-zinc-500 text-xs mt-2">${gPct}% complete</p>`;
+    } else {
+      topGoalContent.innerHTML = `<p class="text-zinc-400 text-sm">All goals completed! <a href="/goals.html" class="text-white underline">Add a new one</a></p>`;
     }
-  } catch (e) { console.error('Goals fetch failed', e); }
+  }
+
+  // Buddy says
+  const buddyEl = document.getElementById('buddy-says-message');
+  if (buddyEl) {
+    if (expenses.length === 0) {
+      buddyEl.textContent = 'Welcome to Spendly! Log your first expense to start seeing insights.';
+    } else if (cap > 0 && monthSpent > cap) {
+      buddyEl.textContent = `You're ${fmt(monthSpent - cap)} over your monthly cap. Worth a chat with the Coach.`;
+    } else if (cap > 0 && monthSpent / cap > 0.8 && daysLeft > 5) {
+      buddyEl.textContent = `Heads up — you've used ${fmt(monthSpent)} of your ${fmt(cap)} cap with ${daysLeft} days to go. Pace yourself.`;
+    } else if (cap > 0 && (cap - monthSpent) / cap > 0.2) {
+      buddyEl.textContent = `You're doing well this month — ${fmt(cap - monthSpent)} under cap. Keep it up.`;
+    } else if (cap > 0) {
+      buddyEl.textContent = `On track this month — ${fmt(monthSpent)} spent of ${fmt(cap)} cap.`;
+    } else {
+      buddyEl.textContent = `You've logged ${fmt(monthSpent)} this month. Set a monthly cap in your profile to track your budget.`;
+    }
+  }
+
+  // Recent expenses list
+  const recentList = document.getElementById('recent-expenses-list');
+  const recentEmpty = document.getElementById('recent-expenses-empty');
+  if (recentList) {
+    const recent = [...expenses]
+      .sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id)
+      .slice(0, 5);
+
+    if (recent.length === 0) {
+      recentList.classList.add('hidden');
+      if (recentEmpty) recentEmpty.classList.remove('hidden');
+    } else {
+      recentList.innerHTML = recent.map(exp => `
+        <div class="flex items-center justify-between py-3 border-b border-zinc-800 last:border-b-0">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
+              ${categoryIcon()}
+            </div>
+            <div>
+              <p class="text-white text-sm font-medium">${exp.merchant || 'Unknown'}</p>
+              <p class="text-zinc-500 text-xs">${exp.category || 'Uncategorized'} · ${formatDate(exp.date)}</p>
+            </div>
+          </div>
+          <span class="text-white text-sm font-semibold">-${fmt(exp.amount)}</span>
+        </div>`).join('');
+    }
+  }
 })();

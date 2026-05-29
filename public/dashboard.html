@@ -7,75 +7,107 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex">
+<body class="bg-zinc-950 text-white min-h-screen flex">
 
   <div id="sidebar-container"></div>
 
-  <!-- Main content -->
-  <div class="ml-64 flex-1 min-h-screen bg-slate-950">
-    <main class="p-8 pt-10">
+  <main class="ml-64 min-h-screen bg-zinc-950 p-8">
 
-      <!-- Hero greeting -->
-      <section class="w-full mb-10">
-        <h1 id="greeting-text" class="text-4xl md:text-5xl font-bold text-white">Hello! 👋</h1>
-        <p id="student-status-text" class="text-2xl text-indigo-300 mt-3">🎓</p>
-      </section>
+    <!-- HEADER ROW: Greeting on left, log-expense CTA on right -->
+    <div class="flex items-start justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-white mb-1" id="greeting-heading">
+          Hey there 👋
+        </h1>
+        <p class="text-zinc-400 text-sm" id="greeting-subtitle">
+          Welcome back to Spendly.
+        </p>
+      </div>
+      <a href="/expenses.html" class="bg-white text-zinc-950 hover:bg-zinc-200 font-semibold rounded-xl px-5 py-2.5 text-sm transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Log expense
+      </a>
+    </div>
 
-      <!-- Stats row -->
-      <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- TOP CARDS ROW: This Month spending + Top Goal -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-        <!-- Card 1 — Top Spending Category -->
-        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-          <div class="flex items-center gap-2 mb-4">
-            <span class="text-xl">🏆</span>
-            <h2 class="text-sm font-medium text-slate-400">Top Category This Month</h2>
-          </div>
-          <p id="top-category-value" class="text-2xl font-bold text-white">—</p>
-          <p id="top-category-amount" class="text-sm text-slate-400 mt-1">—</p>
+      <!-- This Month card -->
+      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+        <div class="flex items-baseline justify-between mb-3">
+          <span class="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            This month
+          </span>
+          <span id="month-delta" class="text-xs font-medium text-zinc-400">
+          </span>
         </div>
-
-        <!-- Card 2 — Nearest Goal Deadline -->
-        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-          <div class="flex items-center gap-2 mb-4">
-            <span class="text-xl">🎯</span>
-            <h2 class="text-sm font-medium text-slate-400">Urgent Goal</h2>
-          </div>
-          <p id="goal-name" class="text-xl font-bold text-white">—</p>
-          <p id="goal-days" class="text-sm text-slate-400 mt-1">—</p>
-          <div class="w-full h-2 rounded-full bg-slate-700 mt-4">
-            <div id="goal-progress-bar" class="h-2 rounded-full bg-indigo-500 transition-all" style="width: 0%"></div>
-          </div>
-          <p id="goal-remaining" class="text-sm text-slate-400 mt-3"></p>
+        <div class="flex items-baseline gap-2 mb-4">
+          <span class="text-3xl font-bold text-white" id="month-spent">$0</span>
+          <span class="text-zinc-500 text-sm" id="month-cap-label">of $0</span>
         </div>
+        <!-- Progress bar -->
+        <div class="w-full bg-zinc-800 rounded-full h-2 mb-3">
+          <div id="month-progress-bar" class="bg-white h-2 rounded-full transition-all" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-between text-xs text-zinc-500">
+          <span id="month-remaining">$0 left to spend</span>
+          <span id="month-days-left">— days remaining</span>
+        </div>
+      </div>
 
-        <!-- Card 3 — Next Goal Amount Needed -->
-        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-          <div class="flex items-center gap-2 mb-4">
-            <span class="text-xl">🎯</span>
-            <h2 class="text-sm font-medium text-slate-400">Goal Progress</h2>
-          </div>
-          <p class="text-2xl font-bold text-white">
-            <span id="goal-saved">—</span>
-            <span class="text-slate-500 text-lg font-normal"> / </span>
-            <span id="goal-target">—</span>
+      <!-- Top Goal card -->
+      <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800" id="top-goal-card">
+        <div class="flex items-baseline justify-between mb-3">
+          <span class="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Top goal
+          </span>
+          <a href="/goals.html" class="text-xs text-zinc-400 hover:text-white">View all →</a>
+        </div>
+        <div id="top-goal-content">
+          <p class="text-zinc-500 text-sm">No goals yet. <a href="/goals.html" class="text-white underline">Create one</a></p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BUDDY SAYS card -->
+    <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs font-medium text-zinc-500 mb-1">Buddy says</p>
+          <p class="text-white text-sm leading-relaxed" id="buddy-says-message">
+            Welcome to Spendly! Start by logging your first expense to see personalized insights.
           </p>
-          <p class="text-sm text-slate-400 mt-1">Saved toward target</p>
+          <div class="mt-4 flex gap-2">
+            <a href="/coach.html" class="text-xs font-medium text-white hover:text-zinc-300">
+              Ask the Coach →
+            </a>
+          </div>
         </div>
+      </div>
+    </div>
 
-      </section>
+    <!-- RECENT EXPENSES card -->
+    <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+      <div class="flex items-baseline justify-between mb-4">
+        <h2 class="text-lg font-semibold text-white">Recent expenses</h2>
+        <a href="/expenses.html" class="text-xs text-zinc-400 hover:text-white">View all →</a>
+      </div>
+      <div id="recent-expenses-list" class="space-y-2">
+      </div>
+      <div id="recent-expenses-empty" class="hidden text-center py-8">
+        <p class="text-zinc-500 text-sm">No expenses yet. Start logging to see your activity here.</p>
+      </div>
+    </div>
 
-      <!-- Recent Transactions -->
-      <section class="bg-slate-800 rounded-2xl p-6 border border-slate-700 mb-8">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="text-xl">🧾</span>
-          <h2 class="text-lg font-semibold text-white">Recent Transactions</h2>
-        </div>
-        <ul id="recent-transactions-list"></ul>
-        <a href="expenses.html" class="inline-block mt-4 text-sm text-indigo-400 hover:text-indigo-300">View all →</a>
-      </section>
-
-    </main>
-  </div>
+  </main>
 
   <script src="/js/dashboard.js"></script>
   <script src="/js/sidebar.js"></script>
