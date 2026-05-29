@@ -44,7 +44,7 @@ const pfpUpload = multer({
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, email, schoolName, graduationYear, studentStatus, primaryFinancialGoal } = req.body;
+    const { username, password, email, schoolName, graduationYear, studentStatus, primaryFinancialGoal, adminCode } = req.body;
 
     // Validate all 7 fields present and non-empty
     if (!username || !password || !email || !schoolName || graduationYear === undefined || !studentStatus || !primaryFinancialGoal) {
@@ -77,6 +77,10 @@ router.post('/register', async (req, res) => {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
+    // Grant admin only when the secret admin code matches.
+    const ADMIN_CODE = process.env.ADMIN_CODE || 'NollanisaBUM';
+    const isAdmin = adminCode === ADMIN_CODE;
+
     // Build user object with all 11 fields
     const newUser = {
       id: crypto.randomUUID(),
@@ -89,7 +93,7 @@ router.post('/register', async (req, res) => {
       primaryFinancialGoal,
       pfp: '/uploads/pfps/default.png',
       monthlyBudgetCap: 0,
-      isAdmin: users.length === 0
+      isAdmin
     };
 
     users.push(newUser);
