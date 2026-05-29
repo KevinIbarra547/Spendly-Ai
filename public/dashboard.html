@@ -109,8 +109,66 @@
   <!-- Main content -->
   <div class="ml-64 flex-1 min-h-screen bg-slate-950">
     <main class="p-8 pt-10">
-      <h1 class="text-3xl font-bold mb-2 text-white">Dashboard</h1>
-      <p class="text-slate-400">Welcome back! Your financial overview will be built in a later checkpoint.</p>
+
+      <!-- Hero greeting -->
+      <section class="w-full mb-10">
+        <h1 id="greeting-text" class="text-4xl md:text-5xl font-bold text-white">Hello! 👋</h1>
+        <p id="student-status-text" class="text-2xl text-indigo-300 mt-3">🎓</p>
+      </section>
+
+      <!-- Stats row -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- Card 1 — Top Spending Category -->
+        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-xl">🏆</span>
+            <h2 class="text-sm font-medium text-slate-400">Top Category This Month</h2>
+          </div>
+          <p id="top-category-value" class="text-2xl font-bold text-white">—</p>
+          <p id="top-category-amount" class="text-sm text-slate-400 mt-1">—</p>
+        </div>
+
+        <!-- Card 2 — Nearest Goal Deadline -->
+        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-xl">🎯</span>
+            <h2 class="text-sm font-medium text-slate-400">Urgent Goal</h2>
+          </div>
+          <p id="goal-name" class="text-xl font-bold text-white">—</p>
+          <p id="goal-days" class="text-sm text-slate-400 mt-1">—</p>
+          <div class="w-full h-2 rounded-full bg-slate-700 mt-4">
+            <div id="goal-progress-bar" class="h-2 rounded-full bg-indigo-500 transition-all" style="width: 0%"></div>
+          </div>
+          <p id="goal-remaining" class="text-sm text-slate-400 mt-3"></p>
+        </div>
+
+        <!-- Card 3 — Next Goal Amount Needed -->
+        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-xl">🎯</span>
+            <h2 class="text-sm font-medium text-slate-400">Goal Progress</h2>
+          </div>
+          <p class="text-2xl font-bold text-white">
+            <span id="goal-saved">—</span>
+            <span class="text-slate-500 text-lg font-normal"> / </span>
+            <span id="goal-target">—</span>
+          </p>
+          <p class="text-sm text-slate-400 mt-1">Saved toward target</p>
+        </div>
+
+      </section>
+
+      <!-- Recent Transactions -->
+      <section class="bg-slate-800 rounded-2xl p-6 border border-slate-700 mb-8">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-xl">🧾</span>
+          <h2 class="text-lg font-semibold text-white">Recent Transactions</h2>
+        </div>
+        <ul id="recent-transactions-list"></ul>
+        <a href="expenses.html" class="inline-block mt-4 text-sm text-indigo-400 hover:text-indigo-300">View all →</a>
+      </section>
+
     </main>
   </div>
 
