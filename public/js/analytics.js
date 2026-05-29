@@ -53,6 +53,8 @@ function renderCategoryChart(expenses) {
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           position: 'bottom',
@@ -110,6 +112,8 @@ function renderTrendChart(expenses) {
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: {
           ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { size: 11 } },
@@ -189,6 +193,8 @@ function renderWeeklyChart(expenses) {
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: {
           ticks: { color: '#94a3b8', font: { size: 12 } },
