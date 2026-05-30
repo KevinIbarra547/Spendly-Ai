@@ -7,6 +7,11 @@
     user = await res.json();
   } catch (e) { window.location.href = 'index.html'; return; }
 
+  if (user.onboardingComplete === false) {
+    window.location.href = '/onboarding.html';
+    return;
+  }
+
   // Greeting
   const greetingEl = document.getElementById('greeting-heading');
   const subtitleEl = document.getElementById('greeting-subtitle');
