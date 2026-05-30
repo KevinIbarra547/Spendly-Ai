@@ -92,16 +92,16 @@ function render() {
         </div>
         <p class="text-zinc-400 text-sm mt-1">$${saved.toFixed(2)} of $${target.toFixed(2)}</p>
         <div class="bg-zinc-800 rounded-full h-2 mt-3">
-          <div class="bg-indigo-500 rounded-full h-2" style="width: ${pct}%"></div>
+          <div style="height:100%;background:#22c55e;border-radius:9999px;width:${pct}%"></div>
         </div>
         <div class="flex items-center justify-between mt-2">
           <span class="text-indigo-400 text-xs font-semibold">${pct.toFixed(0)}%</span>
           ${g.deadline ? `<span class="text-zinc-500 text-xs">Due ${escapeHtml(g.deadline)}</span>` : ''}
         </div>
         <div class="flex items-center gap-2 mt-4">
-          <button data-savings="${escapeHtml(g.id)}" class="bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-1.5 rounded-lg">Add Savings</button>
-          <button data-edit="${escapeHtml(g.id)}" class="bg-zinc-800 hover:bg-zinc-700 text-white text-xs px-3 py-1.5 rounded-lg">Edit</button>
-          <button data-delete="${escapeHtml(g.id)}" class="bg-zinc-800 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-lg">Delete</button>
+          <button data-savings="${escapeHtml(g.id)}" style="background:#22c55e;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer">Add Savings</button>
+          <button data-edit="${escapeHtml(g.id)}" style="background:#27272a;color:#f4f1ec;border:1px solid #3f3f46;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer">Edit</button>
+          <button data-delete="${escapeHtml(g.id)}" style="background:#27272a;color:#f4f1ec;border:1px solid #3f3f46;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer">Delete</button>
         </div>
       </div>
     `;
