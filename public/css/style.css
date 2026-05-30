@@ -1,1 +1,312 @@
-/* style.css — Spendly global styles. Implemented in later checkpoints. */
+/* ============================================================
+   Spendly — Colors & Type
+   "Your money's smarter friend"
+
+   Two themes live in this system:
+   1. PRODUCTION (dark)  — the shipped app + marketing site.
+                           Built on Tailwind's zinc scale.
+   2. PROPOSED (light)   — the "enhanced" exploration direction
+                           (Recurring, Savings Velocity, Onboarding).
+                           Indigo primary on light surfaces.
+
+   There is NO custom brand webfont. Spendly uses the native
+   system UI sans stack (Tailwind v4 default). Keep it that way
+   unless the team adopts a typeface.
+   ============================================================ */
+
+/* ---------- TYPE ---------- */
+:root {
+  /* The whole product rides on the system sans stack. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+               Roboto, Helvetica, Arial, "Apple Color Emoji",
+               "Segoe UI Emoji", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+               Consolas, "Liberation Mono", monospace;
+
+  /* Weights actually used: 400 body, 500 medium, 600 semibold, 700 bold */
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Type scale (px). Marketing hero is the only place that goes big. */
+  --text-hero: 60px;     /* landing h1 (text-5xl/6xl)        */
+  --text-h1: 30px;       /* page titles (text-3xl)           */
+  --text-h2: 24px;       /* section / page heads (text-2xl)  */
+  --text-h3: 18px;       /* card titles (text-lg)            */
+  --text-body: 14px;     /* default UI body (text-sm)        */
+  --text-base: 16px;     /* marketing body (text-base/lg)    */
+  --text-xs: 12px;       /* labels, meta (text-xs)           */
+  --text-2xs: 11px;      /* enhanced-theme micro labels      */
+
+  --tracking-label: 0.06em; /* uppercase eyebrow labels      */
+  --leading-tight: 1.15;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* ---------- RADII ---------- */
+  --radius-sm: 8px;      /* inputs, small buttons (rounded-lg)   */
+  --radius-md: 12px;     /* buttons, micro-cards (rounded-xl)    */
+  --radius-lg: 16px;     /* cards, modals (rounded-2xl)          */
+  --radius-pill: 9999px; /* pills, toggles, avatars             */
+
+  /* ---------- SPACING (4px base grid) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-16: 64px;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.25);
+  --shadow-md: 0 4px 12px 0 rgb(0 0 0 / 0.30);
+  --shadow-lg: 0 10px 30px -5px rgb(0 0 0 / 0.45);
+}
+
+/* ============================================================
+   PRODUCTION — DARK THEME (default for app + marketing)
+   Tailwind zinc scale + accent set.
+   ============================================================ */
+:root {
+  /* Surfaces */
+  --bg-base:      #09090b;  /* zinc-950 — page background        */
+  --bg-surface:   #18181b;  /* zinc-900 — cards, sidebar, modals */
+  --bg-elevated:  #27272a;  /* zinc-800 — inputs, hover, chips   */
+  --bg-elevated-2:#3f3f46;  /* zinc-700 — input borders, toggles */
+
+  /* Borders */
+  --border:       #27272a;  /* zinc-800 — default hairline       */
+  --border-strong:#3f3f46;  /* zinc-700 — inputs                 */
+
+  /* Text — warm-soft off-whites for a friendly, less clinical feel
+     (warm text on cool zinc reads as cozy/inviting, not harsh) */
+  --fg1: #f4f1ec;           /* primary — soft warm ivory (was pure #fff) */
+  --fg2: #b3aeb8;           /* secondary / body — gentle warm grey       */
+  --fg3: #837e88;           /* muted labels                              */
+  --fg4: #56525c;           /* footer / disabled                         */
+
+  /* Brand accent — indigo (actions, AI, links, progress) */
+  --accent:        #6366f1; /* indigo-500 — primary action btns  */
+  --accent-hover:  #4f46e5; /* indigo-600                        */
+  --accent-soft:   #818cf8; /* indigo-400 — icons on dark        */
+  --accent-faint:  rgb(99 102 241 / 0.20); /* AI/Buddy halo bg   */
+
+  /* Semantic */
+  --success:       #22c55e; /* green-500 — "Add Savings"         */
+  --success-hover: #16a34a; /* green-600                         */
+  --emerald:       #10b981; /* emerald-500 — scanner "Save"      */
+  --danger:        #ef4444; /* red-500 — overspend, logout       */
+  --warn:          #f59e0b; /* amber-500 — behind / caution      */
+
+  /* The white CTA — the most distinctive Spendly button.
+     White fill, near-black text. Used for the #1 action per screen. */
+  --cta-fill: #ffffff;
+  --cta-text: #09090b;
+  --cta-hover: #e4e4e7; /* zinc-200 */
+
+  /* Text on saturated colored backgrounds (always white in both themes) */
+  --fg-on-color: #ffffff;
+
+  /* ---- Category color tokens (used by CategoryPill / CatTag) ----
+     Translucent hue + pale text — readable on dark surfaces. */
+  --cat-food-bg:          rgb(249 115 22 / .2);  --cat-food-fg:          #fdba74;
+  --cat-transport-bg:     rgb(59 130 246 / .2);  --cat-transport-fg:     #93c5fd;
+  --cat-transportation-bg:rgb(59 130 246 / .2);  --cat-transportation-fg:#93c5fd;
+  --cat-entertainment-bg: rgb(168 85 247 / .2);  --cat-entertainment-fg: #d8b4fe;
+  --cat-shopping-bg:      rgb(236 72 153 / .2);  --cat-shopping-fg:      #f9a8d4;
+  --cat-health-bg:        rgb(34 197 94 / .2);   --cat-health-fg:        #86efac;
+  --cat-coffee-bg:        rgb(234 179 8 / .2);   --cat-coffee-fg:        #fde047;
+  --cat-groceries-bg:     rgb(16 185 129 / .2);  --cat-groceries-fg:     #6ee7b7;
+  --cat-subscriptions-bg: rgb(168 85 247 / .2);  --cat-subscriptions-fg: #d8b4fe;
+  --cat-other-bg:         rgb(113 113 122 / .2); --cat-other-fg:         #d4d4d8;
+
+  /* ---- Enhanced-kit tokens · DARK values ----
+     (the proposed light theme overrides these under .theme-light) */
+  --bg-sidebar: #18181b;
+  --bg-sidebar-active: #27272a;
+  --bg-tab-active: #6366f1;       /* indigo active tab on dark */
+  --border-hair: rgb(255 255 255 / 0.08);
+
+  --badge-green-bg: rgb(34 197 94 / .16);  --badge-green-fg: #86efac;
+  --badge-amber-bg: rgb(245 158 11 / .16); --badge-amber-fg: #fcd34d;
+  --badge-red-bg:   rgb(239 68 68 / .16);  --badge-red-fg:   #fca5a5;
+  --badge-blue-bg:  rgb(59 130 246 / .16); --badge-blue-fg:  #93c5fd;
+  --badge-purple-bg:rgb(168 85 247 / .16); --badge-purple-fg:#d8b4fe;
+
+  --note-green-bg: rgb(34 197 94 / .10); --note-green-bd: rgb(34 197 94 / .30); --note-green-fg: #86efac;
+  --note-amber-bg: rgb(245 158 11 / .10); --note-amber-bd: rgb(245 158 11 / .30); --note-amber-fg: #fcd34d;
+  --note-red-bg:   rgb(239 68 68 / .10); --note-red-bd:   rgb(239 68 68 / .30); --note-red-fg:   #fca5a5;
+  --note-indigo-bg:rgb(99 102 241 / .12); --note-indigo-fg:#a5b4fc;
+}
+
+/* ---------- Category colors (expense system) ----------
+   Rendered as translucent pills on dark: bg = hue/20, text = hue-300.
+   Solid hue values given for chart series + light theme. */
+:root {
+  --cat-food:          #f97316;  /* orange  */
+  --cat-food-text:     #fdba74;  /* orange-300 */
+  --cat-transport:     #3b82f6;  /* blue    */
+  --cat-transport-text:#93c5fd;  /* blue-300 */
+  --cat-entertainment: #a855f7;  /* purple  */
+  --cat-entertainment-text:#d8b4fe;
+  --cat-shopping:      #ec4899;  /* pink    */
+  --cat-shopping-text: #f9a8d4;
+  --cat-health:        #22c55e;  /* green   */
+  --cat-health-text:   #86efac;
+  --cat-coffee:        #eab308;  /* yellow  */
+  --cat-coffee-text:   #fde047;
+  --cat-groceries:     #10b981;  /* emerald */
+  --cat-groceries-text:#6ee7b7;
+  --cat-other:         #71717a;  /* zinc    */
+  --cat-other-text:    #d4d4d8;
+}
+
+/* ============================================================
+   PROPOSED — LIGHT THEME ("enhanced" direction)
+   From the enhanced mockup: light cards, dark sidebar,
+   indigo primary, soft tinted callouts, Tabler icons.
+   Scope under .theme-light to avoid clashing with production.
+   ============================================================ */
+.theme-light {
+  --bg-base:     #f4f4f5;   /* page                              */
+  --bg-surface:  #ffffff;   /* cards                             */
+  --bg-elevated: #f4f4f5;   /* inputs, micro-stats               */
+  --bg-sidebar:  #111111;   /* dark sidebar rail                 */
+  --bg-sidebar-active: #1e1e30;
+  --bg-tab-active:#1a1a2e;  /* active tab navy                   */
+
+  --border:        #e4e4e7;
+  --border-hair:   rgb(0 0 0 / 0.08); /* 0.5px hairlines         */
+
+  --fg1: #18181b;           /* near-black primary text           */
+  --fg2: #71717a;           /* secondary                         */
+  --fg3: #a1a1aa;
+
+  --accent:       #6366f1;  /* indigo primary                    */
+  --accent-soft:  #a5b4fc;  /* light indigo (sidebar icons)      */
+
+  /* Status badges (bg / text) */
+  --badge-green-bg: #dcfce7;  --badge-green-fg: #166534;
+  --badge-amber-bg: #fef9c3;  --badge-amber-fg: #854d0e;
+  --badge-red-bg:   #fee2e2;  --badge-red-fg:   #991b1b;
+  --badge-blue-bg:  #dbeafe;  --badge-blue-fg:  #1e40af;
+  --badge-purple-bg:#ede9fe;  --badge-purple-fg:#5b21b6;
+
+  /* Velocity / insight callout tints (bg / border / text) */
+  --note-green-bg: #f0fdf4; --note-green-bd: #bbf7d0; --note-green-fg: #166534;
+  --note-amber-bg: #fef9c3; --note-amber-bd: #fde68a; --note-amber-fg: #854d0e;
+  --note-red-bg:   #fee2e2; --note-red-bd:   #fca5a5; --note-red-fg:   #991b1b;
+  --note-indigo-bg:#f0f4ff; --note-indigo-fg:#3730a3;
+
+  /* App-kit additions — keep production app working in light mode */
+  --bg-elevated-2: #d4d4d8;             /* toggle track, etc. */
+  --border-strong: #d4d4d8;             /* input borders      */
+  --accent-faint:  rgb(99 102 241 / 0.10);
+  --accent-hover:  #4f46e5;
+  --success:       #16a34a;
+  --success-hover: #15803d;
+  --emerald:       #059669;
+  --danger:        #dc2626;
+  --warn:          #d97706;
+
+  /* The white CTA inverts to a near-black CTA on light surfaces */
+  --cta-fill: #18181b;
+  --cta-text: #ffffff;
+  --cta-hover: #27272a;
+
+  --fg-on-color: #ffffff;
+
+  /* Category pills in light: Tailwind hue-100 bg + hue-700 fg pattern */
+  --cat-food-bg:          #ffedd5;  --cat-food-fg:          #c2410c;
+  --cat-transport-bg:     #dbeafe;  --cat-transport-fg:     #1d4ed8;
+  --cat-transportation-bg:#dbeafe;  --cat-transportation-fg:#1d4ed8;
+  --cat-entertainment-bg: #ede9fe;  --cat-entertainment-fg: #6d28d9;
+  --cat-shopping-bg:      #fce7f3;  --cat-shopping-fg:      #be185d;
+  --cat-health-bg:        #dcfce7;  --cat-health-fg:        #166534;
+  --cat-coffee-bg:        #fef9c3;  --cat-coffee-fg:        #a16207;
+  --cat-groceries-bg:     #d1fae5;  --cat-groceries-fg:     #047857;
+  --cat-subscriptions-bg: #ede9fe;  --cat-subscriptions-fg: #6d28d9;
+  --cat-other-bg:         #f4f4f5;  --cat-other-fg:         #52525b;
+}
+
+/* ============================================================
+   SEMANTIC TYPE ROLES — apply to either theme
+   ============================================================ */
+.t-hero {
+  font: var(--fw-bold) var(--text-hero)/var(--leading-tight) var(--font-sans);
+  letter-spacing: -0.02em;
+  color: var(--fg1);
+}
+.t-h1 {
+  font: var(--fw-bold) var(--text-h1)/var(--leading-tight) var(--font-sans);
+  letter-spacing: -0.01em;
+  color: var(--fg1);
+}
+.t-h2 {
+  font: var(--fw-bold) var(--text-h2)/1.25 var(--font-sans);
+  color: var(--fg1);
+}
+.t-h3 {
+  font: var(--fw-semibold) var(--text-h3)/1.3 var(--font-sans);
+  color: var(--fg1);
+}
+.t-body {
+  font: var(--fw-normal) var(--text-body)/var(--leading-relaxed) var(--font-sans);
+  color: var(--fg2);
+}
+.t-body-lg {
+  font: var(--fw-normal) var(--text-base)/var(--leading-relaxed) var(--font-sans);
+  color: var(--fg2);
+}
+.t-label {
+  font: var(--fw-medium) var(--text-xs)/1.2 var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--fg3);
+}
+.t-meta {
+  font: var(--fw-normal) var(--text-xs)/1.4 var(--font-sans);
+  color: var(--fg3);
+}
+.t-amount {
+  /* the big numeric readout — dashboard "$141.89" */
+  font: var(--fw-bold) var(--text-h1)/1 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg1);
+}
+.t-mono {
+  font: var(--fw-normal) var(--text-body)/1.4 var(--font-mono);
+  color: var(--fg2);
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-6); }
+.card-elevated { background: var(--bg-elevated); border-radius: var(--radius-lg); padding: var(--space-6); }
+.btn-cta { display:inline-flex;align-items:center;gap:8px;background:var(--cta-fill);color:var(--cta-text);border:none;border-radius:var(--radius-md);padding:10px 20px;font-weight:600;font-size:14px;cursor:pointer;transition:background .15s; }
+.btn-cta:hover { background:var(--cta-hover); }
+.btn-primary { display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--fg-on-color);border:none;border-radius:var(--radius-sm);padding:8px 16px;font-weight:600;font-size:14px;cursor:pointer;transition:background .15s; }
+.btn-primary:hover { background:var(--accent-hover); }
+.btn-ghost { display:inline-flex;align-items:center;gap:8px;background:var(--bg-elevated);color:var(--fg1);border:none;border-radius:var(--radius-sm);padding:8px 16px;font-weight:500;font-size:14px;cursor:pointer;transition:background .15s; }
+.btn-ghost:hover { background:var(--bg-elevated-2); }
+.cat-pill { display:inline-flex;align-items:center;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:500; }
+.cat-food { background:var(--cat-food-bg);color:var(--cat-food-fg); }
+.cat-transport { background:var(--cat-transport-bg);color:var(--cat-transport-fg); }
+.cat-entertainment { background:var(--cat-entertainment-bg);color:var(--cat-entertainment-fg); }
+.cat-shopping { background:var(--cat-shopping-bg);color:var(--cat-shopping-fg); }
+.cat-health { background:var(--cat-health-bg);color:var(--cat-health-fg); }
+.cat-coffee { background:var(--cat-coffee-bg);color:var(--cat-coffee-fg); }
+.cat-groceries { background:var(--cat-groceries-bg);color:var(--cat-groceries-fg); }
+.cat-other { background:var(--cat-other-bg);color:var(--cat-other-fg); }
+.badge { display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:9999px;font-weight:500; }
+.badge-green { background:var(--badge-green-bg);color:var(--badge-green-fg); }
+.badge-amber { background:var(--badge-amber-bg);color:var(--badge-amber-fg); }
+.badge-red { background:var(--badge-red-bg);color:var(--badge-red-fg); }
+.badge-blue { background:var(--badge-blue-bg);color:var(--badge-blue-fg); }
+.badge-purple { background:var(--badge-purple-bg);color:var(--badge-purple-fg); }
+input:focus, select:focus, textarea:focus { border-color:var(--accent) !important; box-shadow:0 0 0 1px var(--accent) !important; outline:none; }
+* { transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
