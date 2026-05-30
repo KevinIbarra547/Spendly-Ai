@@ -32,6 +32,7 @@
   const input = document.getElementById('chat-input');
   const sendBtn = document.getElementById('send-btn');
   const clearBtn = document.getElementById('clear-btn');
+  const suggestionChips = document.getElementById('suggestion-chips');
 
   function addBubble(role, content) {
     const wrap = document.createElement('div');
@@ -51,6 +52,7 @@
     const text = input.value.trim();
     if (!text) return;
 
+    if (suggestionChips) suggestionChips.style.display = 'none';
     addBubble('user', text);
     messages.push({ role: 'user', content: text });
     input.value = '';
@@ -136,4 +138,18 @@
   });
 
   addBubble('assistant', "Hey! I'm your Spendly Coach. What's on your mind?");
+
+  if (messages.length > 1 && suggestionChips) suggestionChips.style.display = 'none';
+
+  if (suggestionChips) {
+    suggestionChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.suggestion-chip');
+      if (!chip) return;
+      const prompt = chip.dataset.prompt;
+      if (!prompt) return;
+      input.value = prompt;
+      suggestionChips.style.display = 'none';
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    });
+  }
 })();
