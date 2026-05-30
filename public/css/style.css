@@ -310,3 +310,57 @@
 .badge-purple { background:var(--badge-purple-bg);color:var(--badge-purple-fg); }
 input:focus, select:focus, textarea:focus { border-color:var(--accent) !important; box-shadow:0 0 0 1px var(--accent) !important; outline:none; }
 * { transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+
+/* ============================================================
+   THEME WIRING — base surfaces + light-mode overrides
+   ============================================================ */
+html, body {
+  background: var(--bg-base) !important;
+  color: var(--fg1);
+  min-height: 100vh;
+}
+
+html.theme-light .bg-zinc-950,
+html.theme-light .bg-zinc-900,
+html.theme-light main.bg-zinc-950,
+html.theme-light .min-h-screen.bg-zinc-950 {
+  background: var(--bg-base) !important;
+}
+
+html.theme-light .bg-zinc-900 {
+  background: var(--bg-surface) !important;
+}
+
+html.theme-light .bg-zinc-800,
+html.theme-light .bg-zinc-800\/40 {
+  background: var(--bg-elevated) !important;
+}
+
+html.theme-light .text-white {
+  color: var(--fg1) !important;
+}
+
+html.theme-light .text-zinc-400 {
+  color: var(--fg2) !important;
+}
+
+html.theme-light .text-zinc-500 {
+  color: var(--fg3) !important;
+}
+
+html.theme-light .border-zinc-800 {
+  border-color: var(--border) !important;
+}
+
+html.theme-light .border-zinc-700 {
+  border-color: var(--border-strong) !important;
+}
+
+html.theme-light aside {
+  background: var(--bg-sidebar) !important;
+  border-color: var(--border) !important;
+}
+
+html.theme-light .bg-indigo-600\/20 {
+  background: var(--accent-faint) !important;
+}
