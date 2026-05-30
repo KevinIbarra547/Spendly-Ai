@@ -3,6 +3,12 @@
 // straight back to the server. A 403 from any admin call kicks the
 // visitor back to the dashboard (they aren't an admin).
 (async function () {
+  const authRes = await fetch('/api/auth/me');
+  if (!authRes.ok) {
+    window.location.href = '/';
+    return;
+  }
+
   const coachToggle = document.getElementById('toggle-coach');
   const scannerToggle = document.getElementById('toggle-scanner');
   const motdInput = document.getElementById('motd-input');

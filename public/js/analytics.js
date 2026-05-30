@@ -266,7 +266,7 @@ function renderGoalProgress(goals) {
 document.addEventListener('DOMContentLoaded', async () => {
   // Auth guard
   try {
-    const authRes = await fetch('/api/auth/profile', { credentials: 'include' });
+    const authRes = await fetch('/api/auth/me', { credentials: 'include' });
     if (authRes.status === 401) {
       window.location.href = 'index.html';
       return;

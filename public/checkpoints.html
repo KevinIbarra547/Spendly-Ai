@@ -24,6 +24,13 @@
   </div>
 
   <script>
+  (async () => {
+    const res = await fetch('/api/auth/me');
+    if (!res.ok) {
+      window.location.href = '/';
+      return;
+    }
+
     const checkpoints = [
       { cp: 'CP01', name: 'Project Architecture', owner: 'Kayden', date: 'Week 1', reflection: 'Set up Express server, JSON schemas, and Replit configuration. Established the foundation for the entire app.' },
       { cp: 'CP02', name: 'Core Authentication', owner: 'Kayden', date: 'Week 1', reflection: 'Built register and login with bcrypt password hashing and session management. Users can securely sign in.' },
@@ -52,6 +59,7 @@
         </div>
       </div>
     `).join('');
+  })();
   </script>
   <script src="/js/sidebar.js"></script>
 </body>
