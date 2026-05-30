@@ -150,4 +150,13 @@ document.getElementById('save-btn').addEventListener('click', async () => {
   }
 });
 
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } catch (e) {
+    console.error('Logout failed', e);
+  }
+  window.location.href = '/';
+});
+
 init();

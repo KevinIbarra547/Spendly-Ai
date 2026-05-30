@@ -44,6 +44,22 @@
              class="flex-1 overflow-y-auto px-4 py-4 flex flex-col">
         </div>
 
+        <!-- Suggestion chips (hidden once conversation starts) -->
+        <div id="suggestion-chips" class="flex flex-wrap gap-2 px-4 pb-2">
+          <button class="suggestion-chip bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-1.5 rounded-full border border-zinc-700 transition-colors"
+                  data-prompt="Give me tips to save money this month">
+            💡 Save tips
+          </button>
+          <button class="suggestion-chip bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-1.5 rounded-full border border-zinc-700 transition-colors"
+                  data-prompt="Where is most of my money going right now?">
+            📊 Where did my $ go?
+          </button>
+          <button class="suggestion-chip bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium px-3 py-1.5 rounded-full border border-zinc-700 transition-colors"
+                  data-prompt="How am I doing on my savings goals?">
+            🎯 Goal advice
+          </button>
+        </div>
+
         <!-- Input row -->
         <div class="px-4 py-3 border-t border-zinc-700 bg-zinc-800 flex items-end gap-2">
           <textarea
