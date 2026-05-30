@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendly — Let's set you up</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body { background: var(--bg-base); color: var(--fg1); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); }
+    .ob-input {
+      width: 100%; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px;
+      color: #f4f1ec; padding: 10px 12px; font-size: 14px; outline: none;
+      font-family: inherit; box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .ob-input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.25); }
+    .ob-input::placeholder { color: #52525b; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .dot { width: 8px; height: 8px; border-radius: 9999px; background: #3f3f46; transition: all 0.2s ease; }
+    .dot.active { width: 24px; background: #6366f1; }
+    .dot.done { background: #6366f1; }
+  </style>
+</head>
+<body>
+
+  <div style="width:100%;max-width:480px;padding:24px;">
+
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="display:inline-flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:10px;background:#27272a;display:flex;align-items:center;justify-content:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#f4f1ec">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+          </svg>
+        </div>
+        <span style="font-size:20px;font-weight:700;color:#f4f1ec;">Spendly</span>
+      </div>
+    </div>
+
+    <!-- Step dots -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:32px;">
+      <div class="dot active" id="dot-0"></div>
+      <div class="dot" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+      <div class="dot" id="dot-3"></div>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+
+      <!-- STEP 1: Income -->
+      <div class="step active" id="step-0">
+        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">Your income</h1>
+        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Let's start with what comes in each month.</p>
+        <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Monthly income ($)</label>
+        <input id="f-income" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 2000">
+        <p id="err-0" style="color:#f87171;font-size:13px;margin:8px 0 0;display:none;"></p>
+        <div style="margin-top:24px;display:flex;justify-content:flex-end;">
+          <button class="btn-primary" onclick="next(0)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Fixed bills -->
+      <div class="step" id="step-1">
+        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">Fixed bills</h1>
+        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Recurring costs that don't change month to month.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Rent / housing ($)</label>
+            <input id="f-rent" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 800">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Phone bill ($)</label>
+            <input id="f-phone" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 50">
+          </div>
+        </div>
+        <p id="err-1" style="color:#f87171;font-size:13px;margin:8px 0 0;display:none;"></p>
+        <div style="margin-top:24px;display:flex;justify-content:space-between;">
+          <button class="btn-ghost" onclick="back(1)">← Back</button>
+          <button class="btn-primary" onclick="next(1)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Other expenses -->
+      <div class="step" id="step-2">
+        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">Other expenses</h1>
+        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Any other regular costs and your dining budget.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Other fixed bills ($)</label>
+            <input id="f-other" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 30">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Monthly dining budget ($)</label>
+            <input id="f-dining" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 200">
+          </div>
+        </div>
+        <p id="err-2" style="color:#f87171;font-size:13px;margin:8px 0 0;display:none;"></p>
+        <div style="margin-top:24px;display:flex;justify-content:space-between;">
+          <button class="btn-ghost" onclick="back(2)">← Back</button>
+          <button class="btn-primary" onclick="next(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Summary -->
+      <div class="step" id="step-3">
+        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">You're all set 🎉</h1>
+        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Here's your financial snapshot.</p>
+
+        <!-- Summary rows -->
+        <div style="background:#27272a;border-radius:12px;padding:16px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #3f3f46;">
+            <span style="font-size:13px;color:#837e88;">Monthly income</span>
+            <span id="sum-income" style="font-size:13px;font-weight:600;color:#f4f1ec;"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #3f3f46;">
+            <span style="font-size:13px;color:#837e88;">Fixed costs</span>
+            <span id="sum-fixed" style="font-size:13px;font-weight:600;color:#f87171;"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
+            <span style="font-size:13px;font-weight:700;color:#f4f1ec;">Flexible spending</span>
+            <span id="sum-flexible" style="font-size:14px;font-weight:700;color:#4ade80;"></span>
+          </div>
+        </div>
+
+        <!-- Buddy message -->
+        <div style="background:#1c1c27;border:1px solid #2e2e40;border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:24px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#818cf8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+            </svg>
+          </div>
+          <p id="buddy-msg" style="font-size:14px;color:#b3aeb8;line-height:1.55;margin:0;"></p>
+        </div>
+
+        <p id="err-3" style="color:#f87171;font-size:13px;margin:0 0 12px;display:none;"></p>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button class="btn-ghost" onclick="back(3)">← Back</button>
+          <button id="finish-btn" class="btn-primary" onclick="finish()">Let's go →</button>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /container -->
+
+<script>
+(async () => {
+  // Guard: must be logged in
+  const meRes = await fetch('/api/auth/me');
+  if (!meRes.ok) { window.location.href = '/'; return; }
+  const user = await meRes.json();
+  // Already completed onboarding
+  if (user.onboardingComplete === true) { window.location.href = '/dashboard.html'; return; }
+})();
+
+const data = { income: 0, rent: 0, phoneBill: 0, otherBills: 0, diningBudget: 0 };
+
+function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
+
+function showErr(stepIdx, msg) {
+  const el = document.getElementById('err-' + stepIdx);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function clearErr(stepIdx) {
+  document.getElementById('err-' + stepIdx).style.display = 'none';
+}
+
+function getVal(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? null : v;
+}
+
+function goTo(stepIdx) {
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.toggle('active', i === stepIdx);
+  });
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === stepIdx);
+    d.classList.toggle('done', i < stepIdx);
+  });
+}
+
+function next(from) {
+  clearErr(from);
+  if (from === 0) {
+    const v = getVal('f-income');
+    if (v === null || v < 0) { showErr(0, 'Please enter a valid income.'); return; }
+    data.income = v;
+  } else if (from === 1) {
+    const r = getVal('f-rent'), p = getVal('f-phone');
+    if (r === null || r < 0) { showErr(1, 'Please enter a valid rent amount.'); return; }
+    if (p === null || p < 0) { showErr(1, 'Please enter a valid phone bill amount.'); return; }
+    data.rent = r; data.phoneBill = p;
+  } else if (from === 2) {
+    const o = getVal('f-other'), d = getVal('f-dining');
+    if (o === null || o < 0) { showErr(2, 'Please enter a valid other bills amount.'); return; }
+    if (d === null || d < 0) { showErr(2, 'Please enter a valid dining budget.'); return; }
+    data.otherBills = o; data.diningBudget = d;
+    buildSummary();
+  }
+  goTo(from + 1);
+}
+
+function back(from) {
+  clearErr(from);
+  goTo(from - 1);
+}
+
+function buildSummary() {
+  const fixed = data.rent + data.phoneBill + data.otherBills;
+  const flexible = Math.max(0, data.income - fixed);
+  const daily = flexible / 30;
+
+  document.getElementById('sum-income').textContent = fmt(data.income);
+  document.getElementById('sum-fixed').textContent = '-' + fmt(fixed);
+  document.getElementById('sum-flexible').textContent = fmt(flexible);
+  document.getElementById('buddy-msg').textContent =
+    'Based on your numbers, you have ' + fmt(flexible) +
+    ' flexible per month. I\'ll set your daily limit to ' + fmt(daily) + '/day.';
+}
+
+async function finish() {
+  const btn = document.getElementById('finish-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  clearErr(3);
+  try {
+    const res = await fetch('/api/auth/onboarding', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Save failed' }));
+      showErr(3, err.error || 'Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Let\'s go →';
+      return;
+    }
+    window.location.href = '/dashboard.html';
+  } catch (e) {
+    showErr(3, 'Network error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Let\'s go →';
+  }
+}
+</script>
+</body>
+</html>

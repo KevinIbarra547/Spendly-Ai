@@ -81,7 +81,7 @@ router.post('/register', async (req, res) => {
     const ADMIN_CODE = process.env.ADMIN_CODE || 'NollanisaBUM';
     const isAdmin = adminCode === ADMIN_CODE;
 
-    // Build user object with all 11 fields
+    // Build user object
     const newUser = {
       id: crypto.randomUUID(),
       username,
@@ -94,6 +94,12 @@ router.post('/register', async (req, res) => {
       pfp: '/uploads/pfps/default.png',
       monthlyBudgetCap: 0,
       isAdmin,
+      income: 0,
+      rent: 0,
+      phoneBill: 0,
+      otherBills: 0,
+      diningBudget: 0,
+      onboardingComplete: false,
       financialProfile: {
         livingSituation: null,
         paysRecurringBills: null,
@@ -256,4 +262,33 @@ router.patch('/profile', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
       }
     });
+// POST /api/auth/onboarding
+router.post('/onboarding', requireAuth, (req, res) => {
+  const { income, rent, phoneBill, otherBills, diningBudget } = req.body;
+  const fields = { income, rent, phoneBill, otherBills, diningBudget };
+
+  for (const [key, val] of Object.entries(fields)) {
+    const n = Number(val);
+    if (isNaN(n) || n < 0) {
+      return res.status(400).json({ error: `${key} must be a non-negative number` });
+    }
+    fields[key] = n;
+  }
+
+  try {
+    const users = readUsers();
+    const idx = users.findIndex(u => u.id === req.session.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+
+    Object.assign(users[idx], fields, { onboardingComplete: true });
+    writeUsers(users);
+
+    const { passwordHash, ...safeUser } = users[idx];
+    return res.status(200).json(safeUser);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
