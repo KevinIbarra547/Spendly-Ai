@@ -93,7 +93,24 @@ router.post('/register', async (req, res) => {
       primaryFinancialGoal,
       pfp: '/uploads/pfps/default.png',
       monthlyBudgetCap: 0,
-      isAdmin
+      isAdmin,
+      financialProfile: {
+        livingSituation: null,
+        paysRecurringBills: null,
+        billTypes: null,
+        hasIncome: null,
+        monthlyIncome: null,
+        foodSituation: null,
+        hasSubscriptions: null,
+        subscriptionDetails: null,
+        hasSavingsGoal: null,
+        savingsGoalName: null,
+        savingsGoalTarget: null,
+        spendingStyle: null,
+        primaryIntent: null,
+        surveyCompletedAt: null,
+        surveyLastUpdatedAt: null,
+      }
     };
 
     users.push(newUser);
@@ -136,7 +153,8 @@ router.post('/login', async (req, res) => {
     req.session.userId = user.id;
 
     const { passwordHash, ...safeUser } = user;
-    return res.status(200).json(safeUser);
+    const surveyComplete = !!(user.financialProfile && user.financialProfile.surveyCompletedAt);
+    return res.status(200).json({ ...safeUser, surveyComplete });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -169,7 +187,8 @@ router.get('/me', (req, res) => {
   }
 
   const { passwordHash, ...safeUser } = user;
-  return res.status(200).json(safeUser);
+  const surveyComplete = !!(user.financialProfile && user.financialProfile.surveyCompletedAt);
+  return res.status(200).json({ ...safeUser, surveyComplete });
 });
 
 // POST /api/auth/pfp
