@@ -45,11 +45,15 @@
         navLink('admin.html',     'admin.html',     SHIELD_ICON, 'Admin Dashboard', 'admin-nav-link') +
       '</nav>' +
 
-      '<div class="px-3 pb-1">' +
-        '<button id="theme-toggle-btn" style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-family:var(--font-sans);font-size:12px;color:#888;margin-bottom:4px" onclick="SpendlyTheme.toggle()">' +
-          '<svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>' +
-          '<span id="theme-label">Light mode</span>' +
-        '</button>' +
+      '<div id="theme-toggle-btn" style="display:flex;align-items:center;background:#27272a;border:1px solid #3f3f46;border-radius:9999px;padding:4px;margin:0 12px 8px;cursor:pointer" onclick="SpendlyTheme.toggle()">' +
+        '<div id="theme-opt-light" class="theme-opt" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 10px;border-radius:9999px;font-size:12px;font-weight:500;color:#71717a;font-family:inherit">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" /></svg>' +
+          'Light' +
+        '</div>' +
+        '<div id="theme-opt-dark" class="theme-opt selected" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 10px;border-radius:9999px;font-size:12px;font-weight:500;color:#71717a;font-family:inherit">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" /></svg>' +
+          'Dark' +
+        '</div>' +
       '</div>' +
 
       '<div id="sidebar-user-card" class="p-4 border-t border-zinc-800" style="border-color:var(--border)">' +
@@ -135,9 +139,22 @@ window.SpendlyTheme = {
     SpendlyTheme._updateBtn();
   },
   _updateBtn: function() {
-    const isLight = document.documentElement.classList.contains('theme-light');
-    const lbl = document.getElementById('theme-label');
-    if (lbl) lbl.textContent = isLight ? 'Dark mode' : 'Light mode';
+    var isLight = document.documentElement.classList.contains('theme-light');
+    var lightOpt = document.getElementById('theme-opt-light');
+    var darkOpt = document.getElementById('theme-opt-dark');
+    var toggleBtn = document.getElementById('theme-toggle-btn');
+    if (!lightOpt || !darkOpt) return;
+    var activeStyle = 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 10px;border-radius:9999px;font-size:12px;font-weight:500;font-family:inherit;background:#18181b;color:#f4f1ec;';
+    var inactiveStyle = 'flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 10px;border-radius:9999px;font-size:12px;font-weight:500;font-family:inherit;background:transparent;color:#71717a;';
+    if (isLight) {
+      lightOpt.style.cssText = activeStyle.replace('#18181b','#ffffff').replace('#f4f1ec','#09090b');
+      darkOpt.style.cssText = inactiveStyle;
+      if (toggleBtn) { toggleBtn.style.background = '#f4f4f5'; toggleBtn.style.borderColor = '#d4d4d8'; }
+    } else {
+      lightOpt.style.cssText = inactiveStyle;
+      darkOpt.style.cssText = activeStyle;
+      if (toggleBtn) { toggleBtn.style.background = '#27272a'; toggleBtn.style.borderColor = '#3f3f46'; }
+    }
   }
 };
 SpendlyTheme.init();

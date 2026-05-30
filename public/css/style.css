@@ -364,3 +364,244 @@ html.theme-light aside {
 html.theme-light .bg-indigo-600\/20 {
   background: var(--accent-faint) !important;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM EXPANSION — CP13b
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── TYPOGRAPHY ── */
+.t-hero { font-size: 60px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--fg1); }
+.t-h1   { font-size: 30px; font-weight: 700; line-height: 1.2; color: var(--fg1); }
+.t-h2   { font-size: 24px; font-weight: 700; line-height: 1.25; color: var(--fg1); }
+.t-h3   { font-size: 18px; font-weight: 600; line-height: 1.3; color: var(--fg1); }
+.t-body { font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--fg2); }
+.t-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg3); }
+.t-amount { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; color: var(--fg1); }
+.t-amount-sm { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--fg1); }
+
+/* ── BUTTONS ── */
+.btn-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #ffffff; color: #09090b;
+  border: none; border-radius: 12px;
+  padding: 10px 20px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.btn-cta:hover { background: #e4e4e7; }
+.btn-cta:active { transform: scale(0.97); }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #6366f1; color: #ffffff;
+  border: none; border-radius: 12px;
+  padding: 10px 20px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.btn-primary:hover { background: #4f46e5; }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-success {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #22c55e; color: #ffffff;
+  border: none; border-radius: 12px;
+  padding: 10px 20px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.btn-success:hover { background: #16a34a; }
+.btn-success:active { transform: scale(0.97); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #27272a; color: #f4f1ec;
+  border: 1px solid #3f3f46; border-radius: 12px;
+  padding: 10px 20px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.btn-ghost:hover { background: #3f3f46; }
+.btn-ghost:active { transform: scale(0.97); }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: #f4f1ec;
+  border: 1px solid #3f3f46; border-radius: 12px;
+  padding: 10px 20px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+.btn-outline:hover { background: #27272a; border-color: #71717a; }
+
+/* ── CARDS ── */
+.card {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 24px;
+}
+.card-elevated {
+  background: #27272a;
+  border-radius: 12px;
+  padding: 16px;
+}
+.card-modal {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* ── INPUTS ── */
+.input-field {
+  width: 100%;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #f4f1ec;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-field::placeholder { color: #52525b; }
+.input-field:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.25);
+}
+
+/* ── PROGRESS BARS ── */
+.progress-track {
+  height: 6px; background: #27272a; border-radius: 9999px; overflow: hidden;
+}
+.progress-fill-white  { height: 100%; background: #ffffff; border-radius: 9999px; transition: width 0.4s ease; }
+.progress-fill-green  { height: 100%; background: #22c55e; border-radius: 9999px; transition: width 0.4s ease; }
+.progress-fill-indigo { height: 100%; background: #6366f1; border-radius: 9999px; transition: width 0.4s ease; }
+.progress-fill-amber  { height: 100%; background: #f59e0b; border-radius: 9999px; transition: width 0.4s ease; }
+.progress-fill-red    { height: 100%; background: #ef4444; border-radius: 9999px; transition: width 0.4s ease; }
+
+/* ── BUDDY MESSAGE BLOCK ── */
+.buddy-block {
+  background: #1c1c27;
+  border: 1px solid #2e2e40;
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.buddy-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(99,102,241,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: #818cf8;
+}
+
+/* ── CATEGORY PILLS ── */
+.cat-pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+.cat-food          { background: rgba(249,115,22,0.2);  color: #fdba74; }
+.cat-transport     { background: rgba(59,130,246,0.2);  color: #93c5fd; }
+.cat-entertainment { background: rgba(168,85,247,0.2);  color: #d8b4fe; }
+.cat-shopping      { background: rgba(236,72,153,0.2);  color: #f9a8d4; }
+.cat-health        { background: rgba(34,197,94,0.2);   color: #86efac; }
+.cat-coffee        { background: rgba(234,179,8,0.2);   color: #fde047; }
+.cat-groceries     { background: rgba(20,184,166,0.2);  color: #5eead4; }
+.cat-other         { background: rgba(113,113,122,0.2); color: #a1a1aa; }
+
+/* ── EXPENSE ROW ICON CHIP ── */
+.exp-icon-chip {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.exp-icon-food          { background: rgba(249,115,22,0.2);  color: #fdba74; }
+.exp-icon-transport     { background: rgba(59,130,246,0.2);  color: #93c5fd; }
+.exp-icon-entertainment { background: rgba(168,85,247,0.2);  color: #d8b4fe; }
+.exp-icon-shopping      { background: rgba(236,72,153,0.2);  color: #f9a8d4; }
+.exp-icon-health        { background: rgba(34,197,94,0.2);   color: #86efac; }
+.exp-icon-coffee        { background: rgba(234,179,8,0.2);   color: #fde047; }
+.exp-icon-groceries     { background: rgba(20,184,166,0.2);  color: #5eead4; }
+.exp-icon-other         { background: rgba(113,113,122,0.2); color: #a1a1aa; }
+
+/* ── BADGES / STATUS CHIPS ── */
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 9999px; }
+.badge-green  { background: rgba(34,197,94,0.15);  color: #4ade80; }
+.badge-amber  { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.badge-red    { background: rgba(239,68,68,0.15);  color: #f87171; }
+.badge-blue   { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-purple { background: rgba(168,85,247,0.15); color: #c084fc; }
+.badge-gray   { background: rgba(113,113,122,0.15);color: #a1a1aa; }
+
+/* ── SEMANTIC COLORS ── */
+.note-green { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.25);  color: #4ade80; border-radius: 10px; padding: 12px 14px; font-size: 13px; }
+.note-amber { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24; border-radius: 10px; padding: 12px 14px; font-size: 13px; }
+.note-red   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.25);  color: #f87171; border-radius: 10px; padding: 12px 14px; font-size: 13px; }
+.note-blue  { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); color: #818cf8; border-radius: 10px; padding: 12px 14px; font-size: 13px; }
+
+/* ── ELEVATION / SHADOWS ── */
+.shadow-sm { box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.shadow-md { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.shadow-lg { box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+
+/* ── CORNER RADII ── */
+.r-sm { border-radius: 8px; }
+.r-md { border-radius: 12px; }
+.r-lg { border-radius: 16px; }
+.r-full { border-radius: 9999px; }
+
+/* ── THEME TOGGLE PILL ── */
+#theme-toggle-btn {
+  display: flex !important;
+  align-items: center;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 9999px;
+  padding: 4px;
+  cursor: pointer;
+  gap: 0;
+  width: calc(100% - 24px);
+  margin: 0 12px 8px;
+}
+.theme-opt {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 6px 10px; border-radius: 9999px;
+  font-size: 12px; font-weight: 500; color: #71717a;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.theme-opt.selected {
+  background: #18181b; color: #f4f1ec;
+}
+.theme-opt svg { width: 14px; height: 14px; }
+
+/* ── LIGHT THEME OVERRIDES ── */
+html.theme-light { color-scheme: light; }
+html.theme-light body,
+html.theme-light .bg-zinc-950,
+html.theme-light main.bg-zinc-950,
+html.theme-light .min-h-screen { background: #f8f8f6 !important; }
+html.theme-light .bg-zinc-900,
+html.theme-light aside,
+html.theme-light .card { background: #ffffff !important; border-color: #e4e4e7 !important; }
+html.theme-light .bg-zinc-800,
+html.theme-light .card-elevated,
+html.theme-light .bg-zinc-800\/40 { background: #f4f4f5 !important; }
+html.theme-light .text-white { color: #09090b !important; }
+html.theme-light .text-zinc-400 { color: #52525b !important; }
+html.theme-light .text-zinc-500 { color: #71717a !important; }
+html.theme-light .border-zinc-800 { border-color: #e4e4e7 !important; }
+html.theme-light .border-zinc-700 { border-color: #d4d4d8 !important; }
+html.theme-light .bg-zinc-900\/80 { background: rgba(255,255,255,0.9) !important; }
+html.theme-light .input-field { background: #f4f4f5; border-color: #d4d4d8; color: #09090b; }
+html.theme-light .btn-ghost { background: #f4f4f5; color: #09090b; border-color: #d4d4d8; }
+html.theme-light #theme-toggle-btn { background: #f4f4f5; border-color: #d4d4d8; }
+html.theme-light .theme-opt.selected { background: #ffffff; color: #09090b; }
+html.theme-light .buddy-block { background: #f0f0ff; border-color: #c7d2fe; }
+html.theme-light .sidebar-user-card { border-color: #e4e4e7 !important; }
+
+/* Global smooth transitions */
+*, *::before, *::after {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}

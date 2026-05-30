@@ -41,7 +41,7 @@
       <!-- This Month card -->
       <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
         <div class="flex items-baseline justify-between mb-3">
-          <span class="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <span class="t-label">
             This month
           </span>
           <span id="month-delta" class="text-xs font-medium text-zinc-400">
@@ -53,7 +53,7 @@
         </div>
         <!-- Progress bar -->
         <div class="w-full bg-zinc-800 rounded-full h-2 mb-3">
-          <div id="month-progress-bar" class="bg-white h-2 rounded-full transition-all" style="width: 0%"></div>
+          <div id="month-progress-bar" style="height:6px;background:#ffffff;border-radius:9999px;width:0%;transition:width 0.4s ease"></div>
         </div>
         <div class="flex justify-between text-xs text-zinc-500">
           <span id="month-remaining">$0 left to spend</span>
@@ -64,7 +64,7 @@
       <!-- Top Goal card -->
       <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800" id="top-goal-card">
         <div class="flex items-baseline justify-between mb-3">
-          <span class="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <span class="t-label">
             Top goal
           </span>
           <a href="/goals.html" class="text-xs text-zinc-400 hover:text-white">View all →</a>
@@ -101,7 +101,7 @@
     <!-- RECENT EXPENSES card -->
     <div class="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
       <div class="flex items-baseline justify-between mb-4">
-        <h2 class="text-lg font-semibold text-white">Recent expenses</h2>
+        <h2 class="t-h3">Recent expenses</h2>
         <a href="/expenses.html" class="text-xs text-zinc-400 hover:text-white">View all →</a>
       </div>
       <div id="recent-expenses-list" class="space-y-2">

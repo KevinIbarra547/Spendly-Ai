@@ -10,7 +10,10 @@
   // Greeting
   const greetingEl = document.getElementById('greeting-heading');
   const subtitleEl = document.getElementById('greeting-subtitle');
-  if (greetingEl) greetingEl.textContent = `Hey ${user.username} 👋`;
+  if (greetingEl) {
+    greetingEl.textContent = `Hey ${user.username} 👋`;
+    greetingEl.style.cssText = 'font-size:30px;font-weight:700;color:#f4f1ec;letter-spacing:-0.01em;';
+  }
   if (subtitleEl) subtitleEl.textContent = 'Welcome back to Spendly.';
 
   // Helpers
@@ -27,10 +30,34 @@
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + timeStr;
   }
 
-  function categoryIcon() {
-    return `<svg class="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-    </svg>`;
+  function getCatBg(cat) {
+    var m = {Food:'rgba(249,115,22,0.2)',Transport:'rgba(59,130,246,0.2)',Transportation:'rgba(59,130,246,0.2)',Entertainment:'rgba(168,85,247,0.2)',Shopping:'rgba(236,72,153,0.2)',Health:'rgba(34,197,94,0.2)',Coffee:'rgba(234,179,8,0.2)',Groceries:'rgba(20,184,166,0.2)',Other:'rgba(113,113,122,0.2)'};
+    return m[cat] || m.Other;
+  }
+  function getCatFg(cat) {
+    var m = {Food:'#fdba74',Transport:'#93c5fd',Transportation:'#93c5fd',Entertainment:'#d8b4fe',Shopping:'#f9a8d4',Health:'#86efac',Coffee:'#fde047',Groceries:'#5eead4',Other:'#a1a1aa'};
+    return m[cat] || m.Other;
+  }
+
+  function categoryIcon(category) {
+    var cat = (category || 'other').toLowerCase();
+    var colorMap = {
+      food:'rgba(249,115,22,0.2)', transport:'rgba(59,130,246,0.2)',
+      transportation:'rgba(59,130,246,0.2)', entertainment:'rgba(168,85,247,0.2)',
+      shopping:'rgba(236,72,153,0.2)', health:'rgba(34,197,94,0.2)',
+      coffee:'rgba(234,179,8,0.2)', groceries:'rgba(20,184,166,0.2)',
+      other:'rgba(113,113,122,0.2)'
+    };
+    var iconColorMap = {
+      food:'#fdba74', transport:'#93c5fd', transportation:'#93c5fd',
+      entertainment:'#d8b4fe', shopping:'#f9a8d4', health:'#86efac',
+      coffee:'#fde047', groceries:'#5eead4', other:'#a1a1aa'
+    };
+    var bg = colorMap[cat] || colorMap.other;
+    var ic = iconColorMap[cat] || iconColorMap.other;
+    return '<div style="width:36px;height:36px;border-radius:10px;background:' + bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+      '<svg style="color:' + ic + '" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75" /></svg>' +
+    '</div>';
   }
 
   // Days remaining in current month
@@ -148,12 +175,10 @@
       recentList.innerHTML = recent.map(exp => `
         <div class="flex items-center justify-between py-3 border-b border-zinc-800 last:border-b-0">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-zinc-800 flex items-center justify-center flex-shrink-0">
-              ${categoryIcon()}
-            </div>
+            ${categoryIcon(exp.category)}
             <div>
               <p class="text-white text-sm font-medium">${exp.merchant || 'Unknown'}</p>
-              <p class="text-zinc-500 text-xs">${exp.category || 'Uncategorized'} · ${formatDate(exp.date)}</p>
+              <p class="text-zinc-500 text-xs"><span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:500;background:${getCatBg(exp.category)};color:${getCatFg(exp.category)}">${exp.category || 'Other'}</span> · ${formatDate(exp.date)}</p>
             </div>
           </div>
           <span class="text-white text-sm font-semibold">-${fmt(exp.amount)}</span>
