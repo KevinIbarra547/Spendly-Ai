@@ -3,248 +3,890 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spendly — Let's set you up</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Spendly — Financial Onboarding</title>
   <link rel="stylesheet" href="/css/style.css" />
   <style>
-    body { background: var(--bg-base); color: var(--fg1); min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); }
-    .ob-input {
-      width: 100%; background: #27272a; border: 1px solid #3f3f46; border-radius: 8px;
-      color: #f4f1ec; padding: 10px 12px; font-size: 14px; outline: none;
-      font-family: inherit; box-sizing: border-box; transition: border-color 0.15s, box-shadow 0.15s;
+    body {
+      background: var(--bg-base);
+      color: var(--fg1);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      font-family: var(--font-sans);
+      padding: 24px 16px;
+      box-sizing: border-box;
     }
-    .ob-input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.25); }
-    .ob-input::placeholder { color: #52525b; }
-    .step { display: none; }
-    .step.active { display: block; }
-    .dot { width: 8px; height: 8px; border-radius: 9999px; background: #3f3f46; transition: all 0.2s ease; }
-    .dot.active { width: 24px; background: #6366f1; }
-    .dot.done { background: #6366f1; }
+    .survey-shell {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 4vh;
+    }
+
+    /* Brand */
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      justify-content: center; margin-bottom: 24px;
+    }
+    .brand-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: var(--bg-elevated);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-name { font-size: 19px; font-weight: 700; color: var(--fg1); }
+
+    /* Progress */
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-bar-track {
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 9999px;
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+    .progress-text {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--fg3);
+      font-weight: 500;
+    }
+
+    /* Screen */
+    .screen-heading { margin: 0 0 6px; }
+    .screen-subtext { font-size: 14px; color: var(--fg3); margin: 0 0 22px; line-height: 1.5; }
+    .screen-heading + .controls { margin-top: 22px; }
+
+    /* Single / multi select options */
+    .option-list { display: flex; flex-direction: column; gap: 12px; }
+    .option {
+      width: 100%;
+      text-align: left;
+      background: var(--bg-elevated);
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--fg1);
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      box-sizing: border-box;
+    }
+    .option:hover { background: var(--bg-elevated-2); }
+    .option:active { transform: scale(0.99); }
+    .option.selected {
+      border-color: var(--accent);
+      background: var(--accent-faint);
+    }
+    .option .checkbox {
+      width: 20px; height: 20px; border-radius: 6px;
+      border: 1.5px solid var(--border-strong);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .option.selected .checkbox {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .option .checkbox svg { width: 13px; height: 13px; color: #fff; opacity: 0; transition: opacity 0.15s; }
+    .option.selected .checkbox svg { opacity: 1; }
+
+    /* Yes/No big buttons */
+    .yesno-row { display: flex; gap: 14px; }
+    .yesno-btn {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      padding: 28px 18px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--fg1);
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    }
+    .yesno-btn:hover { background: var(--bg-elevated-2); }
+    .yesno-btn:active { transform: scale(0.98); }
+    .yesno-btn.selected { border-color: var(--accent); background: var(--accent-faint); }
+
+    /* Currency / text inputs */
+    .field-group { margin-bottom: 16px; }
+    .field-label {
+      display: block; font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--fg3); margin-bottom: 8px;
+    }
+    .currency-wrap { position: relative; }
+    .currency-wrap .currency-prefix {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--fg3); font-size: 14px; pointer-events: none;
+    }
+    .currency-wrap .input-field { padding-left: 26px; }
+
+    .err-text { color: var(--danger); font-size: 13px; margin: 8px 0 0; min-height: 1px; }
+
+    /* Footer nav */
+    .footer-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 28px; gap: 12px;
+    }
+    .footer-nav .spacer { flex: 1; }
+    .skip-link {
+      background: none; border: none; cursor: pointer;
+      color: var(--fg3); font-size: 13px; font-weight: 500;
+      font-family: inherit; padding: 8px 4px; text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .skip-link:hover { color: var(--fg2); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button:disabled:active { transform: none; }
+
+    /* Completion */
+    .summary-card { margin: 20px 0 4px; }
+    .summary-title { font-size: 13px; color: var(--fg3); margin: 0 0 12px; font-weight: 600; }
+    .summary-line {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--fg1); line-height: 1.5; padding: 4px 0;
+    }
+    .summary-line .bullet { color: var(--accent-soft); flex-shrink: 0; }
+    .complete-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--accent-faint);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      color: var(--accent-soft);
+    }
   </style>
 </head>
 <body>
+  <div class="survey-shell">
 
-  <div style="width:100%;max-width:480px;padding:24px;">
-
-    <!-- Logo -->
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="display:inline-flex;align-items:center;gap:10px;">
-        <div style="width:36px;height:36px;border-radius:10px;background:#27272a;display:flex;align-items:center;justify-content:center;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#f4f1ec">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-          </svg>
-        </div>
-        <span style="font-size:20px;font-weight:700;color:#f4f1ec;">Spendly</span>
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-mark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="var(--fg1)">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+        </svg>
       </div>
+      <span class="brand-name">Spendly</span>
     </div>
 
-    <!-- Step dots -->
-    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:32px;">
-      <div class="dot active" id="dot-0"></div>
-      <div class="dot" id="dot-1"></div>
-      <div class="dot" id="dot-2"></div>
-      <div class="dot" id="dot-3"></div>
+    <!-- Progress -->
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-text" id="progress-text">Step 1 of 9</div>
     </div>
 
     <!-- Card -->
-    <div class="card">
-
-      <!-- STEP 1: Income -->
-      <div class="step active" id="step-0">
-        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">Your income</h1>
-        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Let's start with what comes in each month.</p>
-        <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Monthly income ($)</label>
-        <input id="f-income" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 2000">
-        <p id="err-0" style="color:#f87171;font-size:13px;margin:8px 0 0;display:none;"></p>
-        <div style="margin-top:24px;display:flex;justify-content:flex-end;">
-          <button class="btn-primary" onclick="next(0)">Continue →</button>
-        </div>
-      </div>
-
-      <!-- STEP 2: Fixed bills -->
-      <div class="step" id="step-1">
-        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">Fixed bills</h1>
-        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Recurring costs that don't change month to month.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Rent / housing ($)</label>
-            <input id="f-rent" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 800">
-          </div>
-          <div>
-            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Phone bill ($)</label>
-            <input id="f-phone" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 50">
-          </div>
-        </div>
-        <p id="err-1" style="color:#f87171;font-size:13px;margin:8px 0 0;display:none;"></p>
-        <div style="margin-top:24px;display:flex;justify-content:space-between;">
-          <button class="btn-ghost" onclick="back(1)">← Back</button>
-          <button class="btn-primary" onclick="next(1)">Continue →</button>
-        </div>
-      </div>
-
-      <!-- STEP 3: Other expenses -->
-      <div class="step" id="step-2">
-        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">Other expenses</h1>
-        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Any other regular costs and your dining budget.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Other fixed bills ($)</label>
-            <input id="f-other" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 30">
-          </div>
-          <div>
-            <label style="display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#837e88;margin-bottom:6px;">Monthly dining budget ($)</label>
-            <input id="f-dining" class="ob-input" type="number" min="0" step="0.01" placeholder="e.g. 200">
-          </div>
-        </div>
-        <p id="err-2" style="color:#f87171;font-size:13px;margin:8px 0 0;display:none;"></p>
-        <div style="margin-top:24px;display:flex;justify-content:space-between;">
-          <button class="btn-ghost" onclick="back(2)">← Back</button>
-          <button class="btn-primary" onclick="next(2)">Continue →</button>
-        </div>
-      </div>
-
-      <!-- STEP 4: Summary -->
-      <div class="step" id="step-3">
-        <h1 style="font-size:22px;font-weight:700;color:#f4f1ec;margin:0 0 6px;">You're all set 🎉</h1>
-        <p style="font-size:14px;color:#837e88;margin:0 0 24px;">Here's your financial snapshot.</p>
-
-        <!-- Summary rows -->
-        <div style="background:#27272a;border-radius:12px;padding:16px;margin-bottom:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #3f3f46;">
-            <span style="font-size:13px;color:#837e88;">Monthly income</span>
-            <span id="sum-income" style="font-size:13px;font-weight:600;color:#f4f1ec;"></span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #3f3f46;">
-            <span style="font-size:13px;color:#837e88;">Fixed costs</span>
-            <span id="sum-fixed" style="font-size:13px;font-weight:600;color:#f87171;"></span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;">
-            <span style="font-size:13px;font-weight:700;color:#f4f1ec;">Flexible spending</span>
-            <span id="sum-flexible" style="font-size:14px;font-weight:700;color:#4ade80;"></span>
-          </div>
-        </div>
-
-        <!-- Buddy message -->
-        <div style="background:#1c1c27;border:1px solid #2e2e40;border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:24px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#818cf8">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-            </svg>
-          </div>
-          <p id="buddy-msg" style="font-size:14px;color:#b3aeb8;line-height:1.55;margin:0;"></p>
-        </div>
-
-        <p id="err-3" style="color:#f87171;font-size:13px;margin:0 0 12px;display:none;"></p>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <button class="btn-ghost" onclick="back(3)">← Back</button>
-          <button id="finish-btn" class="btn-primary" onclick="finish()">Let's go →</button>
-        </div>
-      </div>
-
-    </div><!-- /card -->
-  </div><!-- /container -->
+    <div class="card" id="survey-card">
+      <div id="screen"></div>
+    </div>
+  </div>
 
 <script>
 (async () => {
   // Guard: must be logged in
-  const meRes = await fetch('/api/auth/me');
-  if (!meRes.ok) { window.location.href = '/'; return; }
-  const user = await meRes.json();
-  // Already completed onboarding
-  if (user.onboardingComplete === true) { window.location.href = '/dashboard.html'; return; }
+  try {
+    const meRes = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!meRes.ok) { window.location.href = '/'; return; }
+    const user = await meRes.json();
+    // Already completed the survey
+    if (user.financialProfile && user.financialProfile.surveyCompletedAt) {
+      window.location.href = '/dashboard.html';
+      return;
+    }
+  } catch (e) {
+    window.location.href = '/';
+    return;
+  }
+  init();
 })();
 
-const data = { income: 0, rent: 0, phoneBill: 0, otherBills: 0, diningBudget: 0 };
+// ── State ──────────────────────────────────────────────
+const answers = {
+  livingSituation: null, paysRecurringBills: null, billTypes: null,
+  hasIncome: null, monthlyIncome: null, foodSituation: null,
+  hasSubscriptions: null, subscriptionDetails: null,
+  hasSavingsGoal: null, savingsGoalName: null, savingsGoalTarget: null,
+  spendingStyle: null, primaryIntent: null
+};
 
-function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
+// Transient field values (re-shown on Back, not part of final answers shape directly)
+const draft = {
+  billOtherText: '',
+  subList: '',
+  subTotal: ''
+};
 
-function showErr(stepIdx, msg) {
-  const el = document.getElementById('err-' + stepIdx);
-  el.textContent = msg;
-  el.style.display = 'block';
+let currentKey = 'livingSituation';
+
+const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+
+// ── Flow (dynamic) ─────────────────────────────────────
+function buildFlow() {
+  const f = ['livingSituation', 'paysRecurringBills'];
+  if (answers.paysRecurringBills === true) f.push('billTypes');
+  f.push('hasIncome');
+  if (answers.hasIncome === true) f.push('monthlyIncome');
+  f.push('foodSituation');
+  f.push('hasSubscriptions');
+  if (answers.hasSubscriptions === true) f.push('subscriptionDetails');
+  f.push('hasSavingsGoal');
+  if (answers.hasSavingsGoal === true) f.push('savingsGoalName');
+  f.push('spendingStyle');
+  f.push('primaryIntent');
+  f.push('completion');
+  return f;
 }
-function clearErr(stepIdx) {
-  document.getElementById('err-' + stepIdx).style.display = 'none';
-}
 
-function getVal(id) {
-  const v = parseFloat(document.getElementById(id).value);
-  return isNaN(v) ? null : v;
-}
-
-function goTo(stepIdx) {
-  document.querySelectorAll('.step').forEach((s, i) => {
-    s.classList.toggle('active', i === stepIdx);
-  });
-  document.querySelectorAll('.dot').forEach((d, i) => {
-    d.classList.toggle('active', i === stepIdx);
-    d.classList.toggle('done', i < stepIdx);
-  });
-}
-
-function next(from) {
-  clearErr(from);
-  if (from === 0) {
-    const v = getVal('f-income');
-    if (v === null || v < 0) { showErr(0, 'Please enter a valid income.'); return; }
-    data.income = v;
-  } else if (from === 1) {
-    const r = getVal('f-rent'), p = getVal('f-phone');
-    if (r === null || r < 0) { showErr(1, 'Please enter a valid rent amount.'); return; }
-    if (p === null || p < 0) { showErr(1, 'Please enter a valid phone bill amount.'); return; }
-    data.rent = r; data.phoneBill = p;
-  } else if (from === 2) {
-    const o = getVal('f-other'), d = getVal('f-dining');
-    if (o === null || o < 0) { showErr(2, 'Please enter a valid other bills amount.'); return; }
-    if (d === null || d < 0) { showErr(2, 'Please enter a valid dining budget.'); return; }
-    data.otherBills = o; data.diningBudget = d;
-    buildSummary();
+// ── Screen definitions ─────────────────────────────────
+const singleSelects = {
+  livingSituation: {
+    heading: 'What best describes your current living situation?',
+    options: [
+      ['with_family_no_bills', "I live with parents/family — I don't pay rent or bills"],
+      ['with_family_contributes', 'I live with parents/family — I contribute to some bills'],
+      ['renting', 'I rent my own place'],
+      ['owns_home', 'I own my home'],
+      ['other', 'Other']
+    ]
+  },
+  foodSituation: {
+    heading: 'What best describes your usual food situation?',
+    options: [
+      ['cooks', 'I cook most of my meals at home'],
+      ['eats_out', 'I mostly buy fast food or eat out'],
+      ['covered', 'My food is covered for me'],
+      ['mixed', "It's a mix of cooking and eating out"]
+    ]
+  },
+  spendingStyle: {
+    heading: 'How would you describe your current spending habits?',
+    options: [
+      ['overspender', 'I tend to overspend — money goes fast'],
+      ['balanced', "I'm pretty balanced — I try to stay within limits"],
+      ['saver', "I'm a natural saver — I rarely overspend"]
+    ]
+  },
+  primaryIntent: {
+    heading: 'What’s the main thing you want Spendly to help you with?',
+    options: [
+      ['stop_overspending', 'Stop overspending and stick to a budget'],
+      ['save_for_goal', 'Save up for a specific goal faster'],
+      ['understand_spending', 'Understand where my money is going'],
+      ['build_habits', 'Build better long-term financial habits'],
+      ['manage_family', 'Manage shared or family expenses']
+    ]
   }
-  goTo(from + 1);
+};
+
+const billOptions = [
+  ['phone', 'Phone plan'],
+  ['car_payment', 'Car payment'],
+  ['car_insurance', 'Car insurance'],
+  ['health_insurance', 'Health insurance'],
+  ['streaming', 'Streaming subscriptions'],
+  ['gym', 'Gym or club membership'],
+  ['student_loan', 'Student loan'],
+  ['credit_card', 'Credit card payment'],
+  ['other', 'Other']
+];
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function back(from) {
-  clearErr(from);
-  goTo(from - 1);
+// ── Renderers ──────────────────────────────────────────
+const screenEl = () => document.getElementById('screen');
+
+function render() {
+  const flow = buildFlow();
+  let idx = flow.indexOf(currentKey);
+  if (idx === -1) { currentKey = flow[0]; idx = 0; }
+
+  // Progress
+  const total = flow.length;
+  const step = idx + 1;
+  document.getElementById('progress-fill').style.width = (step / total * 100) + '%';
+  document.getElementById('progress-text').textContent = 'Step ' + step + ' of ' + total;
+
+  if (currentKey === 'completion') {
+    document.getElementById('progress-wrap').style.visibility = 'hidden';
+  } else {
+    document.getElementById('progress-wrap').style.visibility = 'visible';
+  }
+
+  const renderer = renderers[currentKey];
+  renderer(idx, flow);
 }
 
-function buildSummary() {
-  const fixed = data.rent + data.phoneBill + data.otherBills;
-  const flexible = Math.max(0, data.income - fixed);
-  const daily = flexible / 30;
+function footer(opts) {
+  // opts: { back: bool, nextValid: bool, onNext, skip: bool, onSkip, nextLabel }
+  const wrap = document.createElement('div');
+  wrap.className = 'footer-nav';
 
-  document.getElementById('sum-income').textContent = fmt(data.income);
-  document.getElementById('sum-fixed').textContent = '-' + fmt(fixed);
-  document.getElementById('sum-flexible').textContent = fmt(flexible);
-  document.getElementById('buddy-msg').textContent =
-    'Based on your numbers, you have ' + fmt(flexible) +
-    ' flexible per month. I\'ll set your daily limit to ' + fmt(daily) + '/day.';
+  if (opts.back) {
+    const b = document.createElement('button');
+    b.className = 'btn-ghost';
+    b.innerHTML = '← Back';
+    b.onclick = goBack;
+    wrap.appendChild(b);
+  }
+  const spacer = document.createElement('div');
+  spacer.className = 'spacer';
+  wrap.appendChild(spacer);
+
+  if (opts.skip) {
+    const s = document.createElement('button');
+    s.className = 'skip-link';
+    s.textContent = 'Skip';
+    s.onclick = opts.onSkip;
+    wrap.appendChild(s);
+  }
+
+  const n = document.createElement('button');
+  n.className = 'btn-primary';
+  n.innerHTML = (opts.nextLabel || 'Next') + ' →';
+  n.disabled = !opts.nextValid;
+  n.onclick = opts.onNext;
+  wrap.appendChild(n);
+
+  return wrap;
 }
 
-async function finish() {
-  const btn = document.getElementById('finish-btn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  clearErr(3);
+function heading(text) {
+  const h = document.createElement('h1');
+  h.className = 't-h2 screen-heading';
+  h.textContent = text;
+  return h;
+}
+function subtext(text) {
+  const p = document.createElement('p');
+  p.className = 'screen-subtext';
+  p.textContent = text;
+  return p;
+}
+
+function renderSingleSelect(key) {
+  const cfg = singleSelects[key];
+  const el = screenEl();
+  el.innerHTML = '';
+  el.appendChild(heading(cfg.heading));
+
+  const list = document.createElement('div');
+  list.className = 'option-list controls';
+  cfg.options.forEach(([value, label]) => {
+    const btn = document.createElement('button');
+    btn.className = 'option' + (answers[key] === value ? ' selected' : '');
+    btn.innerHTML = '<span>' + esc(label) + '</span>';
+    btn.onclick = () => { answers[key] = value; render(); };
+    list.appendChild(btn);
+  });
+  el.appendChild(list);
+
+  el.appendChild(footer({
+    back: true,
+    nextValid: answers[key] !== null,
+    onNext: goNext
+  }));
+}
+
+function renderYesNo(key, opts) {
+  // opts: { heading, sub, skip, onSkip }
+  const el = screenEl();
+  el.innerHTML = '';
+  el.appendChild(heading(opts.heading));
+  if (opts.sub) el.appendChild(subtext(opts.sub));
+
+  const row = document.createElement('div');
+  row.className = 'yesno-row controls';
+  [['Yes', true], ['No', false]].forEach(([label, val]) => {
+    const b = document.createElement('button');
+    b.className = 'yesno-btn' + (answers[key] === val ? ' selected' : '');
+    b.textContent = label;
+    b.onclick = () => { answers[key] = val; render(); };
+    row.appendChild(b);
+  });
+  el.appendChild(row);
+
+  el.appendChild(footer({
+    back: true,
+    nextValid: answers[key] === true || answers[key] === false,
+    onNext: goNext,
+    skip: !!opts.skip,
+    onSkip: opts.onSkip
+  }));
+}
+
+const renderers = {
+  livingSituation: () => renderSingleSelect('livingSituation'),
+  foodSituation: () => renderSingleSelect('foodSituation'),
+  spendingStyle: () => renderSingleSelect('spendingStyle'),
+  primaryIntent: () => renderSingleSelect('primaryIntent'),
+
+  paysRecurringBills: () => renderYesNo('paysRecurringBills', {
+    heading: 'Do you currently pay any recurring bills?',
+    sub: '(e.g. phone plan, car payment, insurance)'
+  }),
+
+  hasIncome: () => renderYesNo('hasIncome', {
+    heading: 'Do you have a job or receive any regular income?'
+  }),
+
+  hasSubscriptions: () => renderYesNo('hasSubscriptions', {
+    heading: 'Do you currently pay for any subscriptions or memberships?',
+    skip: true,
+    onSkip: () => { answers.hasSubscriptions = null; answers.subscriptionDetails = null; goNext(true); }
+  }),
+
+  hasSavingsGoal: () => renderYesNo('hasSavingsGoal', {
+    heading: 'Do you have a savings goal right now?'
+  }),
+
+  billTypes: renderBillTypes,
+  monthlyIncome: renderMonthlyIncome,
+  subscriptionDetails: renderSubscriptionDetails,
+  savingsGoalName: renderSavingsGoal,
+  completion: renderCompletion
+};
+
+// ── Q2a billTypes ──────────────────────────────────────
+function currentBillSelections() {
+  // returns array of plain values (without the "other:" entry), and otherChecked
+  const arr = Array.isArray(answers.billTypes) ? answers.billTypes : [];
+  const plain = arr.filter(v => !String(v).startsWith('other')).slice();
+  const otherEntry = arr.find(v => String(v).startsWith('other'));
+  const otherChecked = arr.includes('other') || !!otherEntry;
+  return { plain, otherChecked };
+}
+
+function renderBillTypes() {
+  const el = screenEl();
+  el.innerHTML = '';
+  el.appendChild(heading('What bills do you currently pay?'));
+  el.appendChild(subtext('Select all that apply'));
+
+  const selectedSet = new Set();
+  let otherChecked = false;
+  if (Array.isArray(answers.billTypes)) {
+    answers.billTypes.forEach(v => {
+      if (String(v).startsWith('other')) { otherChecked = true; }
+      else selectedSet.add(v);
+    });
+  }
+  if (selectedSet.has('other')) { otherChecked = true; selectedSet.delete('other'); }
+
+  const list = document.createElement('div');
+  list.className = 'option-list controls';
+
+  billOptions.forEach(([value, label]) => {
+    const isOther = value === 'other';
+    const checked = isOther ? otherChecked : selectedSet.has(value);
+    const btn = document.createElement('button');
+    btn.className = 'option' + (checked ? ' selected' : '');
+    btn.innerHTML = '<span class="checkbox">' + checkSvg + '</span><span>' + esc(label) + '</span>';
+    btn.onclick = () => {
+      if (isOther) {
+        otherChecked = !otherChecked;
+        if (!otherChecked) draft.billOtherText = '';
+      } else {
+        if (selectedSet.has(value)) selectedSet.delete(value); else selectedSet.add(value);
+      }
+      commitBills(selectedSet, otherChecked);
+      renderBillTypes();
+    };
+    list.appendChild(btn);
+
+    if (isOther && otherChecked) {
+      const fg = document.createElement('div');
+      fg.className = 'field-group';
+      fg.style.marginTop = '4px';
+      const inp = document.createElement('input');
+      inp.className = 'input-field';
+      inp.type = 'text';
+      inp.placeholder = 'Describe your other bill';
+      inp.value = draft.billOtherText;
+      inp.oninput = () => { draft.billOtherText = inp.value; commitBills(selectedSet, otherChecked); };
+      fg.appendChild(inp);
+      list.appendChild(fg);
+    }
+  });
+  el.appendChild(list);
+
+  el.appendChild(footer({
+    back: true,
+    nextValid: Array.isArray(answers.billTypes) && answers.billTypes.length > 0,
+    onNext: goNext
+  }));
+}
+
+function commitBills(selectedSet, otherChecked) {
+  const arr = Array.from(selectedSet);
+  if (otherChecked) {
+    const t = draft.billOtherText.trim();
+    arr.push(t ? 'other: ' + t : 'other');
+  }
+  answers.billTypes = arr;
+  // refresh next button enabled state without full re-render of inputs (avoids losing focus)
+  const nextBtn = document.querySelector('#screen .footer-nav .btn-primary');
+  if (nextBtn) nextBtn.disabled = !(arr.length > 0);
+}
+
+// ── Q3a monthlyIncome ──────────────────────────────────
+function validIncome(v) {
+  const n = parseFloat(v);
+  return !isNaN(n) && n > 0 && n <= 99999;
+}
+
+function renderMonthlyIncome() {
+  const el = screenEl();
+  el.innerHTML = '';
+  el.appendChild(heading('Approximately how much do you earn per month after tax?'));
+
+  const fg = document.createElement('div');
+  fg.className = 'field-group controls';
+  const wrap = document.createElement('div');
+  wrap.className = 'currency-wrap';
+  wrap.innerHTML = '<span class="currency-prefix">$</span>';
+  const inp = document.createElement('input');
+  inp.className = 'input-field';
+  inp.type = 'number';
+  inp.min = '0'; inp.step = '0.01'; inp.max = '99999';
+  inp.placeholder = 'e.g. 2000';
+  if (answers.monthlyIncome != null) inp.value = answers.monthlyIncome;
+  wrap.appendChild(inp);
+  fg.appendChild(wrap);
+  el.appendChild(fg);
+
+  const err = document.createElement('p');
+  err.className = 'err-text';
+  el.appendChild(err);
+
+  const foot = footer({ back: true, nextValid: validIncome(answers.monthlyIncome), onNext: goNext });
+  el.appendChild(foot);
+  const nextBtn = foot.querySelector('.btn-primary');
+
+  inp.oninput = () => {
+    const raw = inp.value;
+    if (raw === '') { answers.monthlyIncome = null; err.textContent = ''; nextBtn.disabled = true; return; }
+    if (validIncome(raw)) {
+      answers.monthlyIncome = parseFloat(raw);
+      err.textContent = '';
+      nextBtn.disabled = false;
+    } else {
+      answers.monthlyIncome = null;
+      err.textContent = 'Enter an amount between $1 and $99,999.';
+      nextBtn.disabled = true;
+    }
+  };
+}
+
+// ── Q5a subscriptionDetails ────────────────────────────
+function renderSubscriptionDetails() {
+  const el = screenEl();
+  el.innerHTML = '';
+  el.appendChild(heading('List your subscriptions'));
+  el.appendChild(subtext('Approximate monthly total is fine'));
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'controls';
+
+  const fg1 = document.createElement('div');
+  fg1.className = 'field-group';
+  fg1.innerHTML = '<label class="field-label">Subscriptions</label>';
+  const listInp = document.createElement('input');
+  listInp.className = 'input-field';
+  listInp.type = 'text';
+  listInp.placeholder = 'e.g. Netflix, Spotify';
+  listInp.value = draft.subList;
+  fg1.appendChild(listInp);
+  wrapper.appendChild(fg1);
+
+  const fg2 = document.createElement('div');
+  fg2.className = 'field-group';
+  fg2.innerHTML = '<label class="field-label">Monthly total (optional)</label>';
+  const cw = document.createElement('div');
+  cw.className = 'currency-wrap';
+  cw.innerHTML = '<span class="currency-prefix">$</span>';
+  const totalInp = document.createElement('input');
+  totalInp.className = 'input-field';
+  totalInp.type = 'number';
+  totalInp.min = '0'; totalInp.step = '0.01';
+  totalInp.placeholder = 'e.g. 25';
+  totalInp.value = draft.subTotal;
+  cw.appendChild(totalInp);
+  fg2.appendChild(cw);
+  wrapper.appendChild(fg2);
+
+  el.appendChild(wrapper);
+
+  const commit = () => {
+    draft.subList = listInp.value;
+    draft.subTotal = totalInp.value;
+    const list = listInp.value.trim();
+    const total = parseFloat(totalInp.value);
+    if (!list) {
+      answers.subscriptionDetails = total > 0 ? '($' + total + '/mo)' : '';
+    } else if (total > 0) {
+      answers.subscriptionDetails = list + ' ($' + total + '/mo)';
+    } else {
+      answers.subscriptionDetails = list;
+    }
+  };
+  listInp.oninput = commit;
+  totalInp.oninput = commit;
+  commit();
+
+  // Optional screen — Next always enabled
+  el.appendChild(footer({ back: true, nextValid: true, onNext: goNext }));
+}
+
+// ── Q6a savingsGoal ────────────────────────────────────
+function validGoal() {
+  const nameOk = typeof answers.savingsGoalName === 'string' &&
+                 answers.savingsGoalName.trim().length >= 2 &&
+                 answers.savingsGoalName.trim().length <= 80;
+  const target = parseFloat(answers.savingsGoalTarget);
+  const targetOk = !isNaN(target) && target > 0;
+  return nameOk && targetOk;
+}
+
+function renderSavingsGoal() {
+  const el = screenEl();
+  el.innerHTML = '';
+  el.appendChild(heading('What are you saving for, and how much do you need?'));
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'controls';
+
+  const fg1 = document.createElement('div');
+  fg1.className = 'field-group';
+  fg1.innerHTML = '<label class="field-label">Goal name</label>';
+  const nameInp = document.createElement('input');
+  nameInp.className = 'input-field';
+  nameInp.type = 'text';
+  nameInp.maxLength = 80;
+  nameInp.placeholder = 'e.g. New phone';
+  if (answers.savingsGoalName != null) nameInp.value = answers.savingsGoalName;
+  fg1.appendChild(nameInp);
+  wrapper.appendChild(fg1);
+
+  const fg2 = document.createElement('div');
+  fg2.className = 'field-group';
+  fg2.innerHTML = '<label class="field-label">Target amount</label>';
+  const cw = document.createElement('div');
+  cw.className = 'currency-wrap';
+  cw.innerHTML = '<span class="currency-prefix">$</span>';
+  const targetInp = document.createElement('input');
+  targetInp.className = 'input-field';
+  targetInp.type = 'number';
+  targetInp.min = '0'; targetInp.step = '0.01';
+  targetInp.placeholder = 'e.g. 800';
+  if (answers.savingsGoalTarget != null) targetInp.value = answers.savingsGoalTarget;
+  cw.appendChild(targetInp);
+  fg2.appendChild(cw);
+  wrapper.appendChild(fg2);
+
+  el.appendChild(wrapper);
+
+  const err = document.createElement('p');
+  err.className = 'err-text';
+  el.appendChild(err);
+
+  const foot = footer({ back: true, nextValid: validGoal(), onNext: goNext });
+  el.appendChild(foot);
+  const nextBtn = foot.querySelector('.btn-primary');
+
+  const commit = () => {
+    answers.savingsGoalName = nameInp.value;
+    const t = parseFloat(targetInp.value);
+    answers.savingsGoalTarget = isNaN(t) ? null : t;
+    const ok = validGoal();
+    nextBtn.disabled = !ok;
+    if (nameInp.value.trim().length > 0 && nameInp.value.trim().length < 2) {
+      err.textContent = 'Goal name must be at least 2 characters.';
+    } else {
+      err.textContent = '';
+    }
+  };
+  nameInp.oninput = commit;
+  targetInp.oninput = commit;
+}
+
+// ── Completion ─────────────────────────────────────────
+function fmtMoney(n) {
+  const v = parseFloat(n);
+  if (isNaN(v)) return '$0';
+  return '$' + (Number.isInteger(v) ? v : v.toFixed(2));
+}
+
+function buildSummaryLines() {
+  const lines = [];
+
+  if (answers.hasSavingsGoal === true && answers.savingsGoalName) {
+    lines.push("You're saving for " + answers.savingsGoalName.trim() +
+      (answers.savingsGoalTarget ? ' (' + fmtMoney(answers.savingsGoalTarget) + ')' : ''));
+  }
+  if (answers.hasIncome === true && answers.monthlyIncome) {
+    lines.push('You earn about ' + fmtMoney(answers.monthlyIncome) + '/month');
+  }
+  const foodMap = {
+    cooks: 'You usually cook your meals at home',
+    eats_out: 'You usually eat out or grab fast food',
+    covered: 'Your food is mostly covered for you',
+    mixed: 'You mix cooking and eating out'
+  };
+  if (answers.foodSituation && foodMap[answers.foodSituation]) lines.push(foodMap[answers.foodSituation]);
+
+  const spendMap = {
+    overspender: 'You tend to overspend — we’ll help you rein it in',
+    balanced: 'You keep a balanced budget',
+    saver: 'You’re a natural saver'
+  };
+  if (answers.spendingStyle && spendMap[answers.spendingStyle]) lines.push(spendMap[answers.spendingStyle]);
+
+  const intentMap = {
+    stop_overspending: 'You want to stop overspending and stick to a budget',
+    save_for_goal: 'You want to save for a goal faster',
+    understand_spending: 'You want to understand where your money goes',
+    build_habits: 'You want to build better financial habits',
+    manage_family: 'You want to manage shared or family expenses'
+  };
+  if (answers.primaryIntent && intentMap[answers.primaryIntent]) lines.push(intentMap[answers.primaryIntent]);
+
+  const livingMap = {
+    with_family_no_bills: 'You live with family and don’t pay bills yet',
+    with_family_contributes: 'You live with family and chip in on some bills',
+    renting: 'You rent your own place',
+    owns_home: 'You own your home',
+    other: 'You have your own living setup'
+  };
+  if (answers.livingSituation && livingMap[answers.livingSituation]) lines.push(livingMap[answers.livingSituation]);
+
+  return lines.slice(0, 3);
+}
+
+function renderCompletion() {
+  const el = screenEl();
+  el.innerHTML = '';
+
+  const icon = document.createElement('div');
+  icon.className = 'complete-icon';
+  icon.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+  el.appendChild(icon);
+
+  const h = heading('Your profile is ready!');
+  h.style.textAlign = 'center';
+  el.appendChild(h);
+
+  const sub = subtext('Spendly will now give you personalized advice.');
+  sub.style.textAlign = 'center';
+  el.appendChild(sub);
+
+  const lines = buildSummaryLines();
+  if (lines.length) {
+    const card = document.createElement('div');
+    card.className = 'card-elevated summary-card';
+    let html = '<p class="summary-title">Here’s what I now know about you:</p>';
+    lines.forEach(l => {
+      html += '<div class="summary-line"><span class="bullet">•</span><span>' + esc(l) + '</span></div>';
+    });
+    card.innerHTML = html;
+    el.appendChild(card);
+  }
+
+  const err = document.createElement('p');
+  err.className = 'err-text';
+  err.style.textAlign = 'center';
+  el.appendChild(err);
+
+  const footWrap = document.createElement('div');
+  footWrap.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:24px;gap:12px;';
+  const back = document.createElement('button');
+  back.className = 'btn-ghost';
+  back.innerHTML = '← Back';
+  back.onclick = goBack;
+  footWrap.appendChild(back);
+
+  const cta = document.createElement('button');
+  cta.className = 'btn-cta';
+  cta.innerHTML = 'Get Started →';
+  cta.onclick = () => submitSurvey(cta, back, err);
+  footWrap.appendChild(cta);
+  el.appendChild(footWrap);
+}
+
+async function submitSurvey(cta, back, err) {
+  cta.disabled = true;
+  back.disabled = true;
+  cta.innerHTML = 'Saving…';
+  err.textContent = '';
   try {
-    const res = await fetch('/api/auth/onboarding', {
+    const res = await fetch('/api/auth/survey', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      credentials: 'include',
+      body: JSON.stringify(answers)
     });
+    if (res.status === 404) {
+      console.warn('POST /api/auth/survey returned 404 — endpoint not implemented yet. Redirecting anyway.');
+      window.location.href = '/dashboard.html';
+      return;
+    }
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: 'Save failed' }));
-      showErr(3, err.error || 'Something went wrong. Please try again.');
-      btn.disabled = false;
-      btn.textContent = 'Let\'s go →';
+      const e = await res.json().catch(() => ({}));
+      err.textContent = e.error || 'Something went wrong. Please try again.';
+      cta.disabled = false; back.disabled = false;
+      cta.innerHTML = 'Get Started →';
       return;
     }
     window.location.href = '/dashboard.html';
   } catch (e) {
-    showErr(3, 'Network error. Please try again.');
-    btn.disabled = false;
-    btn.textContent = 'Let\'s go →';
+    err.textContent = 'Network error. Please try again.';
+    cta.disabled = false; back.disabled = false;
+    cta.innerHTML = 'Get Started →';
   }
+}
+
+// ── Navigation ─────────────────────────────────────────
+function goNext(fromSkip) {
+  const flow = buildFlow();
+  const idx = flow.indexOf(currentKey);
+  if (idx < flow.length - 1) {
+    currentKey = flow[idx + 1];
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function goBack() {
+  const flow = buildFlow();
+  const idx = flow.indexOf(currentKey);
+  if (idx > 0) {
+    currentKey = flow[idx - 1];
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function init() {
+  currentKey = 'livingSituation';
+  render();
 }
 </script>
 </body>
