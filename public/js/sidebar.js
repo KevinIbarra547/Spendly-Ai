@@ -23,7 +23,7 @@
   if (!container) return;
 
   container.innerHTML =
-    '<aside class="fixed top-0 left-0 h-screen w-64 bg-zinc-900 flex flex-col border-r border-zinc-800 z-40">' +
+    '<aside class="fixed top-0 left-0 h-screen w-64 flex flex-col border-r border-zinc-800 z-40" style="background:var(--bg-sidebar)">' +
 
       '<div class="p-5 border-b border-zinc-800">' +
         '<a href="index.html" class="flex items-center gap-3">' +
@@ -52,7 +52,7 @@
         '</button>' +
       '</div>' +
 
-      '<div id="sidebar-user-card" class="p-4 border-t border-zinc-800">' +
+      '<div id="sidebar-user-card" class="p-4 border-t border-zinc-800" style="border-color:var(--border)">' +
         '<div class="flex items-center gap-3">' +
           '<div id="sidebar-avatar" class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden">' +
             '<span id="sidebar-initials"></span>' +
