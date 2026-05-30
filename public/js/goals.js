@@ -41,14 +41,17 @@ async function populateSidebar() {
     const res = await fetch('/api/auth/me', { credentials: 'include' });
     if (!res.ok) return;
     const user = await res.json();
-    document.getElementById('sidebar-username').textContent = user.username;
+    const usernameEl = document.getElementById('sidebar-username');
+    if (usernameEl) usernameEl.textContent = user.username;
     const avatarEl = document.getElementById('sidebar-avatar');
     const initialsEl = document.getElementById('sidebar-initials');
     const isDefaultPfp = !user.pfp || user.pfp === '/uploads/pfps/default.png';
-    if (!isDefaultPfp) {
-      avatarEl.innerHTML = `<img src="${user.pfp}" class="w-full h-full object-cover" alt="">`;
-    } else {
-      initialsEl.textContent = user.username.slice(0, 2).toUpperCase();
+    if (avatarEl && initialsEl) {
+      if (!isDefaultPfp) {
+        avatarEl.innerHTML = `<img src="${user.pfp}" class="w-full h-full object-cover" alt="">`;
+      } else {
+        initialsEl.textContent = user.username.slice(0, 2).toUpperCase();
+      }
     }
   } catch (e) { /* ignore */ }
 }

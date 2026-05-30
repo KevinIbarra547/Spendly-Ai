@@ -39,9 +39,9 @@
 
   function showStatus(msg, kind) {
     const classes = {
-      error:   'bg-red-50 text-red-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm',
-      success: 'bg-green-50 text-green-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm',
-      info:    'bg-blue-50 text-blue-700 p-3 rounded mt-4 transition-opacity duration-200 text-sm'
+      error:   'bg-red-900/50 text-red-300 p-3 rounded mt-4 transition-opacity duration-200 text-sm',
+      success: 'bg-green-900/50 text-green-300 p-3 rounded mt-4 transition-opacity duration-200 text-sm',
+      info:    'bg-indigo-900/50 text-indigo-300 p-3 rounded mt-4 transition-opacity duration-200 text-sm'
     };
     status.className = classes[kind] || classes.success;
     status.textContent = msg;
