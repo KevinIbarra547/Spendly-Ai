@@ -9,6 +9,7 @@ const { requireAuth } = require('../middleware/auth');
 
 const USERS_PATH = path.join(__dirname, '..', 'data', 'users.json');
 const GOALS_PATH = path.join(__dirname, '..', 'data', 'goals.json');
+const FAMILIES_PATH = path.join(__dirname, '..', 'data', 'families.json');
 
 function readUsers() {
   try {
@@ -34,6 +35,33 @@ function readGoals() {
 
 function writeGoals(goals) {
   fs.writeFileSync(GOALS_PATH, JSON.stringify(goals, null, 2), 'utf8');
+}
+
+function readFamilies() {
+  try {
+    const raw = fs.readFileSync(FAMILIES_PATH, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    return [];
+  }
+}
+
+function writeFamilies(families) {
+  fs.writeFileSync(FAMILIES_PATH, JSON.stringify(families, null, 2), 'utf8');
+}
+
+// Generate a 6-character uppercase alphanumeric invite code that does not
+// already exist in the families list — regenerate on collision.
+function generateUniqueInviteCode(families) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code;
+  do {
+    code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars[crypto.randomInt(chars.length)];
+    }
+  } while (families.some(f => f.inviteCode === code));
+  return code;
 }
 
 const pfpStorage = multer.diskStorage({
@@ -122,6 +150,16 @@ router.post('/register', async (req, res) => {
       primaryFinancialGoal,
       role,
       inviteCode: role === 'child' && typeof inviteCode === 'string' && inviteCode.trim() !== '' ? inviteCode.trim() : null,
+      familyId: null,
+      linkedAt: null,
+      pendingAllowance: 0,
+      allocations: {
+        savingsGoal: 0,
+        food: 0,
+        freeSpending: 0
+      },
+      allowanceHistory: [],
+      familyNotes: role === 'parent' ? {} : null,
       pfp: '/uploads/pfps/default.png',
       monthlyBudgetCap: 0,
       isAdmin,
@@ -152,6 +190,36 @@ router.post('/register', async (req, res) => {
         surveyLastUpdatedAt: null,
       }
     };
+
+    // Family linking (CP-F01).
+    if (role === 'parent') {
+      // Auto-create a family group for the new parent and link them to it.
+      const families = readFamilies();
+      const newFamily = {
+        id: `family_${crypto.randomUUID()}`,
+        parentId: newUser.id,
+        inviteCode: generateUniqueInviteCode(families),
+        createdAt: new Date().toISOString(),
+        childIds: []
+      };
+      families.push(newFamily);
+      writeFamilies(families);
+
+      newUser.familyId = newFamily.id;
+      newUser.linkedAt = new Date().toISOString();
+    } else if (role === 'child' && newUser.inviteCode) {
+      // Validate the invite code and link the child to the matching family.
+      const families = readFamilies();
+      const normalized = newUser.inviteCode.toUpperCase();
+      const family = families.find(f => f.inviteCode.toUpperCase() === normalized);
+      if (!family) {
+        return res.status(400).json({ error: 'Invalid family invite code.' });
+      }
+      newUser.familyId = family.id;
+      newUser.linkedAt = new Date().toISOString();
+      family.childIds.push(newUser.id);
+      writeFamilies(families);
+    }
 
     users.push(newUser);
     writeUsers(users);

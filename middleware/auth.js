@@ -37,4 +37,34 @@ function requireAdmin(req, res, next) {
   }
 }
 
-module.exports = { requireAuth, requireAdmin };
+// Must be called after requireAuth — assumes req.session.userId exists.
+function requireParent(req, res, next) {
+  try {
+    const users = readUsers();
+    const user = users.find(u => u.id === req.session.userId);
+    if (!user || user.role !== 'parent') {
+      return res.status(403).json({ error: 'Parent account required.' });
+    }
+    next();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// Must be called after requireAuth — assumes req.session.userId exists.
+function requireChild(req, res, next) {
+  try {
+    const users = readUsers();
+    const user = users.find(u => u.id === req.session.userId);
+    if (!user || user.role !== 'child') {
+      return res.status(403).json({ error: 'Child account required.' });
+    }
+    next();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+module.exports = { requireAuth, requireAdmin, requireParent, requireChild };

@@ -5,6 +5,7 @@ node_modules/
 data/users.json
 data/expenses.json
 data/goals.json
+data/families.json
 public/uploads/pfps/*
 public/uploads/receipts/*
 !public/uploads/pfps/.gitkeep
