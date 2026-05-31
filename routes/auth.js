@@ -8,6 +8,7 @@ const multer = require('multer');
 const { requireAuth } = require('../middleware/auth');
 
 const USERS_PATH = path.join(__dirname, '..', 'data', 'users.json');
+const GOALS_PATH = path.join(__dirname, '..', 'data', 'goals.json');
 
 function readUsers() {
   try {
@@ -20,6 +21,19 @@ function readUsers() {
 
 function writeUsers(users) {
   fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2), 'utf8');
+}
+
+function readGoals() {
+  try {
+    const raw = fs.readFileSync(GOALS_PATH, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    return [];
+  }
+}
+
+function writeGoals(goals) {
+  fs.writeFileSync(GOALS_PATH, JSON.stringify(goals, null, 2), 'utf8');
 }
 
 const pfpStorage = multer.diskStorage({
@@ -282,6 +296,176 @@ router.post('/onboarding', requireAuth, (req, res) => {
 
     Object.assign(users[idx], fields, { onboardingComplete: true });
     writeUsers(users);
+
+    const { passwordHash, ...safeUser } = users[idx];
+    return res.status(200).json(safeUser);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ── Financial Onboarding Survey (CP-S03) ───────────────────────────────
+
+// Validate the 13 survey fields. hasSubscriptions / subscriptionDetails are
+// optional and never cause a validation error if missing.
+function validateSurveyBody(body) {
+  const {
+    livingSituation, paysRecurringBills, billTypes, hasIncome, monthlyIncome,
+    foodSituation, hasSavingsGoal, savingsGoalName, savingsGoalTarget,
+    spendingStyle, primaryIntent
+  } = body;
+
+  if (typeof livingSituation !== 'string' || livingSituation.trim() === '') {
+    return { valid: false, error: 'livingSituation must be a non-empty string' };
+  }
+  if (typeof paysRecurringBills !== 'boolean') {
+    return { valid: false, error: 'paysRecurringBills must be a boolean' };
+  }
+  if (!Array.isArray(billTypes)) {
+    return { valid: false, error: 'billTypes must be an array' };
+  }
+  if (typeof hasIncome !== 'boolean') {
+    return { valid: false, error: 'hasIncome must be a boolean' };
+  }
+  if (hasIncome) {
+    if (typeof monthlyIncome !== 'number' || monthlyIncome <= 0) {
+      return { valid: false, error: 'monthlyIncome must be a positive number when hasIncome is true' };
+    }
+  } else if (monthlyIncome !== null && monthlyIncome !== undefined) {
+    return { valid: false, error: 'monthlyIncome must be null when hasIncome is false' };
+  }
+  if (typeof foodSituation !== 'string' || foodSituation.trim() === '') {
+    return { valid: false, error: 'foodSituation must be a non-empty string' };
+  }
+  if (typeof hasSavingsGoal !== 'boolean') {
+    return { valid: false, error: 'hasSavingsGoal must be a boolean' };
+  }
+  if (hasSavingsGoal) {
+    if (typeof savingsGoalName !== 'string' || savingsGoalName.trim().length < 2 || savingsGoalName.trim().length > 80) {
+      return { valid: false, error: 'savingsGoalName must be a string between 2 and 80 characters when hasSavingsGoal is true' };
+    }
+    if (typeof savingsGoalTarget !== 'number' || savingsGoalTarget <= 0) {
+      return { valid: false, error: 'savingsGoalTarget must be a positive number when hasSavingsGoal is true' };
+    }
+  } else {
+    if (savingsGoalName !== null && savingsGoalName !== undefined) {
+      return { valid: false, error: 'savingsGoalName must be null when hasSavingsGoal is false' };
+    }
+    if (savingsGoalTarget !== null && savingsGoalTarget !== undefined) {
+      return { valid: false, error: 'savingsGoalTarget must be null when hasSavingsGoal is false' };
+    }
+  }
+  if (typeof spendingStyle !== 'string' || spendingStyle.trim() === '') {
+    return { valid: false, error: 'spendingStyle must be a non-empty string' };
+  }
+  if (typeof primaryIntent !== 'string' || primaryIntent.trim() === '') {
+    return { valid: false, error: 'primaryIntent must be a non-empty string' };
+  }
+  return { valid: true };
+}
+
+// Build the normalized survey fields to merge into financialProfile.
+// Optional subscription fields are only included when actually provided so a
+// PATCH that omits them does not wipe existing values.
+function buildSurveyFields(body) {
+  const fields = {
+    livingSituation: body.livingSituation,
+    paysRecurringBills: body.paysRecurringBills,
+    billTypes: body.billTypes,
+    hasIncome: body.hasIncome,
+    monthlyIncome: body.hasIncome ? body.monthlyIncome : null,
+    foodSituation: body.foodSituation,
+    hasSavingsGoal: body.hasSavingsGoal,
+    savingsGoalName: body.hasSavingsGoal ? body.savingsGoalName : null,
+    savingsGoalTarget: body.hasSavingsGoal ? body.savingsGoalTarget : null,
+    spendingStyle: body.spendingStyle,
+    primaryIntent: body.primaryIntent,
+  };
+  if (body.hasSubscriptions !== undefined) fields.hasSubscriptions = body.hasSubscriptions;
+  if (body.subscriptionDetails !== undefined) fields.subscriptionDetails = body.subscriptionDetails;
+  return fields;
+}
+
+// Auto-create a Savings Goal from the survey answers, with duplicate
+// protection: a goal is only created if there isn't already an
+// onboarding-created goal with the same title for this user.
+function autoCreateSavingsGoal(userId, body) {
+  if (body.hasSavingsGoal === true && body.savingsGoalName && body.savingsGoalTarget) {
+    const goals = readGoals();
+    const exists = goals.some(g =>
+      g.userId === userId &&
+      g.title === body.savingsGoalName &&
+      g.createdFromOnboarding === true
+    );
+    if (!exists) {
+      goals.push({
+        id: `goal_${Date.now()}`,
+        userId,
+        title: body.savingsGoalName,
+        targetAmount: body.savingsGoalTarget,
+        currentSaved: 0,
+        deadline: null,
+        createdFromOnboarding: true,
+      });
+      writeGoals(goals);
+    }
+  }
+}
+
+// POST /api/auth/survey — first-time survey completion
+router.post('/survey', requireAuth, (req, res) => {
+  const validation = validateSurveyBody(req.body);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
+  }
+
+  try {
+    const users = readUsers();
+    const idx = users.findIndex(u => u.id === req.session.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+
+    const fields = buildSurveyFields(req.body);
+    users[idx].financialProfile = Object.assign({}, users[idx].financialProfile, fields);
+
+    const now = new Date().toISOString();
+    // Only stamp the first completion — never overwrite an existing one.
+    if (!users[idx].financialProfile.surveyCompletedAt) {
+      users[idx].financialProfile.surveyCompletedAt = now;
+    }
+    users[idx].financialProfile.surveyLastUpdatedAt = now;
+
+    writeUsers(users);
+    autoCreateSavingsGoal(req.session.userId, req.body);
+
+    const { passwordHash, ...safeUser } = users[idx];
+    return res.status(200).json(safeUser);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PATCH /api/auth/survey — edits from Settings > My Financial Profile
+router.patch('/survey', requireAuth, (req, res) => {
+  const validation = validateSurveyBody(req.body);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
+  }
+
+  try {
+    const users = readUsers();
+    const idx = users.findIndex(u => u.id === req.session.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+
+    const fields = buildSurveyFields(req.body);
+    users[idx].financialProfile = Object.assign({}, users[idx].financialProfile, fields);
+
+    // Do NOT touch surveyCompletedAt on an edit.
+    users[idx].financialProfile.surveyLastUpdatedAt = new Date().toISOString();
+
+    writeUsers(users);
+    autoCreateSavingsGoal(req.session.userId, req.body);
 
     const { passwordHash, ...safeUser } = users[idx];
     return res.status(200).json(safeUser);
