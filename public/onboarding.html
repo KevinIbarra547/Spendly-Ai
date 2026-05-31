@@ -210,6 +210,16 @@
       window.location.href = '/dashboard.html';
       return;
     }
+    // Child / student accounts get a simplified survey: Q1, Q2, Q2a and both
+    // cost screens are skipped and auto-filled.
+    if (user.role === 'child') {
+      isChild = true;
+      answers.livingSituation = 'lives_with_family_no_bills';
+      answers.paysRecurringBills = false;
+      answers.billTypes = [];
+      answers.monthlyHousingCost = null;
+      answers.monthlyBillsCost = null;
+    }
   } catch (e) {
     window.location.href = '/';
     return;
@@ -218,8 +228,11 @@
 })();
 
 // ── State ──────────────────────────────────────────────
+let isChild = false;
+
 const answers = {
   livingSituation: null, paysRecurringBills: null, billTypes: null,
+  monthlyHousingCost: null, monthlyBillsCost: null,
   hasIncome: null, monthlyIncome: null, foodSituation: null,
   hasSubscriptions: null, subscriptionDetails: null,
   hasSavingsGoal: null, savingsGoalName: null, savingsGoalTarget: null,
@@ -238,9 +251,22 @@ let currentKey = 'livingSituation';
 const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
 
 // ── Flow (dynamic) ─────────────────────────────────────
+function housingCostShown() {
+  return ['with_family_contributes', 'renting', 'owns_home'].includes(answers.livingSituation);
+}
+
 function buildFlow() {
-  const f = ['livingSituation', 'paysRecurringBills'];
-  if (answers.paysRecurringBills === true) f.push('billTypes');
+  const f = [];
+  // Child accounts skip Q1, Q2, Q2a and both cost screens entirely.
+  if (!isChild) {
+    f.push('livingSituation');
+    if (housingCostShown()) f.push('monthlyHousingCost');
+    f.push('paysRecurringBills');
+    if (answers.paysRecurringBills === true) {
+      f.push('billTypes');
+      f.push('monthlyBillsCost');
+    }
+  }
   f.push('hasIncome');
   if (answers.hasIncome === true) f.push('monthlyIncome');
   f.push('foodSituation');
@@ -458,6 +484,9 @@ const renderers = {
     heading: 'Do you have a savings goal right now?'
   }),
 
+  monthlyHousingCost: () => renderCostScreen('monthlyHousingCost', 'Approximately how much do you contribute to rent or housing costs per month?'),
+  monthlyBillsCost: () => renderCostScreen('monthlyBillsCost', 'Approximately how much do your bills cost in total per month?'),
+
   billTypes: renderBillTypes,
   monthlyIncome: renderMonthlyIncome,
   subscriptionDetails: renderSubscriptionDetails,
@@ -545,6 +574,55 @@ function commitBills(selectedSet, otherChecked) {
   // refresh next button enabled state without full re-render of inputs (avoids losing focus)
   const nextBtn = document.querySelector('#screen .footer-nav .btn-primary');
   if (nextBtn) nextBtn.disabled = !(arr.length > 0);
+}
+
+// ── Cost screens (housing / bills) ─────────────────────
+function validCost(v) {
+  const n = parseFloat(v);
+  return !isNaN(n) && n > 0 && n <= 99999;
+}
+
+function renderCostScreen(key, headingText) {
+  const el = screenEl();
+  el.innerHTML = '';
+  el.appendChild(heading(headingText));
+
+  const fg = document.createElement('div');
+  fg.className = 'field-group controls';
+  const wrap = document.createElement('div');
+  wrap.className = 'currency-wrap';
+  wrap.innerHTML = '<span class="currency-prefix">$</span>';
+  const inp = document.createElement('input');
+  inp.className = 'input-field';
+  inp.type = 'number';
+  inp.min = '0'; inp.step = '0.01'; inp.max = '99999';
+  inp.placeholder = 'e.g. 500';
+  if (answers[key] != null) inp.value = answers[key];
+  wrap.appendChild(inp);
+  fg.appendChild(wrap);
+  el.appendChild(fg);
+
+  const err = document.createElement('p');
+  err.className = 'err-text';
+  el.appendChild(err);
+
+  const foot = footer({ back: true, nextValid: validCost(answers[key]), onNext: goNext });
+  el.appendChild(foot);
+  const nextBtn = foot.querySelector('.btn-primary');
+
+  inp.oninput = () => {
+    const raw = inp.value;
+    if (raw === '') { answers[key] = null; err.textContent = ''; nextBtn.disabled = true; return; }
+    if (validCost(raw)) {
+      answers[key] = parseFloat(raw);
+      err.textContent = '';
+      nextBtn.disabled = false;
+    } else {
+      answers[key] = null;
+      err.textContent = 'Enter an amount between $1 and $99,999.';
+      nextBtn.disabled = true;
+    }
+  };
 }
 
 // ── Q3a monthlyIncome ──────────────────────────────────
@@ -836,6 +914,10 @@ async function submitSurvey(cta, back, err) {
   back.disabled = true;
   cta.innerHTML = 'Saving…';
   err.textContent = '';
+  // Cost fields are null whenever their screen was not part of the flow.
+  const flow = buildFlow();
+  if (!flow.includes('monthlyHousingCost')) answers.monthlyHousingCost = null;
+  if (!flow.includes('monthlyBillsCost')) answers.monthlyBillsCost = null;
   try {
     const res = await fetch('/api/auth/survey', {
       method: 'POST',
@@ -885,7 +967,8 @@ function goBack() {
 }
 
 function init() {
-  currentKey = 'livingSituation';
+  // Child accounts start at the first non-skipped screen.
+  currentKey = isChild ? 'hasIncome' : 'livingSituation';
   render();
 }
 </script>

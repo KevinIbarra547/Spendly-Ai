@@ -58,11 +58,16 @@ const pfpUpload = multer({
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, email, schoolName, graduationYear, studentStatus, primaryFinancialGoal, adminCode } = req.body;
+    const { username, password, email, schoolName, graduationYear, studentStatus, primaryFinancialGoal, adminCode, role, inviteCode } = req.body;
 
-    // Validate all 7 fields present and non-empty
-    if (!username || !password || !email || !schoolName || graduationYear === undefined || !studentStatus || !primaryFinancialGoal) {
+    // Validate the always-required fields are present and non-empty.
+    if (!username || !password || !email || !schoolName || !primaryFinancialGoal) {
       return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Validate role — must be exactly "parent" or "child".
+    if (role !== 'parent' && role !== 'child') {
+      return res.status(400).json({ error: 'Role must be either "parent" or "child"' });
     }
 
     // Validate password length
@@ -76,9 +81,19 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // Validate graduationYear
-    if (typeof graduationYear !== 'number' || graduationYear < 2024 || graduationYear > 2035) {
-      return res.status(400).json({ error: 'Graduation year must be between 2024 and 2035' });
+    // Graduation year and student status are only required for child/student
+    // accounts. Parent accounts do not submit them and store them as null.
+    let normalizedGraduationYear = null;
+    let normalizedStudentStatus = null;
+    if (role === 'child') {
+      if (graduationYear === undefined || !studentStatus) {
+        return res.status(400).json({ error: 'All fields are required' });
+      }
+      if (typeof graduationYear !== 'number' || graduationYear < 2024 || graduationYear > 2035) {
+        return res.status(400).json({ error: 'Graduation year must be between 2024 and 2035' });
+      }
+      normalizedGraduationYear = graduationYear;
+      normalizedStudentStatus = studentStatus;
     }
 
     const users = readUsers();
@@ -102,9 +117,11 @@ router.post('/register', async (req, res) => {
       passwordHash,
       email,
       schoolName,
-      graduationYear,
-      studentStatus,
+      graduationYear: normalizedGraduationYear,
+      studentStatus: normalizedStudentStatus,
       primaryFinancialGoal,
+      role,
+      inviteCode: role === 'child' && typeof inviteCode === 'string' && inviteCode.trim() !== '' ? inviteCode.trim() : null,
       pfp: '/uploads/pfps/default.png',
       monthlyBudgetCap: 0,
       isAdmin,
@@ -119,6 +136,8 @@ router.post('/register', async (req, res) => {
         livingSituation: null,
         paysRecurringBills: null,
         billTypes: null,
+        monthlyHousingCost: null,
+        monthlyBillsCost: null,
         hasIncome: null,
         monthlyIncome: null,
         foodSituation: null,
@@ -314,7 +333,7 @@ function validateSurveyBody(body) {
   const {
     livingSituation, paysRecurringBills, billTypes, hasIncome, monthlyIncome,
     foodSituation, hasSavingsGoal, savingsGoalName, savingsGoalTarget,
-    spendingStyle, primaryIntent
+    spendingStyle, primaryIntent, monthlyHousingCost, monthlyBillsCost
   } = body;
 
   if (typeof livingSituation !== 'string' || livingSituation.trim() === '') {
@@ -363,6 +382,18 @@ function validateSurveyBody(body) {
   if (typeof primaryIntent !== 'string' || primaryIntent.trim() === '') {
     return { valid: false, error: 'primaryIntent must be a non-empty string' };
   }
+  // Cost screens are conditional — both are optional and may be null when the
+  // user's living situation / bills answers skipped those screens.
+  if (monthlyHousingCost !== null && monthlyHousingCost !== undefined) {
+    if (typeof monthlyHousingCost !== 'number' || monthlyHousingCost <= 0 || monthlyHousingCost > 99999) {
+      return { valid: false, error: 'monthlyHousingCost must be a positive number no greater than 99999' };
+    }
+  }
+  if (monthlyBillsCost !== null && monthlyBillsCost !== undefined) {
+    if (typeof monthlyBillsCost !== 'number' || monthlyBillsCost <= 0 || monthlyBillsCost > 99999) {
+      return { valid: false, error: 'monthlyBillsCost must be a positive number no greater than 99999' };
+    }
+  }
   return { valid: true };
 }
 
@@ -385,6 +416,10 @@ function buildSurveyFields(body) {
   };
   if (body.hasSubscriptions !== undefined) fields.hasSubscriptions = body.hasSubscriptions;
   if (body.subscriptionDetails !== undefined) fields.subscriptionDetails = body.subscriptionDetails;
+  // Only include cost fields when present so a PATCH that omits them does not
+  // wipe existing values.
+  if (body.monthlyHousingCost !== undefined) fields.monthlyHousingCost = body.monthlyHousingCost;
+  if (body.monthlyBillsCost !== undefined) fields.monthlyBillsCost = body.monthlyBillsCost;
   return fields;
 }
 

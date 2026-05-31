@@ -159,14 +159,25 @@
           <input type="password" name="password" placeholder="Password" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
           <input type="email" name="email" placeholder="Email" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
           <input type="text" name="schoolName" placeholder="School Name" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
-          <input type="number" name="graduationYear" placeholder="Graduation Year" min="2024" max="2035" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
-          <select name="studentStatus" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
-            <option value="" disabled selected>Student Status</option>
-            <option value="Freshman">Freshman</option>
-            <option value="Sophomore">Sophomore</option>
-            <option value="Junior">Junior</option>
-            <option value="Senior">Senior</option>
-          </select>
+
+          <label class="block text-zinc-300 text-sm font-medium mb-1.5">Are you a parent or a child/student?</label>
+          <div id="role-toggle" class="grid grid-cols-2 gap-2 mb-3">
+            <button type="button" data-role="parent" class="role-option bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-semibold rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-700">Parent</button>
+            <button type="button" data-role="child" class="role-option bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm font-semibold rounded-lg px-3 py-2.5 transition-colors hover:bg-zinc-700">Child / Student</button>
+          </div>
+          <input type="hidden" name="role" id="role-input" value="">
+
+          <div id="student-fields">
+            <input type="number" name="graduationYear" id="graduationYear" placeholder="Graduation Year" min="2024" max="2035" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
+            <select name="studentStatus" id="studentStatus" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
+              <option value="" disabled selected>Student Status</option>
+              <option value="Freshman">Freshman</option>
+              <option value="Sophomore">Sophomore</option>
+              <option value="Junior">Junior</option>
+              <option value="Senior">Senior</option>
+            </select>
+            <input type="text" name="inviteCode" id="inviteCode" placeholder="Family Invite Code (optional)" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500">
+          </div>
           <input type="text" name="primaryFinancialGoal" placeholder="Primary Financial Goal (e.g., savings)" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" required>
           <label id="admin-code-label" for="admin-code" class="block text-zinc-300 text-sm font-medium mb-1.5" style="display:none">🔐 Super Duper Secret Admin Mode</label>
           <input type="password" id="admin-code" name="adminCode" placeholder="Admin Code" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 mb-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500" style="display:none">
@@ -259,19 +270,73 @@
       } catch (err) { /* stay on landing */ }
     }
 
+    // ── Role selector (Parent vs Child/Student) ──────────────────
+    const roleInput = document.getElementById('role-input');
+    const studentFields = document.getElementById('student-fields');
+    const gradYearInput = document.getElementById('graduationYear');
+    const studentStatusInput = document.getElementById('studentStatus');
+    const inviteCodeInput = document.getElementById('inviteCode');
+    const roleButtons = document.querySelectorAll('#role-toggle .role-option');
+
+    function applyRole(role) {
+      roleInput.value = role;
+      roleButtons.forEach(btn => {
+        const active = btn.dataset.role === role;
+        btn.classList.toggle('bg-white', active);
+        btn.classList.toggle('text-zinc-950', active);
+        btn.classList.toggle('border-white', active);
+        btn.classList.toggle('bg-zinc-800', !active);
+        btn.classList.toggle('text-zinc-300', !active);
+        btn.classList.toggle('border-zinc-700', !active);
+      });
+
+      if (role === 'child') {
+        studentFields.style.display = '';
+        gradYearInput.required = true;
+        studentStatusInput.required = true;
+      } else {
+        // Parent: hide and reset student-only fields so nothing is submitted.
+        studentFields.style.display = 'none';
+        gradYearInput.required = false;
+        studentStatusInput.required = false;
+        gradYearInput.value = '';
+        studentStatusInput.selectedIndex = 0;
+        inviteCodeInput.value = '';
+      }
+    }
+
+    roleButtons.forEach(btn => {
+      btn.addEventListener('click', () => applyRole(btn.dataset.role));
+    });
+
+    // Default: nothing selected — hide student fields and drop their required
+    // flags so the browser doesn't block submit on hidden controls.
+    studentFields.style.display = 'none';
+    gradYearInput.required = false;
+    studentStatusInput.required = false;
+
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(e.target);
+      const role = formData.get('role');
+      if (role !== 'parent' && role !== 'child') {
+        showStatus('Please select whether you are a parent or a child/student', true, 'status-message');
+        return;
+      }
       const data = {
         username: formData.get('username'),
         password: formData.get('password'),
         email: formData.get('email'),
         schoolName: formData.get('schoolName'),
-        graduationYear: parseInt(formData.get('graduationYear')),
-        studentStatus: formData.get('studentStatus'),
         primaryFinancialGoal: formData.get('primaryFinancialGoal'),
+        role,
         adminCode: formData.get('adminCode') || ''
       };
+      if (role === 'child') {
+        data.graduationYear = parseInt(formData.get('graduationYear'));
+        data.studentStatus = formData.get('studentStatus');
+        data.inviteCode = formData.get('inviteCode') || null;
+      }
       try {
         const response = await fetch('/api/auth/register', {
           method: 'POST',
