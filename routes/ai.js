@@ -31,7 +31,40 @@ function safeRead(filePath, fallback) {
   }
 }
 
-function buildSystemPrompt(user, expenses, userGoals) {
+function detectRecurring(userExpenses) {
+  const SCANNED = ['Subscriptions','Entertainment','Health','Shopping','Other'];
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 180);
+  const cutoffStr = cutoff.toISOString().slice(0,10);
+
+  const filtered = userExpenses.filter(e =>
+    SCANNED.includes(e.category) && e.date >= cutoffStr
+  );
+
+  const groups = {};
+  filtered.forEach(e => {
+    const key = e.merchant.toLowerCase();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(e);
+  });
+
+  const results = [];
+  Object.entries(groups).forEach(([key, exps]) => {
+    const months = new Set(exps.map(e => e.date.slice(0,7)));
+    if (months.size >= 2) {
+      const avg = exps.reduce((s,e) => s + Number(e.amount), 0) / exps.length;
+      results.push({
+        merchant: exps[0].merchant,
+        monthlyAmount: Math.round(avg * 100) / 100,
+        monthCount: months.size
+      });
+    }
+  });
+
+  return results.sort((a,b) => b.monthCount - a.monthCount);
+}
+
+function buildSystemPrompt(user, expenses, userGoals, recurringList) {
   const userExpenses = expenses.filter(e => e.userId === user.id);
   const byCategory = {};
   let totalSpent = 0;
@@ -65,6 +98,86 @@ function buildSystemPrompt(user, expenses, userGoals) {
     goalsBlock = `Their active savings goals:\n${goalLines}`;
   }
 
+  // Build financial profile context
+  let profileBlock;
+  const fp = user.financialProfile;
+
+  if (!fp || !fp.surveyCompletedAt) {
+    profileBlock = `This user has NOT completed their financial profile survey yet.
+Important: somewhere in your response, gently remind them that completing their
+profile at /onboarding.html will help you give them much more personalized advice.`;
+  } else {
+    const livingMap = {
+      'with_family_no_bills': 'lives with family and pays no rent or bills',
+      'with_family_contributes': 'lives with family and contributes to some bills',
+      'renting': 'rents their own place',
+      'owns_home': 'owns their home',
+      'other': 'has another living situation'
+    };
+    const foodMap = {
+      'cooks': 'mostly cooks at home',
+      'eats_out': 'mostly buys fast food or eats out',
+      'covered': 'has food covered for them (family, meal plan, etc.)',
+      'mixed': 'mixes cooking and eating out'
+    };
+    const styleMap = {
+      'overspender': 'tends to overspend — money goes fast',
+      'balanced': 'is pretty balanced — tries to stay within limits',
+      'saver': 'is a natural saver — rarely overspends'
+    };
+    const intentMap = {
+      'stop_overspending': 'stop overspending and stick to a budget',
+      'save_for_goal': 'save up for a specific goal faster',
+      'understand_spending': 'understand where their money is actually going',
+      'build_habits': 'build better long-term financial habits',
+      'manage_family': 'manage shared or family expenses'
+    };
+
+    const billsLine = fp.paysRecurringBills && fp.billTypes && fp.billTypes.length > 0
+      ? `They pay these recurring bills: ${fp.billTypes.join(', ')}.`
+      : 'They do not pay any recurring bills.';
+
+    const incomeLine = fp.hasIncome && fp.monthlyIncome
+      ? `They earn approximately $${fp.monthlyIncome}/month after tax.`
+      : 'They do not have a job or regular income.';
+
+    const subsLine = fp.hasSubscriptions && fp.subscriptionDetails
+      ? `Their known subscriptions: ${fp.subscriptionDetails}.`
+      : fp.hasSubscriptions === false
+      ? 'They do not pay for any subscriptions.'
+      : 'Their subscription status is unknown.';
+
+    const recurringLine = recurringList && recurringList.length > 0
+      ? `Detected recurring subscriptions from expense history: ${recurringList.map(r => `${r.merchant} ($${r.monthlyAmount}/mo, seen ${r.monthCount} months)`).join(', ')}.`
+      : 'No recurring subscriptions detected from expense history yet.';
+
+    const goalLine = fp.hasSavingsGoal && fp.savingsGoalName
+      ? `They are actively saving for: "${fp.savingsGoalName}" with a target of $${fp.savingsGoalTarget}.`
+      : 'They do not currently have a savings goal set.';
+
+    profileBlock = `
+FINANCIAL PROFILE (from onboarding survey — use this to personalize every response):
+- Living situation: ${livingMap[fp.livingSituation] || fp.livingSituation}
+- ${billsLine}
+- ${incomeLine}
+- Food situation: ${foodMap[fp.foodSituation] || fp.foodSituation}
+- ${subsLine}
+- ${recurringLine}
+- ${goalLine}
+- Spending style: ${styleMap[fp.spendingStyle] || fp.spendingStyle}
+- Primary intent with Spendly: ${intentMap[fp.primaryIntent] || fp.primaryIntent}
+- Survey completed: ${new Date(fp.surveyCompletedAt).toLocaleDateString()}
+
+Use this profile actively. Reference specific details when relevant. For example:
+- If they earn $X/month, use that as the baseline for savings rate recommendations
+- If they cook at home and have a spike in food spending, that IS an anomaly worth flagging
+- If they eat out frequently, higher food spend is expected — don't flag it
+- If they are an overspender, give firmer and more direct advice
+- If they are a natural saver, be more encouraging and focus on goal acceleration
+- If they have a savings goal, reference it when discussing spending priorities
+`.trim();
+  }
+
   return `You are Spendly's AI Coach — a warm, encouraging friend who \
 helps a student named ${user.username} manage their money. You talk like \
 a slightly older sibling or a good RA: supportive, casual, never preachy, \
@@ -77,6 +190,8 @@ About this student:
 - Top spending categories this period: ${topCategories}
 - Total spent this period: $${totalSpent.toFixed(2)}
 - ${goalsBlock}
+
+${profileBlock}
 
 Your style:
 - Keep responses to 2–3 sentences typically.
@@ -119,7 +234,9 @@ router.post('/coach', requireAuth, async (req, res) => {
     const goals = safeRead(GOALS_PATH, []);
     const userGoals = goals.filter(g => g.userId === user.id);
 
-    const systemPrompt = buildSystemPrompt(user, expenses, userGoals);
+    const userExpenses = expenses.filter(e => e.userId === user.id);
+    const recurring = detectRecurring(userExpenses);
+    const systemPrompt = buildSystemPrompt(user, expenses, userGoals, recurring);
     const fullMessages = [
       { role: 'system', content: systemPrompt },
       ...messages

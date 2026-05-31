@@ -139,6 +139,14 @@
 
   addBubble('assistant', "Hey! I'm your Spendly Coach. What's on your mind?");
 
+  // Check for prefilled prompt from recurring page
+  const prefill = localStorage.getItem('coach-prefill');
+  if (prefill) {
+    localStorage.removeItem('coach-prefill');
+    input.value = prefill;
+    sendMessage();
+  }
+
   if (messages.length > 1 && suggestionChips) suggestionChips.style.display = 'none';
 
   if (suggestionChips) {
