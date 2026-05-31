@@ -7,7 +7,7 @@
     user = await res.json();
   } catch (e) { window.location.href = 'index.html'; return; }
 
-  if (user.onboardingComplete === false) {
+  if (!user.financialProfile || !user.financialProfile.surveyCompletedAt) {
     window.location.href = '/onboarding.html';
     return;
   }
