@@ -31,6 +31,47 @@ function safeRead(filePath, fallback) {
   }
 }
 
+async function gradeAllocation(save, spend, give, allowanceAmount, groqClient) {
+  const gradingPrompt = `You are a friendly financial coach for a student. \
+A child has received an allowance of $${allowanceAmount} and wants to split it:
+- Save: ${save}% ($${(allowanceAmount * save / 100).toFixed(2)})
+- Spend: ${spend}% ($${(allowanceAmount * spend / 100).toFixed(2)})
+- Give: ${give}% ($${(allowanceAmount * give / 100).toFixed(2)})
+
+Grade this allocation from A to F using these criteria:
+- A: Save >= 30% AND Give >= 10% — excellent balance
+- B: Save >= 20% AND Give >= 5% — good habits
+- C: Save >= 10% OR Give >= 5% — developing awareness
+- D: Save < 10% AND Give < 5% AND Spend > 80% — needs improvement
+- F: Save === 0 AND Give === 0 — spending everything
+
+Respond ONLY with a valid JSON object, no markdown, no explanation outside the JSON:
+{
+  "grade": "A",
+  "feedback": "2-3 sentences of encouraging, age-appropriate feedback explaining the grade. Be warm and specific about the numbers. For C/D/F, gently suggest what to change."
+}`;
+
+  const response = await groqClient.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{ role: 'user', content: gradingPrompt }],
+    temperature: 0.4,
+    max_tokens: 300
+  });
+
+  const raw     = response.choices[0]?.message?.content || '';
+  const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  const parsed  = JSON.parse(cleaned);
+
+  if (!['A', 'B', 'C', 'D', 'F'].includes(parsed.grade)) {
+    throw new Error('Invalid grade returned by AI');
+  }
+  if (!parsed.feedback || typeof parsed.feedback !== 'string') {
+    throw new Error('Invalid feedback returned by AI');
+  }
+
+  return { grade: parsed.grade, feedback: parsed.feedback };
+}
+
 function detectRecurring(userExpenses, cancelledSubs = []) {
   const SCANNED = ['Subscriptions','Entertainment','Health','Shopping','Other'];
   const cutoff = new Date();
@@ -292,6 +333,38 @@ router.post('/coach', requireAuth, async (req, res) => {
   }
 });
 
+// POST /api/ai/grade-allocation
+router.post('/grade-allocation', requireAuth, async (req, res) => {
+  try {
+    const { save, spend, give, allowanceAmount } = req.body;
+
+    if (typeof save !== 'number' || save < 0 ||
+        typeof spend !== 'number' || spend < 0 ||
+        typeof give !== 'number' || give < 0) {
+      return res.status(400).json({ error: 'save, spend, and give must be non-negative numbers' });
+    }
+    if (save + spend + give !== 100) {
+      return res.status(400).json({ error: 'save + spend + give must equal exactly 100' });
+    }
+    if (typeof allowanceAmount !== 'number' || allowanceAmount <= 0) {
+      return res.status(400).json({ error: 'allowanceAmount must be a positive number' });
+    }
+
+    let result;
+    try {
+      result = await gradeAllocation(save, spend, give, allowanceAmount, groq);
+    } catch (e) {
+      console.error('Grading AI error:', e);
+      return res.status(502).json({ error: 'AI returned invalid response' });
+    }
+
+    return res.json({ grade: result.grade, feedback: result.feedback });
+  } catch (err) {
+    console.error('grade-allocation error:', err);
+    return res.status(500).json({ error: 'Grading unavailable: ' + err.message });
+  }
+});
+
 const ALLOWED_CATEGORIES = ['Food', 'Groceries', 'Coffee', 'Transportation', 'Entertainment', 'Shopping', 'Subscriptions', 'Other'];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -384,3 +457,4 @@ router.use((err, req, res, next) => {
 });
 
 module.exports = router;
+module.exports.gradeAllocation = gradeAllocation;
