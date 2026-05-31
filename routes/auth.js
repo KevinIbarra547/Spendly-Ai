@@ -114,6 +114,7 @@ router.post('/register', async (req, res) => {
       otherBills: 0,
       diningBudget: 0,
       onboardingComplete: false,
+      cancelledSubscriptions: [],
       financialProfile: {
         livingSituation: null,
         paysRecurringBills: null,
