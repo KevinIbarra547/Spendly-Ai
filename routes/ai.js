@@ -31,7 +31,7 @@ function safeRead(filePath, fallback) {
   }
 }
 
-function detectRecurring(userExpenses) {
+function detectRecurring(userExpenses, cancelledSubs = []) {
   const SCANNED = ['Subscriptions','Entertainment','Health','Shopping','Other'];
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 180);
@@ -56,7 +56,8 @@ function detectRecurring(userExpenses) {
       results.push({
         merchant: exps[0].merchant,
         monthlyAmount: Math.round(avg * 100) / 100,
-        monthCount: months.size
+        monthCount: months.size,
+        isCancelled: cancelledSubs.includes(key)
       });
     }
   });
@@ -147,9 +148,24 @@ profile at /onboarding.html will help you give them much more personalized advic
       ? 'They do not pay for any subscriptions.'
       : 'Their subscription status is unknown.';
 
-    const recurringLine = recurringList && recurringList.length > 0
-      ? `Detected recurring subscriptions from expense history: ${recurringList.map(r => `${r.merchant} ($${r.monthlyAmount}/mo, seen ${r.monthCount} months)`).join(', ')}.`
-      : 'No recurring subscriptions detected from expense history yet.';
+    const activeRecurring = recurringList
+      ? recurringList.filter(r => !r.isCancelled)
+      : [];
+    const cancelledRecurring = recurringList
+      ? recurringList.filter(r => r.isCancelled)
+      : [];
+
+    const recurringLine = activeRecurring.length > 0
+      ? `Detected active recurring subscriptions: ${activeRecurring.map(r =>
+          `${r.merchant} ($${r.monthlyAmount}/mo, seen ${r.monthCount} months)`
+        ).join(', ')}.`
+      : 'No active recurring subscriptions detected from expense history yet.';
+
+    const cancelledLine = cancelledRecurring.length > 0
+      ? `Subscriptions the user has already marked as cancelled: ${cancelledRecurring.map(r =>
+          r.merchant
+        ).join(', ')}. Do not suggest cancelling these — the user is already handling them.`
+      : '';
 
     const goalLine = fp.hasSavingsGoal && fp.savingsGoalName
       ? `They are actively saving for: "${fp.savingsGoalName}" with a target of $${fp.savingsGoalTarget}.`
@@ -162,7 +178,7 @@ FINANCIAL PROFILE (from onboarding survey — use this to personalize every resp
 - ${incomeLine}
 - Food situation: ${foodMap[fp.foodSituation] || fp.foodSituation}
 - ${subsLine}
-- ${recurringLine}
+- ${recurringLine}${cancelledLine ? '\n- ' + cancelledLine : ''}
 - ${goalLine}
 - Spending style: ${styleMap[fp.spendingStyle] || fp.spendingStyle}
 - Primary intent with Spendly: ${intentMap[fp.primaryIntent] || fp.primaryIntent}
@@ -235,7 +251,8 @@ router.post('/coach', requireAuth, async (req, res) => {
     const userGoals = goals.filter(g => g.userId === user.id);
 
     const userExpenses = expenses.filter(e => e.userId === user.id);
-    const recurring = detectRecurring(userExpenses);
+    const cancelledSubs = user.cancelledSubscriptions || [];
+    const recurring = detectRecurring(userExpenses, cancelledSubs);
     const systemPrompt = buildSystemPrompt(user, expenses, userGoals, recurring);
     const fullMessages = [
       { role: 'system', content: systemPrompt },
