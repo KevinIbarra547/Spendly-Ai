@@ -110,6 +110,43 @@
       if (fullResponse) {
         messages.push({ role: 'assistant', content: fullResponse });
       }
+
+      // Check if the response contains a LOG_EXPENSE instruction
+      const logMatch = fullResponse.match(/LOG_EXPENSE:(\{[^}]+\})/);
+      if (logMatch) {
+        try {
+          const expenseData = JSON.parse(logMatch[1]);
+          // Remove the JSON line from the displayed bubble
+          assistantBubble.textContent = fullResponse
+            .replace(/LOG_EXPENSE:\{[^}]+\}/, '')
+            .trim();
+
+          // Log the expense via API
+          const logRes = await fetch('/api/expenses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(expenseData)
+          });
+
+          if (logRes.ok) {
+            const successNote = document.createElement('div');
+            successNote.style.cssText =
+              'font-size:11px;color:#4ade80;margin-top:4px;margin-left:4px;' +
+              'display:flex;align-items:center;gap:4px;';
+            successNote.innerHTML =
+              '<svg width="12" height="12" fill="none" viewBox="0 0 24 24" ' +
+              'stroke-width="2" stroke="currentColor">' +
+              '<path stroke-linecap="round" stroke-linejoin="round" ' +
+              'd="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>' +
+              '</svg>' +
+              'Expense logged to your log';
+            assistantBubble.parentElement.appendChild(successNote);
+          }
+        } catch (e) {
+          console.error('Failed to parse or log expense:', e);
+        }
+      }
     } catch (err) {
       assistantBubble.textContent = '⚠️ Network error: ' + err.message;
     } finally {
