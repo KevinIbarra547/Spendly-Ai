@@ -29,6 +29,11 @@ app.use(session({
   }
 }));
 
+// 2.5 DEMO MODE GUARD — intercepts writes from demo accounts before any
+// route handler can persist data. Mount before all /api/* route handlers.
+const { demoModeGuard } = require('./middleware/auth');
+app.use('/api', demoModeGuard);
+
 // 3. API ROUTES THIRD (BEFORE static, so /api/* doesn't fall through)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
