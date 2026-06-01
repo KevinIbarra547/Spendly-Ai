@@ -5,9 +5,27 @@ const fs = require('fs');
 const path = require('path');
 const { requireAuth, requireParent, requireChild } = require('../middleware/auth');
 
-const FAMILIES_PATH = path.join(__dirname, '..', 'data', 'families.json');
-const USERS_PATH = path.join(__dirname, '..', 'data', 'users.json');
-const GOALS_PATH = path.join(__dirname, '..', 'data', 'goals.json');
+const FAMILIES_PATH  = path.join(__dirname, '..', 'data', 'families.json');
+const USERS_PATH     = path.join(__dirname, '..', 'data', 'users.json');
+const GOALS_PATH     = path.join(__dirname, '..', 'data', 'goals.json');
+const RECURRING_PATH = path.join(__dirname, '..', 'data', 'recurringAllowances.json');
+
+function readRecurring() {
+  try {
+    return JSON.parse(fs.readFileSync(RECURRING_PATH, 'utf8'));
+  } catch (e) { return []; }
+}
+
+function writeRecurring(data) {
+  fs.writeFileSync(RECURRING_PATH, JSON.stringify(data, null, 2), 'utf8');
+}
+
+function calculateNextSendAt(recurrence) {
+  const next = new Date();
+  if (recurrence === 'weekly')  next.setDate(next.getDate() + 7);
+  if (recurrence === 'monthly') next.setMonth(next.getMonth() + 1);
+  return next.toISOString();
+}
 
 function readFamilies() {
   try {
@@ -177,6 +195,29 @@ router.post('/allowance', requireAuth, requireParent, (req, res) => {
 
     writeUsers(users);
 
+    // For weekly/monthly, also create a recurring schedule entry (deduped per
+    // parent-child-recurrence trio so resending the same cadence is idempotent).
+    if (recurrence === 'weekly' || recurrence === 'monthly') {
+      const recurring = readRecurring();
+      const exists = recurring.find(r =>
+        r.parentId === req.session.userId &&
+        r.childId === childId &&
+        r.recurrence === recurrence
+      );
+      if (!exists) {
+        recurring.push({
+          id: 'ra_' + Date.now(),
+          parentId: req.session.userId,
+          childId,
+          amount: Number(amount),
+          recurrence,
+          nextSendAt: calculateNextSendAt(recurrence),
+          createdAt: new Date().toISOString()
+        });
+        writeRecurring(recurring);
+      }
+    }
+
     return res.status(200).json({
       message: 'Allowance sent.',
       allowanceId: entry.id,
@@ -185,6 +226,35 @@ router.post('/allowance', requireAuth, requireParent, (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/family/allowance/recurring — parent's scheduled recurring allowances.
+router.get('/allowance/recurring', requireAuth, requireParent, (req, res) => {
+  try {
+    const recurring = readRecurring();
+    return res.json(recurring.filter(r => r.parentId === req.session.userId));
+  } catch (err) {
+    console.error('list recurring error:', err);
+    return res.status(500).json({ error: 'Failed to read recurring allowances' });
+  }
+});
+
+// DELETE /api/family/allowance/recurring/:id — cancel a schedule.
+router.delete('/allowance/recurring/:id', requireAuth, requireParent, (req, res) => {
+  try {
+    let recurring = readRecurring();
+    const entry = recurring.find(r => r.id === req.params.id);
+    if (!entry) return res.status(404).json({ error: 'Schedule not found' });
+    if (entry.parentId !== req.session.userId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    recurring = recurring.filter(r => r.id !== req.params.id);
+    writeRecurring(recurring);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('delete recurring error:', err);
+    return res.status(500).json({ error: 'Failed to delete schedule' });
   }
 });
 
@@ -262,7 +332,7 @@ router.post('/allocate', requireAuth, requireChild, async (req, res) => {
     child.allocations.savingsGoal += savingsGoalAmount;
     child.allocations.food += foodAmount;
     child.allocations.freeSpending += freeSpendingAmount;
-    child.pendingAllowance = (child.pendingAllowance || 0) - entry.amount;
+    child.pendingAllowance = Math.max(0, (child.pendingAllowance || 0) - entry.amount);
 
     entry.allocatedAt = new Date().toISOString();
     entry.allocation = {
