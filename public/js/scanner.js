@@ -157,12 +157,27 @@
     }
   });
 
+  function mapScannerCategory(cat) {
+    const map = {
+      'Transportation': 'Transport',
+      'Subscriptions': 'Other',
+      'Health': 'Health',
+      'Food': 'Food',
+      'Groceries': 'Groceries',
+      'Coffee': 'Coffee',
+      'Entertainment': 'Entertainment',
+      'Shopping': 'Shopping',
+      'Other': 'Other'
+    };
+    return map[cat] || 'Other';
+  }
+
   saveBtn.addEventListener('click', async () => {
     const expense = {
       amount: parseFloat(document.getElementById('result-amount').value),
       merchant: document.getElementById('result-merchant').value.trim(),
       date: document.getElementById('result-date').value,
-      category: document.getElementById('result-category').value,
+      category: mapScannerCategory(document.getElementById('result-category').value),
       notes: document.getElementById('result-notes').value.trim() || 'Scanned receipt'
     };
     if (!expense.amount || !expense.merchant || !expense.date || !expense.category) {
@@ -172,9 +187,11 @@
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
     try {
+      console.log('Saving expense:', JSON.stringify(expense));
       const res = await fetch('/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(expense)
       });
       if (!res.ok) {
@@ -182,8 +199,10 @@
         showStatus(err.error || 'Save failed', 'error');
         return;
       }
-      showStatus('Expense saved!', 'success');
-      setTimeout(reset, 1500);
+      showStatus('Expense saved! Redirecting to your log...', 'success');
+      setTimeout(() => {
+        window.location.href = '/expenses.html';
+      }, 1500);
     } catch (err) {
       showStatus('Network error: ' + err.message, 'error');
     } finally {
