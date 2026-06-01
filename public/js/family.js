@@ -296,6 +296,76 @@
       noteEl.style.display = 'block';
       if (noteTextEl) noteTextEl.textContent = data.familyNote.message || '';
     }
+
+    // Clear any stale AI suggestion banner from a previous render
+    const stale = document.getElementById('ai-suggestion-banner');
+    if (stale) stale.remove();
+
+    // Only fetch an AI suggestion when there's something to allocate.
+    // Skipping when pendingAllowance === 0 also preserves the dataset.locked
+    // state on the submit button after a confirmed A/B grade.
+    if ((data.pendingAllowance || 0) > 0) {
+      fetchAISuggestion();
+    }
+  }
+
+  async function fetchAISuggestion() {
+    const submitBtn = document.getElementById('submit-allocation-btn');
+    if (submitBtn) {
+      submitBtn.textContent = 'Getting AI suggestion…';
+      submitBtn.disabled    = true;
+    }
+
+    try {
+      const res = await fetch('/api/ai/suggest-allocation', { credentials: 'include' });
+      if (!res.ok) throw new Error('Suggestion failed');
+      const suggestion = await res.json();
+
+      const saveSlider  = document.getElementById('slider-save');
+      const spendSlider = document.getElementById('slider-spend');
+      const giveSlider  = document.getElementById('slider-give');
+      if (saveSlider && spendSlider && giveSlider) {
+        saveSlider.value  = suggestion.save;
+        spendSlider.value = suggestion.spend;
+        giveSlider.value  = suggestion.give;
+        updateSliderDisplay();
+      }
+
+      const allocationSection = document.getElementById('allocation-section');
+      if (allocationSection && suggestion.reasoning) {
+        const existing = document.getElementById('ai-suggestion-banner');
+        if (existing) existing.remove();
+
+        const banner = document.createElement('div');
+        banner.id = 'ai-suggestion-banner';
+        banner.style.cssText =
+          'background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);' +
+          'border-radius:10px;padding:12px 14px;font-size:12px;color:#a5b4fc;' +
+          'margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;';
+        banner.innerHTML =
+          '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" ' +
+          'stroke-width="1.5" stroke="currentColor" style="flex-shrink:0;margin-top:1px">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" ' +
+          'd="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 ' +
+          '12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 ' +
+          '0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/>' +
+          '</svg>' +
+          '<span><strong>Buddy suggests:</strong> ' + escapeHtml(suggestion.reasoning) +
+          ' Feel free to adjust the sliders.</span>';
+        allocationSection.insertBefore(banner, allocationSection.firstChild);
+      }
+
+      if (submitBtn) {
+        submitBtn.textContent = 'Submit allocation →';
+        submitBtn.disabled    = false;
+      }
+    } catch (err) {
+      console.error('AI suggestion failed:', err);
+      if (submitBtn) {
+        submitBtn.textContent = 'Submit allocation →';
+        submitBtn.disabled    = false;
+      }
+    }
   }
 
   // Slider total logic — keeps running dollar totals and validates 100%
@@ -495,8 +565,13 @@
         body: JSON.stringify({ childId, amount, recurrence })
       });
       if (res.ok) {
-        closeAllowanceModal();
-        await loadParentDashboard();
+        const sendBtn = document.querySelector('[onclick="doSendAllowance()"]');
+        if (sendBtn) sendBtn.textContent = 'Sent! ✓';
+        setTimeout(async () => {
+          if (sendBtn) sendBtn.textContent = 'Send →';
+          closeAllowanceModal();
+          await loadParentDashboard();
+        }, 800);
       } else {
         const err = await res.json();
         alert(err.error || 'Failed to send allowance');

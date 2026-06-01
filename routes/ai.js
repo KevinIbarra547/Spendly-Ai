@@ -76,6 +76,87 @@ Respond ONLY with a valid JSON object, no markdown, no code fences:
   return { grade: parsed.grade, feedback: parsed.feedback };
 }
 
+async function suggestAllocation(user, expenses, goals) {
+  const userExpenses = expenses.filter(e => e.userId === user.id);
+  const totalSpent = userExpenses.reduce((s, e) => s + Number(e.amount), 0);
+
+  const byCategory = {};
+  userExpenses.forEach(e => {
+    const cat = e.category || 'Other';
+    byCategory[cat] = (byCategory[cat] || 0) + Number(e.amount);
+  });
+  const topCats = Object.entries(byCategory)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([cat, amt]) => `${cat} ($${amt.toFixed(2)})`)
+    .join(', ') || 'no spending logged yet';
+
+  const userGoals = goals.filter(g => g.userId === user.id);
+  const goalsLine = userGoals.length > 0
+    ? userGoals.map(g => `"${g.title}" ($${g.currentSaved}/$${g.targetAmount})`).join(', ')
+    : 'no savings goals set';
+
+  const spendingStyle = user.financialProfile?.spendingStyle || 'balanced';
+  const primaryIntent = user.financialProfile?.primaryIntent || 'understand_spending';
+
+  const suggestionPrompt = `You are a financial coach for a student.
+Based on this student's profile, suggest how they should split their allowance
+into Save, Spend, and Give percentages.
+
+Student profile:
+- Spending style: ${spendingStyle}
+- Primary goal with Spendly: ${primaryIntent}
+- Top spending categories: ${topCats}
+- Total spent so far: $${totalSpent.toFixed(2)}
+- Savings goals: ${goalsLine}
+
+Rules for your suggestion:
+- The three percentages MUST add up to exactly 100
+- Save should be at least 10% minimum
+- Give should be at least 5% minimum
+- Adjust based on their spending style:
+  * overspender: higher save (35%+), lower spend
+  * balanced: moderate save (25-30%)
+  * saver: can suggest higher save (40%+)
+- If they have active savings goals, suggest higher save %
+
+Respond ONLY with valid JSON, no markdown, no explanation:
+{
+  "save": 30,
+  "spend": 60,
+  "give": 10,
+  "reasoning": "One sentence explaining why you chose this split"
+}`;
+
+  const response = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{ role: 'user', content: suggestionPrompt }],
+    temperature: 0.3,
+    max_tokens: 200
+  });
+
+  const raw     = response.choices[0]?.message?.content || '';
+  const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  const parsed  = JSON.parse(cleaned);
+
+  const { save, spend, give } = parsed;
+  if (
+    typeof save !== 'number' || typeof spend !== 'number' ||
+    typeof give !== 'number' || save + spend + give !== 100 ||
+    save < 0 || spend < 0 || give < 0
+  ) {
+    return { save: 30, spend: 60, give: 10,
+      reasoning: 'A balanced split to get you started.' };
+  }
+
+  return {
+    save: parsed.save,
+    spend: parsed.spend,
+    give: parsed.give,
+    reasoning: parsed.reasoning || ''
+  };
+}
+
 function detectRecurring(userExpenses, cancelledSubs = []) {
   const SCANNED = ['Subscriptions','Entertainment','Health','Shopping','Other'];
   const cutoff = new Date();
@@ -337,6 +418,28 @@ router.post('/coach', requireAuth, async (req, res) => {
   }
 });
 
+// GET /api/ai/suggest-allocation — AI pre-fill for the child's allocation sliders.
+// Always returns a valid suggestion (falls back to 30/60/10 on any failure).
+router.get('/suggest-allocation', requireAuth, async (req, res) => {
+  try {
+    const users = safeRead(USERS_PATH, []);
+    const user = users.find(u => u.id === req.session.userId);
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
+    const expenses = safeRead(EXPENSES_PATH, []);
+    const goals    = safeRead(GOALS_PATH, []);
+
+    const suggestion = await suggestAllocation(user, expenses, goals);
+    return res.json(suggestion);
+  } catch (err) {
+    console.error('Suggest allocation error:', err);
+    return res.json({
+      save: 30, spend: 60, give: 10,
+      reasoning: 'A solid starting point — save 30%, spend 60%, give 10%.'
+    });
+  }
+});
+
 // POST /api/ai/grade-allocation — grade a proposed Save/Spend/Give split.
 router.post('/grade-allocation', requireAuth, async (req, res) => {
   try {
@@ -457,4 +560,4 @@ router.use((err, req, res, next) => {
   next(err);
 });
 
-module.exports = { router, gradeAllocation };
+module.exports = { router, gradeAllocation, suggestAllocation };
