@@ -160,3 +160,59 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 });
 
 init();
+
+document.getElementById('update-password-btn')
+  .addEventListener('click', async () => {
+  const current = document.getElementById('current-password').value;
+  const newPw = document.getElementById('new-password').value;
+  const confirm = document.getElementById('confirm-password').value;
+  const statusEl = document.getElementById('password-status');
+
+  if (!current || !newPw || !confirm) {
+    statusEl.textContent = 'Please fill in all three fields.';
+    statusEl.className = 'mt-3 text-sm text-red-400';
+    statusEl.style.display = 'block';
+    return;
+  }
+  if (newPw !== confirm) {
+    statusEl.textContent = 'New passwords do not match.';
+    statusEl.className = 'mt-3 text-sm text-red-400';
+    statusEl.style.display = 'block';
+    return;
+  }
+  if (newPw.length < 8) {
+    statusEl.textContent = 'New password must be at least 8 characters.';
+    statusEl.className = 'mt-3 text-sm text-red-400';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        currentPassword: current,
+        newPassword: newPw
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      statusEl.textContent = 'Password updated successfully!';
+      statusEl.className = 'mt-3 text-sm text-green-400';
+      document.getElementById('current-password').value = '';
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-password').value = '';
+    } else {
+      statusEl.textContent = data.error || 'Failed to update password.';
+      statusEl.className = 'mt-3 text-sm text-red-400';
+    }
+    statusEl.style.display = 'block';
+    setTimeout(() => statusEl.style.display = 'none', 4000);
+  } catch(e) {
+    statusEl.textContent = 'Network error.';
+    statusEl.className = 'mt-3 text-sm text-red-400';
+    statusEl.style.display = 'block';
+  }
+});

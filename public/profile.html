@@ -102,6 +102,27 @@
         </div>
       </div>
 
+      <!-- Security / Change password card -->
+      <div class="card" style="margin-top:24px">
+        <h2 class="t-h3" style="margin-bottom:4px">Security</h2>
+        <p style="color:var(--fg3);font-size:13px;margin-bottom:16px">Change password</p>
+
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <input type="password" id="current-password" class="input-field"
+            placeholder="Current password" autocomplete="current-password">
+          <input type="password" id="new-password" class="input-field"
+            placeholder="New password (min 8 characters)" autocomplete="new-password">
+          <input type="password" id="confirm-password" class="input-field"
+            placeholder="Confirm new password" autocomplete="new-password">
+        </div>
+
+        <div id="password-status" style="display:none"></div>
+
+        <div style="margin-top:16px;display:flex;justify-content:flex-end">
+          <button id="update-password-btn" class="btn-primary">Update password</button>
+        </div>
+      </div>
+
       <!-- Logout -->
       <div class="mt-6 flex justify-end">
         <button id="logout-btn" class="text-red-400 hover:text-red-300 text-sm transition-colors">
