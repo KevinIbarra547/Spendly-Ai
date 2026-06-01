@@ -11,3 +11,8 @@ public/uploads/receipts/*
 !public/uploads/pfps/.gitkeep
 !public/uploads/pfps/default.png
 !public/uploads/receipts/.gitkeep
+data/recurringAllowances.json
+data/users.json
+data/expenses.json
+data/goals.json
+data/families.json
