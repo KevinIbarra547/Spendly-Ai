@@ -474,6 +474,60 @@ router.delete('/note', requireAuth, requireParent, (req, res) => {
   }
 });
 
+// POST /api/family/invite — let an existing logged-in user join a family
+// at runtime by entering an invite code. (Registration also accepts an
+// invite code; this route is for users created before the family schema
+// landed or for re-linking.)
+router.post('/invite', requireAuth, (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({ error: 'Invite code required' });
+    }
+    const normalized = code.trim().toUpperCase();
+
+    const users = readUsers();
+    const idx = users.findIndex(u => u.id === req.session.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+    if (users[idx].familyId) {
+      return res.status(400).json({ error: 'You are already in a family group' });
+    }
+
+    const families = readFamilies();
+    const family = families.find(f => f.inviteCode && f.inviteCode.toUpperCase() === normalized);
+    if (!family) {
+      return res.status(404).json({ error: 'Invalid invite code' });
+    }
+
+    // Link the user as a child of this family group.
+    users[idx].role     = 'child';
+    users[idx].familyId = family.id;
+    users[idx].linkedAt = new Date().toISOString();
+    users[idx].inviteCode = normalized;
+    if (users[idx].pendingAllowance === undefined) users[idx].pendingAllowance = 0;
+    if (!users[idx].allocations) {
+      users[idx].allocations = { savingsGoal: 0, food: 0, freeSpending: 0 };
+    }
+    if (!Array.isArray(users[idx].allowanceHistory)) users[idx].allowanceHistory = [];
+
+    if (!Array.isArray(family.childIds)) family.childIds = [];
+    if (!family.childIds.includes(users[idx].id)) family.childIds.push(users[idx].id);
+
+    writeUsers(users);
+    writeFamilies(families);
+
+    return res.json({
+      success: true,
+      role: 'child',
+      familyId: family.id,
+      groupName: family.name || null
+    });
+  } catch (err) {
+    console.error('Join family error:', err);
+    return res.status(500).json({ error: 'Failed to join family' });
+  }
+});
+
 // GET /api/family/invite — the parent's current invite code.
 router.get('/invite', requireAuth, requireParent, (req, res) => {
   try {

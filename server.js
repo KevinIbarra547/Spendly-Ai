@@ -36,6 +36,49 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/family', require('./routes/family'));
 
+// Idempotent boot-time migration: bootstrap data/families.json if it's
+// missing (it's gitignored), and backfill family-related fields on legacy
+// user records that predate CP-F01. Field names match Kayden's CP-F01/F02
+// schema (role, familyId, allocations) — not the older spec draft names.
+(function migrateFamilyFields() {
+  try {
+    const USERS_PATH    = path.join(__dirname, 'data', 'users.json');
+    const FAMILIES_PATH = path.join(__dirname, 'data', 'families.json');
+
+    if (!fs.existsSync(FAMILIES_PATH)) {
+      fs.writeFileSync(FAMILIES_PATH, '[]\n', 'utf8');
+      console.log('Migration: created empty data/families.json');
+    }
+
+    const users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf8'));
+    let changed = false;
+    users.forEach(u => {
+      if (u.role             === undefined) { u.role             = null; changed = true; }
+      if (u.familyId         === undefined) { u.familyId         = null; changed = true; }
+      if (u.linkedAt         === undefined) { u.linkedAt         = null; changed = true; }
+      if (u.inviteCode       === undefined) { u.inviteCode       = null; changed = true; }
+      if (u.pendingAllowance === undefined) { u.pendingAllowance = 0;    changed = true; }
+      if (!u.allocations) {
+        u.allocations = { savingsGoal: 0, food: 0, freeSpending: 0 };
+        changed = true;
+      }
+      if (!Array.isArray(u.allowanceHistory)) {
+        u.allowanceHistory = []; changed = true;
+      }
+      if (u.familyNotes === undefined) { u.familyNotes = null; changed = true; }
+      if (!Array.isArray(u.cancelledSubscriptions)) {
+        u.cancelledSubscriptions = []; changed = true;
+      }
+    });
+    if (changed) {
+      fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2), 'utf8');
+      console.log('Migration: backfilled family fields on existing users');
+    }
+  } catch (err) {
+    console.error('Migration error (non-fatal):', err);
+  }
+})();
+
 // 4. Built-in health and config endpoints
 app.get('/api/health', (req, res) => {
   res.status(200).json({ ok: true, startedAt: SERVER_START_ISO });
