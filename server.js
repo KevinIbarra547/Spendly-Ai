@@ -3,6 +3,8 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
+const cron = require('node-cron');
+const { runAllowanceScheduler } = require('./routes/family');
 
 const app = express();
 
@@ -58,6 +60,11 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something broke internally!' });
 });
+
+// 7. Recurring allowance scheduler — catch up any overdue allowances on boot,
+// then check hourly at the top of every hour.
+runAllowanceScheduler();  // catch-up on boot
+cron.schedule('0 * * * *', () => { runAllowanceScheduler(); });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
