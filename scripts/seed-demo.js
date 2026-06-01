@@ -254,9 +254,13 @@ async function seed() {
   // ── WRITE ALL DATA ──
   // Merge with existing users (don't wipe real accounts)
   let users = readJSON(USERS_PATH);
-  // Remove old demo accounts if they exist
+  // Remove old demo accounts if they exist — match BOTH by id and by
+  // username so stale rows from earlier tests with drifted ids don't
+  // shadow the freshly seeded ones (which would leave expenses/goals
+  // orphaned against an inaccessible userId).
   users = users.filter(u =>
-    !['demo-user-001','demo-parent-001','demo-child-001'].includes(u.id)
+    !['demo-user-001','demo-parent-001','demo-child-001'].includes(u.id) &&
+    !['maya','parent_demo','kid_demo'].includes(u.username)
   );
   users.push(demoUser, demoParent, demoChild);
   writeJSON(USERS_PATH, users);
