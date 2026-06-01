@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { requireAuth, requireParent, requireChild } = require('../middleware/auth');
+const { gradeAllocation } = require('./ai');
 
 const FAMILIES_PATH  = path.join(__dirname, '..', 'data', 'families.json');
 const USERS_PATH     = path.join(__dirname, '..', 'data', 'users.json');
@@ -295,31 +296,17 @@ router.post('/allocate', requireAuth, requireChild, async (req, res) => {
     const foodAmount = Math.round((food / 100) * entry.amount * 100) / 100;
     const freeSpendingAmount = Math.round((freeSpending / 100) * entry.amount * 100) / 100;
 
-    // Internal call to the AI grading endpoint (CP-F05). Falls back gracefully
-    // if the endpoint is not available yet so the flow is not blocked.
+    // Grade the proposed split via Groq. Existing API uses savingsGoal/food/
+    // freeSpending; gradeAllocation takes save/spend/give — map directly.
+    // Non-blocking: any failure falls back to a B so allocation still works.
     let grade = 'B';
     let feedback = 'AI grading unavailable — allocation accepted.';
     try {
-      const gradeUrl = `${req.protocol}://${req.get('host')}/api/ai/grade-allocation`;
-      const aiResp = await fetch(gradeUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          childId: req.session.userId,
-          allocation: { savingsGoal, food, freeSpending },
-          allowanceAmount: entry.amount,
-          financialProfile: child.financialProfile
-        })
-      });
-      if (aiResp.ok) {
-        const data = await aiResp.json();
-        if (data && data.grade) {
-          grade = data.grade;
-          feedback = data.feedback;
-        }
-      }
+      const result = await gradeAllocation(savingsGoal, food, freeSpending, entry.amount);
+      grade    = result.grade;
+      feedback = result.feedback;
     } catch (aiErr) {
-      // Keep the fallback grade/feedback.
+      console.error('Grading failed (non-blocking):', aiErr);
     }
 
     const passed = grade === 'A' || grade === 'B';

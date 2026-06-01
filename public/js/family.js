@@ -353,6 +353,12 @@
       return;
     }
 
+    const submitBtn = document.getElementById('submit-allocation-btn');
+    if (submitBtn) {
+      submitBtn.textContent = 'Grading your split…';
+      submitBtn.disabled    = true;
+    }
+
     try {
       const res = await fetch('/api/family/allocate', {
         method:  'POST',
@@ -370,20 +376,35 @@
         const result = await res.json();
         applyGradeUI(result.grade, result.feedback);
 
+        const isBad = ['C', 'D', 'F'].includes(result.grade);
+        if (submitBtn) {
+          submitBtn.textContent = isBad ? 'Adjust and resubmit →' : 'Submitted ✓';
+        }
+
         if (result.passed) {
-          // Update cache and hide pending banner
           if (_childData) _childData.pendingAllowance = result.pendingAllowance || 0;
           const bannerEl = document.getElementById('pending-banner');
           if (bannerEl) bannerEl.style.display = 'none';
-          // Lock submit button — allocation confirmed
-          const submitBtn = document.getElementById('submit-allocation-btn');
           if (submitBtn) submitBtn.dataset.locked = 'true';
         }
+
+        setTimeout(() => {
+          const gradeEl = document.getElementById('grade-section');
+          if (gradeEl) gradeEl.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       } else {
+        if (submitBtn) {
+          submitBtn.textContent = 'Submit allocation →';
+          submitBtn.disabled    = false;
+        }
         const err = await res.json();
         alert(err.error || 'Submission failed');
       }
     } catch (e) {
+      if (submitBtn) {
+        submitBtn.textContent = 'Submit allocation →';
+        submitBtn.disabled    = false;
+      }
       alert('Network error');
     }
   };
