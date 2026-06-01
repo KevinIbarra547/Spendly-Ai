@@ -8,7 +8,9 @@
   } catch (e) { window.location.href = 'index.html'; return; }
 
   const DEMO_USERNAMES = ['maya', 'parent_demo', 'kid_demo'];
-  if (!DEMO_USERNAMES.includes(user.username) &&
+  const isDemoAccount = DEMO_USERNAMES.includes(user.username);
+
+  if (!isDemoAccount &&
       (!user.financialProfile || !user.financialProfile.surveyCompletedAt)) {
     window.location.href = '/onboarding.html';
     return;

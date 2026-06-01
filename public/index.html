@@ -324,6 +324,11 @@
     });
 
     async function checkAuth() {
+      // Don't bounce to dashboard if the user just logged out of a demo
+      // account and arrived here to register a real one.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'register') return;
+
       try {
         const response = await fetch('/api/auth/me');
         if (response.ok) {
@@ -331,6 +336,18 @@
         }
       } catch (err) { /* stay on landing */ }
     }
+
+    // Auto-open the register modal if redirected from a demo banner.
+    document.addEventListener('DOMContentLoaded', function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'register') {
+        setTimeout(function () {
+          const registerModal = document.getElementById('register-modal');
+          if (registerModal) registerModal.classList.remove('hidden');
+        }, 300);
+        window.history.replaceState({}, '', '/index.html');
+      }
+    });
 
     // ── Role selector (Parent vs Child/Student) ──────────────────
     const roleInput = document.getElementById('role-input');

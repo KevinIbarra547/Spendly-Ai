@@ -134,8 +134,11 @@
           '9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>' +
           '</svg>' +
           'You are viewing a demo account — changes will not be saved.' +
-          '<a href="/index.html" style="color:#000;text-decoration:underline;' +
-          'margin-left:8px;font-weight:800">Create your free account →</a>';
+          '<button onclick="demoLogoutAndRegister()" ' +
+          'style="color:#000;text-decoration:underline;margin-left:8px;' +
+          'font-weight:800;background:none;border:none;cursor:pointer;' +
+          'font-family:inherit;font-size:12px">' +
+          'Create your free account →</button>';
         document.body.prepend(banner);
         var asideEl = document.querySelector('aside');
         if (asideEl) asideEl.style.top = '32px';
@@ -204,3 +207,10 @@ window.SpendlyTheme = {
   }
 };
 SpendlyTheme.init();
+
+window.demoLogoutAndRegister = async function () {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+  } catch (e) { /* ignore — best-effort logout */ }
+  window.location.href = '/index.html?action=register';
+};
