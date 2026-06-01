@@ -48,6 +48,10 @@ async function seed() {
     cancelledSubscriptions: ['netflix'],
     familyGroupId: familyId,
     familyRole: 'child',
+    // Mirror into the canonical CP-F01/F02 field names the rest of the
+    // codebase actually reads (role, familyId, allocations).
+    role: 'child',
+    familyId: familyId,
     pendingAllowance: 50,
     allocation: { save: 40, spend: 50, give: 10 },
     allocationStatus: 'confirmed',
@@ -93,6 +97,15 @@ async function seed() {
     familyRole: 'parent',
     familyInviteCode: 'DEMO99',
     familyGroupName: "The Demo Family",
+    // Canonical fields the real backend reads.
+    role: 'parent',
+    familyId: familyId,
+    // /api/family/members surfaces parent.familyNotes[childId] on each
+    // child summary; populate so the parent dashboard shows the notes.
+    familyNotes: {
+      'demo-user-001':  { message: 'Great job this week Maya! Remember to track everything, even small purchases.', sentAt: new Date(Date.now() - 2*24*60*60*1000).toISOString() },
+      'demo-child-001': { message: 'Great job this week! Try to put a little more in savings next time.', sentAt: new Date(Date.now() - 2*24*60*60*1000).toISOString() }
+    },
     pendingAllowance: 0,
     allocation: null,
     allocationStatus: 'none',
@@ -120,6 +133,9 @@ async function seed() {
     cancelledSubscriptions: [],
     familyGroupId: familyId,
     familyRole: 'child',
+    // Canonical fields the real backend reads.
+    role: 'child',
+    familyId: familyId,
     pendingAllowance: 0,
     allocation: { save: 30, spend: 60, give: 10 },
     allocationStatus: 'confirmed',
