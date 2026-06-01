@@ -257,10 +257,12 @@ function mapCategory(aiCategory) {
     'Groceries': 'Groceries',
     'Food': 'Food',
     'Transportation': 'Transport',
+    'Transport': 'Transport',
     'Entertainment': 'Entertainment',
     'Shopping': 'Shopping',
     'Subscriptions': 'Other',
     'Health': 'Health',
+    'Education': 'Education',
     'Other': 'Other'
   };
   return map[aiCategory] || 'Other';
