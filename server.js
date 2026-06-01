@@ -33,7 +33,7 @@ app.use(session({
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/admin', require('./routes/admin'));
-app.use('/api/ai', require('./routes/ai'));
+app.use('/api/ai', require('./routes/ai').router);
 app.use('/api/family', require('./routes/family'));
 
 // Idempotent boot-time migration: bootstrap data/families.json if it's
