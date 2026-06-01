@@ -67,4 +67,47 @@ function requireChild(req, res, next) {
   }
 }
 
-module.exports = { requireAuth, requireAdmin, requireParent, requireChild };
+const DEMO_IDS = [
+  'demo-user-001',
+  'demo-parent-001',
+  'demo-child-001'
+];
+
+function demoModeGuard(req, res, next) {
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    return next();
+  }
+
+  if (!req.session || !req.session.userId) {
+    return next();
+  }
+
+  if (!DEMO_IDS.includes(req.session.userId)) {
+    return next();
+  }
+
+  if (req.path === '/logout') {
+    return next();
+  }
+
+  if (req.path.includes('/ai/')) {
+    return next();
+  }
+
+  console.log(`[DEMO MODE] Blocked write: ${req.method} ${req.path}`);
+
+  if (req.method === 'DELETE') {
+    return res.status(204).end();
+  }
+
+  const fakeResponse = {
+    ...req.body,
+    id: req.body.id || req.params?.id || 'demo_' + Date.now(),
+    userId: req.session.userId,
+    _demoMode: true
+  };
+
+  return res.status(req.method === 'POST' ? 201 : 200).json(fakeResponse);
+}
+
+module.exports = { requireAuth, requireAdmin, requireParent, requireChild, demoModeGuard };

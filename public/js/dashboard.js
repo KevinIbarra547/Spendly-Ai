@@ -7,7 +7,9 @@
     user = await res.json();
   } catch (e) { window.location.href = 'index.html'; return; }
 
-  if (!user.financialProfile || !user.financialProfile.surveyCompletedAt) {
+  const DEMO_USERNAMES = ['maya', 'parent_demo', 'kid_demo'];
+  if (!DEMO_USERNAMES.includes(user.username) &&
+    (!user.financialProfile || !user.financialProfile.surveyCompletedAt)) {
     window.location.href = '/onboarding.html';
     return;
   }

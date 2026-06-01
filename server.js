@@ -30,6 +30,9 @@ app.use(session({
 }));
 
 // 3. API ROUTES THIRD (BEFORE static, so /api/* doesn't fall through)
+const { demoModeGuard } = require('./middleware/auth');
+app.use('/api', demoModeGuard);
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/admin', require('./routes/admin'));
