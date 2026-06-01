@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendly — Interactive Demo</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    html, body {
+      background: var(--bg-base);
+      color: var(--fg1);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+    }
+
+    /* ── Top progress bar ─────────────────────────────────────────────── */
+    .progress-track {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--bg-elevated);
+      z-index: 60;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.4s ease;
+      width: 12.5%;
+    }
+
+    /* ── Top header ───────────────────────────────────────────────────── */
+    .demo-header {
+      position: fixed;
+      top: 3px; left: 0;
+      width: 100%;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(9, 9, 11, 0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+    }
+    .demo-header a.back {
+      color: var(--fg2);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .demo-header a.back:hover { color: var(--fg1); }
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; color: var(--fg1); font-size: 16px;
+      position: absolute; left: 50%; transform: translateX(-50%);
+      text-decoration: none;
+    }
+    .logo .logo-mark {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--bg-elevated);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--fg1);
+    }
+
+    /* ── Slide layout ─────────────────────────────────────────────────── */
+    main {
+      padding-top: 80px;
+      padding-bottom: 100px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .slide {
+      display: none;
+      animation: fadeIn 0.35s ease;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px;
+      box-sizing: border-box;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .slide-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      width: 100%;
+      align-items: stretch;
+    }
+    @media (max-width: 900px) {
+      .slide-grid { grid-template-columns: 1fr; }
+    }
+
+    .pane-left {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    .pane-right {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 440px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      color: var(--accent-soft);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .pane-left h1 { margin: 0 0 16px; }
+    .pane-left p.lede {
+      color: var(--fg2);
+      font-size: 15px;
+      line-height: 1.6;
+      margin: 0 0 24px;
+    }
+    .benefit-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .benefit-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--fg1);
+    }
+    .check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(34,197,94,0.18);
+      color: #4ade80;
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .pane-left .cta { margin-top: auto; align-self: flex-start; text-decoration: none; }
+
+    /* ── Bottom nav ───────────────────────────────────────────────────── */
+    .nav-bar {
+      position: fixed;
+      bottom: 0; left: 0; width: 100%;
+      padding: 16px 32px;
+      background: rgba(9, 9, 11, 0.85);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 50;
+    }
+    .nav-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--fg1);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) { background: var(--bg-elevated-2); }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .nav-pos {
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+      color: var(--fg3);
+      min-width: 64px;
+      text-align: center;
+    }
+
+    /* ── Generic mockup card (used inside pane-right) ─────────────────── */
+    .mk-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.45);
+    }
+    .mk-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #27272a;
+    }
+    .mk-row:last-child { border-bottom: none; }
+    .mk-iconchip {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .mk-label { font-size: 11px; color: #837e88; letter-spacing: 0.06em;
+                text-transform: uppercase; font-weight: 700; margin-bottom: 12px; }
+    .mk-name  { font-size: 14px; font-weight: 600; color: #f4f1ec; }
+    .mk-sub   { font-size: 12px; color: #837e88; }
+    .mk-amt   { font-size: 14px; font-weight: 700; color: #f4f1ec;
+                font-variant-numeric: tabular-nums; }
+
+    .mk-pill {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 9999px;
+      font-size: 11px; font-weight: 600;
+    }
+    .pill-food          { background: rgba(249,115,22,0.2);  color: #fdba74; }
+    .pill-transport     { background: rgba(59,130,246,0.2);  color: #93c5fd; }
+    .pill-entertainment { background: rgba(168,85,247,0.2);  color: #d8b4fe; }
+    .pill-shopping      { background: rgba(236,72,153,0.2);  color: #f9a8d4; }
+    .pill-health        { background: rgba(34,197,94,0.2);   color: #86efac; }
+    .pill-coffee        { background: rgba(234,179,8,0.2);   color: #fde047; }
+    .pill-groceries     { background: rgba(20,184,166,0.2);  color: #5eead4; }
+    .pill-subs          { background: rgba(99,102,241,0.2);  color: #a5b4fc; }
+
+    /* Slide 1 — donut spending ring */
+    .donut {
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #f97316 0% 31%,
+        #3b82f6 31% 51%,
+        #22c55e 51% 67%,
+        #a855f7 67% 83%,
+        #71717a 83% 100%
+      );
+      display: flex; align-items: center; justify-content: center;
+      margin: 6px auto 16px;
+    }
+    .donut-inner {
+      width: 92px; height: 92px;
+      border-radius: 50%;
+      background: #18181b;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .donut-inner .big   { font-size: 22px; font-weight: 800; color: #f4f1ec;
+                          font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+    .donut-inner .small { font-size: 10px; color: #837e88; margin-top: 1px; }
+
+    .buddy-card {
+      background: #1c1c27;
+      border: 1px solid #2e2e40;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex; gap: 10px; align-items: flex-start;
+      margin-top: 14px;
+    }
+    .buddy-orb {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(99,102,241,0.25); color: #a5b4fc;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; flex-shrink: 0;
+    }
+
+    /* Slide 3 — receipt */
+    .receipt {
+      width: 180px;
+      margin: 0 auto 16px;
+      background: #f4f1ec;
+      color: #18181b;
+      padding: 16px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.5;
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .receipt::after {
+      content: "";
+      position: absolute; bottom: -8px; left: 0; right: 0;
+      height: 12px;
+      background:
+        radial-gradient(circle at 4px 0, transparent 4px, #f4f1ec 4px) 0 0/8px 8px repeat-x;
+    }
+
+    /* Slide 4 — goals */
+    .goal-bar { height: 6px; background: #27272a; border-radius: 9999px; overflow: hidden; }
+    .goal-bar-fill { height: 100%; background: #22c55e; border-radius: 9999px; }
+
+    /* Slide 5 — chat */
+    .chat-bubble {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .chat-user {
+      background: var(--accent);
+      color: white;
+      border-bottom-right-radius: 4px;
+      margin-left: auto;
+    }
+    .chat-buddy {
+      background: #27272a;
+      color: #f4f1ec;
+      border-bottom-left-radius: 4px;
+    }
+    .chat-typing {
+      display: inline-flex; gap: 3px;
+    }
+    .chat-typing span {
+      width: 6px; height: 6px; border-radius: 50%; background: #6366f1;
+      animation: blink 1.2s infinite ease-in-out;
+    }
+    .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
+
+    /* Slide 7 — family allocation bars */
+    .alloc-bar {
+      display: flex; height: 8px; border-radius: 4px; overflow: hidden;
+      background: #27272a;
+    }
+    .grade-pill {
+      padding: 2px 8px; border-radius: 9999px;
+      font-size: 11px; font-weight: 700;
+    }
+
+    /* Slide 8 — final CTA card */
+    .final-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 20px;
+      padding: 36px 28px;
+      text-align: center;
+      max-width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .final-mark {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: var(--bg-elevated);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      color: var(--fg1);
+    }
+    .trust-row {
+      display: flex; justify-content: center; gap: 14px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .trust-row span {
+      font-size: 11px; color: var(--fg3);
+    }
+    .trust-row span::before { content: "✓ "; color: #4ade80; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Progress bar ───────────────────────────────────────────────── -->
+  <div class="progress-track">
+    <div id="progress-fill" class="progress-fill"></div>
+  </div>
+
+  <!-- ── Header ─────────────────────────────────────────────────────── -->
+  <div class="demo-header">
+    <a href="/index.html" class="back">← Back to home</a>
+    <a href="/index.html" class="logo">
+      <div class="logo-mark">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
+          stroke-width="2.2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879
+            1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725
+            0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879
+            4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+        </svg>
+      </div>
+      Spendly
+    </a>
+    <a href="/index.html#signup" class="btn-cta" style="text-decoration:none">
+      Sign up free →
+    </a>
+  </div>
+
+  <main>
+
+  <!-- ════════════ Slide 1 — Dashboard overview ════════════ -->
+  <section class="slide active" data-slide="1">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">01 / 08</span>
+        <h1 class="t-h1">Everything in one place</h1>
+        <p class="lede">
+          Spendly is built for real student life — whether you're tracking
+          lunch money or saving for your first car. No spreadsheets, no
+          complexity, just clarity.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> Free forever</li>
+          <li><span class="check">✓</span> No bank connection needed</li>
+          <li><span class="check">✓</span> Works on any device</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div class="mk-card">
+          <div class="mk-label">This month · April</div>
+          <div class="donut">
+            <div class="donut-inner">
+              <div class="big">$141.89</div>
+              <div class="small">of $200 cap</div>
+            </div>
+          </div>
+          <div class="buddy-card">
+            <div class="buddy-orb">★</div>
+            <div style="font-size:12px;line-height:1.5;color:#b3aeb8">
+              <strong style="color:#f4f1ec">Buddy says:</strong> You're 29% under
+              budget with 5 days left — nice pacing!
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="mk-label">Recent</div>
+            <div class="mk-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="mk-pill pill-coffee">Coffee</span>
+                <span class="mk-name">Blue Bottle</span>
+              </div>
+              <span class="mk-amt">$5.50</span>
+            </div>
+            <div class="mk-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="mk-pill pill-food">Food</span>
+                <span class="mk-name">Chipotle</span>
+              </div>
+              <span class="mk-amt">$13.20</span>
+            </div>
+            <div class="mk-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="mk-pill pill-transport">Transport</span>
+                <span class="mk-name">Lyft</span>
+              </div>
+              <span class="mk-amt">$8.75</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ Slide 2 — Expense Log ════════════ -->
+  <section class="slide" data-slide="2">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">02 / 08</span>
+        <h1 class="t-h1">Track every dollar</h1>
+        <p class="lede">
+          Log what you spend in seconds. Every purchase gets a category color
+          so you can see at a glance where your money goes. Search, filter,
+          edit, delete — full control.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> Category color coding</li>
+          <li><span class="check">✓</span> Search and filter</li>
+          <li><span class="check">✓</span> Edit or delete anytime</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div class="mk-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="mk-label" style="margin-bottom:0">Expense log</div>
+            <div style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;
+              padding:4px 10px;font-size:11px;color:#837e88">🔍 Search</div>
+          </div>
+          <div class="mk-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="mk-iconchip pill-food">🥗</div>
+              <div>
+                <div class="mk-name">Sweetgreen</div>
+                <div class="mk-sub">Apr 14</div>
+              </div>
+            </div>
+            <span class="mk-amt">$14.50</span>
+          </div>
+          <div class="mk-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="mk-iconchip pill-shopping">🛍️</div>
+              <div>
+                <div class="mk-name">Target</div>
+                <div class="mk-sub">Apr 13</div>
+              </div>
+            </div>
+            <span class="mk-amt">$32.18</span>
+          </div>
+          <div class="mk-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="mk-iconchip pill-coffee">☕</div>
+              <div>
+                <div class="mk-name">Starbucks</div>
+                <div class="mk-sub">Apr 13</div>
+              </div>
+            </div>
+            <span class="mk-amt">$6.45</span>
+          </div>
+          <div class="mk-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="mk-iconchip pill-entertainment">🎬</div>
+              <div>
+                <div class="mk-name">AMC Theaters</div>
+                <div class="mk-sub">Apr 12</div>
+              </div>
+            </div>
+            <span class="mk-amt">$18.00</span>
+          </div>
+          <div class="mk-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="mk-iconchip pill-groceries">🛒</div>
+              <div>
+                <div class="mk-name">Trader Joe's</div>
+                <div class="mk-sub">Apr 11</div>
+              </div>
+            </div>
+            <span class="mk-amt">$27.30</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ Slide 3 — Receipt Scanner ════════════ -->
+  <section class="slide" data-slide="3">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">03 / 08</span>
+        <h1 class="t-h1">Scan your receipts</h1>
+        <p class="lede">
+          Point your camera at any receipt and Spendly reads it automatically —
+          merchant name, amount, date, and category all filled in for you.
+          No typing.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> AI-powered OCR</li>
+          <li><span class="check">✓</span> Auto-fills the form</li>
+          <li><span class="check">✓</span> Works with any receipt</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div class="mk-card">
+          <div class="mk-label">New expense from receipt</div>
+          <div class="receipt">
+            <div style="text-align:center;font-weight:700;margin-bottom:4px">
+              CHIPOTLE
+            </div>
+            <div style="text-align:center;margin-bottom:8px">123 Main St</div>
+            <div style="display:flex;justify-content:space-between">
+              <span>Burrito bowl</span><span>10.45</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span>Chips & guac</span><span>2.75</span>
+            </div>
+            <div style="border-top:1px dashed #18181b;margin:6px 0"></div>
+            <div style="display:flex;justify-content:space-between;font-weight:700">
+              <span>TOTAL</span><span>$13.20</span>
+            </div>
+            <div style="text-align:center;margin-top:6px;font-size:10px">
+              04/14/2026
+            </div>
+          </div>
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div class="mk-sub" style="margin-bottom:4px">MERCHANT</div>
+              <div style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;
+                padding:8px 10px;font-size:13px;color:#f4f1ec">Chipotle</div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="flex:1">
+                <div class="mk-sub" style="margin-bottom:4px">AMOUNT</div>
+                <div style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;
+                  padding:8px 10px;font-size:13px;color:#f4f1ec">$13.20</div>
+              </div>
+              <div style="flex:1">
+                <div class="mk-sub" style="margin-bottom:4px">CATEGORY</div>
+                <div style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;
+                  padding:8px 10px"><span class="mk-pill pill-food">Food</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ Slide 4 — Savings Goals ════════════ -->
+  <section class="slide" data-slide="4">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">04 / 08</span>
+        <h1 class="t-h1">Set goals, hit them faster</h1>
+        <p class="lede">
+          Add a goal, set a target, and watch the progress bar fill up.
+          Spendly tells you exactly how many days away you are at your
+          current saving rate.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> Visual progress bars</li>
+          <li><span class="check">✓</span> Savings velocity tracker</li>
+          <li><span class="check">✓</span> Auto-created from your survey</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:380px">
+          <div class="mk-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+              <div>
+                <div class="mk-name">AirPods Pro</div>
+                <div class="mk-sub">$172 of $249 saved</div>
+              </div>
+              <span class="mk-amt" style="color:#4ade80">69%</span>
+            </div>
+            <div class="goal-bar"><div class="goal-bar-fill" style="width:69%"></div></div>
+            <div style="font-size:11px;color:#4ade80;margin-top:8px">
+              ↗ At this pace, 18 days away
+            </div>
+          </div>
+
+          <div class="mk-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+              <div>
+                <div class="mk-name">Summer trip · Italy</div>
+                <div class="mk-sub">$620 of $1,800 saved</div>
+              </div>
+              <span class="mk-amt" style="color:#fbbf24">34%</span>
+            </div>
+            <div class="goal-bar"><div class="goal-bar-fill" style="width:34%;background:#f59e0b"></div></div>
+            <div style="font-size:11px;color:#fbbf24;margin-top:8px">
+              ⏳ Need $98/wk to hit by July
+            </div>
+          </div>
+
+          <div class="mk-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+              <div>
+                <div class="mk-name">Emergency fund</div>
+                <div class="mk-sub">$300 of $500 saved</div>
+              </div>
+              <span class="mk-amt" style="color:#4ade80">60%</span>
+            </div>
+            <div class="goal-bar"><div class="goal-bar-fill" style="width:60%"></div></div>
+            <div style="font-size:11px;color:#4ade80;margin-top:8px">
+              ↗ On track — 24 days away
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ Slide 5 — AI Coach ════════════ -->
+  <section class="slide" data-slide="5">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">05 / 08</span>
+        <h1 class="t-h1">Your AI money coach</h1>
+        <p class="lede">
+          Buddy knows your actual spending, your goals, and your financial
+          profile. Ask anything — get real, personalized advice, not generic
+          tips.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> Knows your real data</li>
+          <li><span class="check">✓</span> Responds in seconds</li>
+          <li><span class="check">✓</span> Never judges you</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div class="mk-card" style="display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid #27272a">
+            <div class="buddy-orb">★</div>
+            <div>
+              <div class="mk-name">Buddy</div>
+              <div class="mk-sub">Your AI Coach · online</div>
+            </div>
+          </div>
+
+          <div style="padding-top:16px;display:flex;flex-direction:column">
+            <div class="chat-bubble chat-user">
+              Why am I broke this week?
+            </div>
+            <div class="chat-bubble chat-buddy">
+              You spent <strong>$48 on coffee</strong> this week — about 3×
+              your usual. Skipping two coffee runs could save $11/wk toward
+              your AirPods goal 🎧
+            </div>
+            <div class="chat-bubble chat-user">
+              How much did I save vs last month?
+            </div>
+            <div class="chat-bubble chat-buddy">
+              Up <strong>$67</strong> from March — nice. Most of the win came
+              from cutting back on takeout (down 24%).
+            </div>
+            <div class="chat-bubble chat-buddy" style="background:transparent;padding:6px 14px">
+              <span class="chat-typing"><span></span><span></span><span></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ Slide 6 — Recurring Detection ════════════ -->
+  <section class="slide" data-slide="6">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">06 / 08</span>
+        <h1 class="t-h1">Spot subscriptions automatically</h1>
+        <p class="lede">
+          Spendly scans your expense history and flags merchants that appear
+          month after month. See exactly how much you're spending on
+          subscriptions every year.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> Auto-detected from your logs</li>
+          <li><span class="check">✓</span> Yearly cost reveal</li>
+          <li><span class="check">✓</span> One tap to start cancelling</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:380px">
+          <div class="mk-card">
+            <div class="mk-label">Detected subscriptions</div>
+            <div class="mk-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="mk-iconchip pill-subs">🎵</div>
+                <div>
+                  <div class="mk-name">Spotify</div>
+                  <div class="mk-sub">Seen 6 months in a row</div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div class="mk-amt">$10.99/mo</div>
+                <span class="mk-pill pill-subs" style="margin-top:4px">Locked-in</span>
+              </div>
+            </div>
+            <div class="mk-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="mk-iconchip pill-entertainment">🎬</div>
+                <div>
+                  <div class="mk-name">Netflix</div>
+                  <div class="mk-sub">Seen 5 months in a row</div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div class="mk-amt">$15.49/mo</div>
+                <span class="mk-pill pill-entertainment" style="margin-top:4px">Auto-detected</span>
+              </div>
+            </div>
+            <div class="mk-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="mk-iconchip pill-subs">☁️</div>
+                <div>
+                  <div class="mk-name">iCloud+</div>
+                  <div class="mk-sub">Seen 4 months in a row</div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div class="mk-amt">$2.99/mo</div>
+                <span class="mk-pill pill-subs" style="margin-top:4px">Auto-detected</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mk-card" style="background:#1c1c27;border-color:#2e2e40">
+            <div class="mk-label" style="color:#a5b4fc">Total monthly cost</div>
+            <div style="font-size:24px;font-weight:800;color:#f4f1ec;
+              font-variant-numeric:tabular-nums">$29.47</div>
+            <div style="font-size:12px;color:#b3aeb8;margin-top:6px">
+              That's <strong style="color:#f4f1ec">$353.64/year</strong> on
+              subscriptions.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ Slide 7 — Family Finance Hub ════════════ -->
+  <section class="slide" data-slide="7">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">07 / 08</span>
+        <h1 class="t-h1">Built for families too</h1>
+        <p class="lede">
+          Parents can send allowances, set spending limits, and see how their
+          kids are managing money. Children split their allowance into Save,
+          Spend, and Give — and AI grades their choices.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> AI-graded allocations</li>
+          <li><span class="check">✓</span> Parent dashboard</li>
+          <li><span class="check">✓</span> Teach money habits early</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div class="mk-card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div style="width:42px;height:42px;border-radius:50%;
+              background:rgba(99,102,241,0.2);color:#a5b4fc;display:flex;
+              align-items:center;justify-content:center;font-weight:700">MA</div>
+            <div style="flex:1">
+              <div class="mk-name">Maya</div>
+              <div class="mk-sub">Last allowance $20 · 3 days ago</div>
+            </div>
+            <span class="grade-pill" style="background:rgba(34,197,94,0.15);color:#4ade80">
+              Grade A
+            </span>
+          </div>
+
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;
+              color:#837e88;margin-bottom:6px">
+              <span>Allocation</span>
+              <span>This month</span>
+            </div>
+            <div class="alloc-bar">
+              <div style="width:40%;background:#22c55e"></div>
+              <div style="width:45%;background:#6366f1"></div>
+              <div style="width:15%;background:#a855f7"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;
+              color:#837e88;margin-top:6px">
+              <span>Save 40%</span><span>Food 45%</span><span>Free 15%</span>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;
+              color:#837e88;margin-bottom:4px">
+              <span>Nintendo Switch</span><span>72%</span>
+            </div>
+            <div class="goal-bar"><div class="goal-bar-fill" style="width:72%"></div></div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="btn-primary" style="font-size:12px;padding:7px 12px">
+              Send allowance
+            </span>
+            <span class="btn-ghost" style="font-size:12px;padding:7px 12px">
+              Leave a note
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ Slide 8 — Ready to start ════════════ -->
+  <section class="slide" data-slide="8">
+    <div class="slide-grid">
+      <div class="pane-left">
+        <span class="step-badge">08 / 08</span>
+        <h1 class="t-h1">Join thousands of students</h1>
+        <p class="lede">
+          It takes 60 seconds to create your account and complete your
+          financial profile. Buddy will be ready with personalized advice
+          the moment you log in.
+        </p>
+        <ul class="benefit-list">
+          <li><span class="check">✓</span> Free forever</li>
+          <li><span class="check">✓</span> No credit card</li>
+          <li><span class="check">✓</span> AI-powered from day one</li>
+        </ul>
+        <a href="/index.html#signup" class="btn-cta cta" style="text-decoration:none">
+          Try it free →
+        </a>
+      </div>
+      <div class="pane-right">
+        <div class="final-card">
+          <div class="final-mark">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"
+              stroke-width="2.2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242
+                0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768
+                12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303
+                0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9
+                0 0 1 18 0z"/>
+            </svg>
+          </div>
+          <h2 class="t-h2" style="margin:0 0 10px">Start your financial journey</h2>
+          <p style="color:var(--fg3);font-size:13px;margin:0 0 22px">
+            Sign up free in under a minute — Buddy is ready to meet you.
+          </p>
+          <a href="/index.html#signup" class="btn-cta" style="width:100%;
+            justify-content:center;text-decoration:none">
+            Sign up free →
+          </a>
+          <div class="trust-row">
+            <span>No credit card</span>
+            <span>Free forever</span>
+            <span>AI-powered</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ── Bottom nav ─────────────────────────────────────────────────── -->
+  <div class="nav-bar">
+    <button id="prev-btn" class="nav-btn" disabled>← Previous</button>
+    <div class="nav-pos"><span id="pos-current">1</span> / 8</div>
+    <button id="next-btn" class="nav-btn">Next →</button>
+  </div>
+
+  <script>
+    (function () {
+      const TOTAL = 8;
+      let current = 1;
+
+      const slides    = document.querySelectorAll('.slide');
+      const prevBtn   = document.getElementById('prev-btn');
+      const nextBtn   = document.getElementById('next-btn');
+      const posEl     = document.getElementById('pos-current');
+      const progress  = document.getElementById('progress-fill');
+
+      function go(n) {
+        if (n < 1 || n > TOTAL) return;
+        current = n;
+        slides.forEach(s => s.classList.toggle(
+          'active', Number(s.dataset.slide) === current
+        ));
+        posEl.textContent = current;
+        progress.style.width = ((current / TOTAL) * 100) + '%';
+        prevBtn.disabled = current === 1;
+        nextBtn.disabled = current === TOTAL;
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+
+      prevBtn.addEventListener('click', () => go(current - 1));
+      nextBtn.addEventListener('click', () => go(current + 1));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault(); go(current + 1);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault(); go(current - 1);
+        }
+      });
+
+      go(1);
+    })();
+  </script>
+
+</body>
+</html>
