@@ -579,4 +579,32 @@ router.patch('/survey', requireAuth, (req, res) => {
   }
 });
 
+// POST /api/auth/change-password — verify current password then rotate hash.
+router.post('/change-password', requireAuth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (typeof currentPassword !== 'string' || typeof newPassword !== 'string') {
+      return res.status(400).json({ error: 'currentPassword and newPassword are required' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+
+    const users = readUsers();
+    const idx = users.findIndex(u => u.id === req.session.userId);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+
+    const ok = await bcrypt.compare(currentPassword, users[idx].passwordHash);
+    if (!ok) return res.status(400).json({ error: 'Current password is incorrect' });
+
+    users[idx].passwordHash = await bcrypt.hash(newPassword, 10);
+    writeUsers(users);
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('change-password error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
