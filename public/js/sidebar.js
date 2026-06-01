@@ -113,6 +113,35 @@
         var adminLink = document.getElementById('admin-nav-link');
         if (adminLink) adminLink.style.display = 'none';
       }
+      // Demo-mode banner: pinned to the top on any of the three demo accounts.
+      var DEMO_USERNAMES = ['maya', 'parent_demo', 'kid_demo'];
+      if (user && DEMO_USERNAMES.indexOf(user.username) !== -1) {
+        var banner = document.createElement('div');
+        banner.id = 'demo-banner';
+        banner.style.cssText =
+          'position:fixed;top:0;left:0;right:0;z-index:9999;' +
+          'background:linear-gradient(90deg,#f59e0b,#d97706);color:#000;' +
+          'text-align:center;font-size:12px;font-weight:700;padding:6px 16px;' +
+          'display:flex;align-items:center;justify-content:center;gap:8px;' +
+          'font-family:inherit;';
+        banner.innerHTML =
+          '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" ' +
+          'stroke-width="2" stroke="currentColor">' +
+          '<path stroke-linecap="round" stroke-linejoin="round" ' +
+          'd="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>' +
+          '<path stroke-linecap="round" stroke-linejoin="round" ' +
+          'd="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 ' +
+          '9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7Z"/>' +
+          '</svg>' +
+          'You are viewing a demo account — changes will not be saved.' +
+          '<a href="/index.html" style="color:#000;text-decoration:underline;' +
+          'margin-left:8px;font-weight:800">Create your free account →</a>';
+        document.body.prepend(banner);
+        var asideEl = document.querySelector('aside');
+        if (asideEl) asideEl.style.top = '32px';
+        var mainEl  = document.querySelector('.ml-64');
+        if (mainEl)  mainEl.style.paddingTop = '32px';
+      }
       // Pulsing yellow dot on Family link for child accounts not yet in a family
       if (user && user.role === 'child' && !user.familyId) {
         var styleTag = document.createElement('style');

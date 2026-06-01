@@ -67,4 +67,42 @@ function requireChild(req, res, next) {
   }
 }
 
-module.exports = { requireAuth, requireAdmin, requireParent, requireChild };
+const DEMO_IDS = [
+  'demo-user-001',
+  'demo-parent-001',
+  'demo-child-001'
+];
+
+// Mounted at app.use('/api', demoModeGuard) — runs before any route handler.
+// For demo accounts only, swallows writes and returns a fake-success body so
+// the UI feels real without persisting to the JSON files.
+function demoModeGuard(req, res, next) {
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    return next();
+  }
+  if (!req.session || !req.session.userId) return next();
+  if (!DEMO_IDS.includes(req.session.userId)) return next();
+
+  // NB: this middleware is mounted under /api, so req.path inside the
+  // handler has the /api prefix stripped (e.g. /auth/logout, /ai/coach).
+  // Whitelist logout so demo users can sign out.
+  if (req.path === '/auth/logout') return next();
+
+  // Whitelist AI routes — coach and scanner don't write user data
+  // and are the most impressive features to demo.
+  if (req.path.includes('/ai/')) return next();
+
+  console.log(`[DEMO MODE] Blocked write: ${req.method} ${req.path}`);
+
+  if (req.method === 'DELETE') return res.status(204).end();
+
+  const fakeResponse = {
+    ...req.body,
+    id: (req.body && req.body.id) || (req.params && req.params.id) || 'demo_' + Date.now(),
+    userId: req.session.userId,
+    _demoMode: true
+  };
+  return res.status(req.method === 'POST' ? 201 : 200).json(fakeResponse);
+}
+
+module.exports = { requireAuth, requireAdmin, requireParent, requireChild, demoModeGuard };
