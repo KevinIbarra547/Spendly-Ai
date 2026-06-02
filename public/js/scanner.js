@@ -6,10 +6,17 @@
       const config = await cfgRes.json();
       if (config.receiptScannerEnabled === false) {
         document.body.innerHTML = `
-          <div class="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-zinc-950 text-white">
-            <h1 class="text-2xl font-bold mb-3">This feature is currently disabled</h1>
-            <p class="text-zinc-400 mb-6">The Receipt Scanner has been turned off by an administrator.</p>
-            <a href="/dashboard.html" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition-colors">Back to Dashboard</a>
+          <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#09090b">
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:40px 32px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+              <div style="width:56px;height:56px;border-radius:50%;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#f87171">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/>
+                </svg>
+              </div>
+              <h1 style="font-size:20px;font-weight:700;color:#f4f1ec;margin-bottom:8px">Receipt Scanner Disabled</h1>
+              <p style="font-size:13px;color:#71717a;line-height:1.6;margin-bottom:28px">The admin has temporarily disabled the Receipt Scanner. Please check back later or log expenses manually.</p>
+              <a href="/dashboard.html" style="display:block;background:#6366f1;color:#fff;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;text-decoration:none;font-family:inherit">← Back to Dashboard</a>
+            </div>
           </div>`;
         return;
       }

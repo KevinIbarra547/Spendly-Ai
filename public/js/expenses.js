@@ -275,7 +275,27 @@ openScannerBtn.addEventListener('click', async () => {
     if (cfgRes.ok) {
       const config = await cfgRes.json();
       if (config.receiptScannerEnabled === false) {
-        alert('The Receipt Scanner is currently disabled by the administrator.');
+        const existing = document.getElementById('scanner-disabled-modal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'scanner-disabled-modal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999';
+        modal.innerHTML = `
+          <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:32px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+            <div style="width:48px;height:48px;border-radius:50%;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#f87171">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/>
+              </svg>
+            </div>
+            <h2 style="font-size:18px;font-weight:700;color:#f4f1ec;margin-bottom:8px">Receipt Scanner Disabled</h2>
+            <p style="font-size:13px;color:#71717a;line-height:1.5;margin-bottom:24px">The admin has temporarily disabled the Receipt Scanner. Please check back later or log expenses manually.</p>
+            <button id="scanner-disabled-dismiss" style="width:100%;background:#6366f1;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Got it — go back</button>
+          </div>
+        `;
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+        document.body.appendChild(modal);
+        document.getElementById('scanner-disabled-dismiss').addEventListener('click', () => modal.remove());
         return;
       }
     }
