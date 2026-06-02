@@ -70,7 +70,8 @@ function requireChild(req, res, next) {
 const DEMO_IDS = [
   'demo-user-001',
   'demo-parent-001',
-  'demo-child-001'
+  'demo-child-001',
+  'demo-admin-001'
 ];
 
 // Mounted at app.use('/api', demoModeGuard) — runs before any route handler.
