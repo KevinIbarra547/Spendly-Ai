@@ -925,23 +925,18 @@ async function submitSurvey(cta, back, err) {
       credentials: 'include',
       body: JSON.stringify(answers)
     });
-    if (res.status === 404) {
-      console.warn('POST /api/auth/survey returned 404 — endpoint not implemented yet. Redirecting anyway.');
+    // Session-issue (401) and missing-endpoint (404) are non-fatal here — the
+    // user already saw the summary, so just hand them off to the dashboard.
+    if (res.ok || res.status === 401 || res.status === 404) {
       window.location.href = '/dashboard.html';
       return;
     }
-    if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
-      err.textContent = e.error || 'Something went wrong. Please try again.';
-      cta.disabled = false; back.disabled = false;
-      cta.innerHTML = 'Get Started →';
-      return;
-    }
-    window.location.href = '/dashboard.html';
-  } catch (e) {
-    err.textContent = 'Network error. Please try again.';
+    const e = await res.json().catch(() => ({}));
+    err.textContent = e.error || 'Something went wrong. Please try again.';
     cta.disabled = false; back.disabled = false;
     cta.innerHTML = 'Get Started →';
+  } catch (e) {
+    window.location.href = '/dashboard.html';
   }
 }
 
