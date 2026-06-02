@@ -6,10 +6,17 @@
       const config = await cfgRes.json();
       if (config.aiCoachEnabled === false) {
         document.body.innerHTML = `
-          <div class="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-zinc-950 text-white">
-            <h1 class="text-2xl font-bold mb-3">This feature is currently disabled</h1>
-            <p class="text-zinc-400 mb-6">The AI Coach has been turned off by an administrator.</p>
-            <a href="/dashboard.html" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition-colors">Back to Dashboard</a>
+          <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#09090b">
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:40px 32px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6)">
+              <div style="width:56px;height:56px;border-radius:50%;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#f87171">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V20.25a.75.75 0 0 0 1.28.53l4.184-4.183a.39.39 0 0 1 .402-.088A48.35 48.35 0 0 0 11.25 17c2.115 0 4.198-.137 6.24-.402 1.608-.209 2.76-1.614 2.76-3.235V8.511Z"/>
+                </svg>
+              </div>
+              <h1 style="font-size:20px;font-weight:700;color:#f4f1ec;margin-bottom:8px">AI Coach Disabled</h1>
+              <p style="font-size:13px;color:#71717a;line-height:1.6;margin-bottom:28px">The admin has temporarily disabled the AI Coach. Please check back later.</p>
+              <a href="/dashboard.html" style="display:block;background:#6366f1;color:#fff;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;text-decoration:none;font-family:inherit">← Back to Dashboard</a>
+            </div>
           </div>`;
         return;
       }
