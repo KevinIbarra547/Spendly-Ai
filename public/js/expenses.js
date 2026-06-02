@@ -268,7 +268,19 @@ function mapCategory(aiCategory) {
   return map[aiCategory] || 'Other';
 }
 
-openScannerBtn.addEventListener('click', () => {
+openScannerBtn.addEventListener('click', async () => {
+  // Respect the admin Receipt Scanner toggle — fail open on fetch error.
+  try {
+    const cfgRes = await fetch('/api/site/config');
+    if (cfgRes.ok) {
+      const config = await cfgRes.json();
+      if (config.receiptScannerEnabled === false) {
+        alert('The Receipt Scanner is currently disabled by the administrator.');
+        return;
+      }
+    }
+  } catch (e) { /* fail open */ }
+
   expenseFormFields.classList.add('hidden');
   scannerPanel.classList.remove('hidden');
 });
