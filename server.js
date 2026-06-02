@@ -84,6 +84,22 @@ app.use('/api/family', require('./routes/family'));
   }
 })();
 
+// Auto-create site_config.json if missing (e.g. fresh clone after
+// data/site_config.json was added to .gitignore).
+(function ensureSiteConfig() {
+  const CONFIG_PATH = path.join(__dirname, 'data', 'site_config.json');
+  if (!fs.existsSync(CONFIG_PATH)) {
+    const defaultConfig = {
+      maintenanceMode: false,
+      aiCoachEnabled: true,
+      receiptScannerEnabled: true,
+      tipOfTheDay: 'Welcome to Spendly!'
+    };
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2));
+    console.log('Created default site_config.json');
+  }
+})();
+
 // 4. Built-in health and config endpoints
 app.get('/api/health', (req, res) => {
   res.status(200).json({ ok: true, startedAt: SERVER_START_ISO });
