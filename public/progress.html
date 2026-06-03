@@ -15,8 +15,23 @@
       margin-bottom: 8px;
       display: flex;
       align-items: flex-start;
+      justify-content: space-between;
       gap: 16px;
       transition: border-color 0.15s, transform 0.15s;
+    }
+    .cp-card-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      min-width: 0;
+      flex: 1;
+    }
+    .cp-card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
     }
     .cp-card:hover {
       border-color: #3f3f46;
@@ -152,6 +167,20 @@
         <span class="stat-pill"><span class="num">3</span> Developers</span>
         <span class="stat-pill"><span class="num">2</span> Weeks</span>
       </div>
+      <div>
+        <a href="https://github.com/KevinIbarra547/Spendly-Ai"
+          target="_blank" rel="noopener noreferrer"
+          style="display:inline-flex;align-items:center;gap:6px;
+          font-size:13px;color:#71717a;text-decoration:none;margin-top:16px;
+          transition:color 0.15s"
+          onmouseover="this.style.color='#f4f1ec'"
+          onmouseout="this.style.color='#71717a'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"/>
+          </svg>
+          View full repo on GitHub
+        </a>
+      </div>
     </div>
   </section>
 
@@ -215,6 +244,36 @@
   </footer>
 
   <script>
+    const REPO_URL = 'https://github.com/KevinIbarra547/Spendly-Ai';
+    const tagMap = {
+      'CP01':   'CP01-project-architecture',
+      'CP02':   'CP02-core-authentication',
+      'CP03':   'CP03-extended-profile',
+      'CP04':   'CP04-expense-goals-crud',
+      'CP05':   'CP05-ui-shell-navigation',
+      'CP06':   'CP06-data-analytics',
+      'CP07':   'CP07-ai-coach',
+      'CP08':   'CP08-ai-receipt-scanner',
+      'CP09':   'CP09-admin-dashboard',
+      'CP10':   'CP10-checkpoints-page',
+      'CP13':   'CP13-design-system',
+      'CP14':   'CP14-onboarding-quiz',
+      'CP-S01': 'CP-S01-survey-data-schema',
+      'CP-S02': 'CP-S02-survey-ui-flow',
+      'CP-S03': 'CP-S03-survey-save-endpoint',
+      'CP-S04': 'CP-S04-ai-profile-wiring',
+      'CP-R01': 'CP-R01-recurring-endpoint',
+      'CP-R02': 'CP-R02-recurring-ui',
+      'CP-R03': 'CP-R03-coach-recurring-context',
+      'CP-F01': 'CP-F01-family-data-schema',
+      'CP-F02': 'CP-F02-family-backend-routes',
+      'CP-F03': 'CP-F03-family-ui',
+      'CP-F04': 'CP-F04-recurring-allowances',
+      'CP-F05': 'CP-F05-ai-grading',
+      'CP-F06': 'CP-F06-ai-autosuggestion',
+      'CP11':   'CP11-final-polish',
+    };
+
     const phases = [
       {
         name: 'Foundation',
@@ -285,6 +344,28 @@
       </svg>
     `;
 
+    function githubLink(cp) {
+      const tag = tagMap[cp];
+      if (!tag) return '';
+      const href = `${REPO_URL}/releases/tag/${tag}`;
+      return `
+        <a href="${href}"
+          target="_blank" rel="noopener noreferrer"
+          style="font-size:11px;color:#52525b;text-decoration:none;
+          display:flex;align-items:center;gap:4px;flex-shrink:0;
+          transition:color 0.15s"
+          onmouseover="this.style.color='#a5b4fc'"
+          onmouseout="this.style.color='#52525b'">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24"
+            stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+          </svg>
+          View on GitHub
+        </a>
+      `;
+    }
+
     const timeline = document.getElementById('timeline');
     timeline.innerHTML = phases.map((phase, i) => {
       const phaseNum = i + 1;
@@ -292,15 +373,20 @@
         const klass = ownerClass(item.owner);
         return `
           <div class="cp-card">
-            <span class="cp-tag cp-tag-${klass}">${escapeHTML(item.cp)}</span>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2 flex-wrap mb-1">
-                <span class="text-white font-semibold">${escapeHTML(item.name)}</span>
-                <span class="owner-pill owner-${klass}">${escapeHTML(item.owner)}</span>
+            <div class="cp-card-left">
+              <span class="cp-tag cp-tag-${klass}">${escapeHTML(item.cp)}</span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <span class="text-white font-semibold">${escapeHTML(item.name)}</span>
+                  <span class="owner-pill owner-${klass}">${escapeHTML(item.owner)}</span>
+                </div>
+                <div class="text-zinc-400 text-sm leading-relaxed">${escapeHTML(item.desc)}</div>
               </div>
-              <div class="text-zinc-400 text-sm leading-relaxed">${escapeHTML(item.desc)}</div>
             </div>
-            ${checkSvg}
+            <div class="cp-card-right">
+              ${githubLink(item.cp)}
+              ${checkSvg}
+            </div>
           </div>
         `;
       }).join('');
