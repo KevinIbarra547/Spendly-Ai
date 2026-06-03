@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spendly — Development Progress</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .cp-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .cp-card:hover {
+      border-color: #3f3f46;
+      transform: translateY(-1px);
+    }
+    .cp-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      padding: 6px 10px;
+      border-radius: 8px;
+      min-width: 64px;
+      text-align: center;
+      flex-shrink: 0;
+      color: #ffffff;
+    }
+    .cp-tag-kevin  { background: #6366f1; }
+    .cp-tag-kayden { background: #22c55e; }
+    .cp-tag-nolan  { background: #a855f7; }
+    .cp-tag-joint  { background: linear-gradient(135deg, #6366f1 0%, #22c55e 100%); }
+
+    .owner-pill {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+    .owner-kevin  { background: rgba(99,102,241,0.2);  color: #a5b4fc; }
+    .owner-kayden { background: rgba(34,197,94,0.2);   color: #4ade80; }
+    .owner-nolan  { background: rgba(168,85,247,0.2);  color: #d8b4fe; }
+    .owner-joint  {
+      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(34,197,94,0.2));
+      color: #c4b5fd;
+    }
+
+    .phase-header {
+      background: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin: 24px 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-pill {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 9999px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #f4f1ec;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stat-pill .num {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+    .avatar-kevin  { background: #6366f1; }
+    .avatar-kayden { background: #22c55e; }
+    .avatar-nolan  { background: #a855f7; }
+
+    .check-icon {
+      color: #22c55e;
+      flex-shrink: 0;
+      margin-left: auto;
+      align-self: center;
+    }
+  </style>
+</head>
+<body style="background:var(--bg-base);color:var(--fg1)">
+
+  <!-- Fixed top nav -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-zinc-950/90 backdrop-blur border-b border-zinc-800">
+    <div class="max-w-6xl mx-auto flex items-center justify-between px-6 h-16">
+      <a href="index.html" class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+          </svg>
+        </div>
+        <span class="text-white font-bold text-lg">Spendly</span>
+      </a>
+      <div class="hidden md:flex items-center gap-7 text-sm text-zinc-400">
+        <a href="/index.html#features" class="hover:text-white transition-colors">Features</a>
+        <a href="/index.html#how-it-works" class="hover:text-white transition-colors">How it works</a>
+        <a href="/progress.html" class="text-white font-semibold">Progress</a>
+        <a href="/index.html#about" class="hover:text-white transition-colors">About</a>
+      </div>
+      <a href="/index.html" class="border border-zinc-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-zinc-800 transition-colors">
+        Log in
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="pt-36 pb-12 px-6 text-center">
+    <div class="max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-zinc-800 text-zinc-300 text-sm font-medium px-4 py-1.5 rounded-full mb-8">
+        🛠️ Built in 2 weeks
+      </div>
+      <h1 class="text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
+        From idea to launch
+      </h1>
+      <p class="text-zinc-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+        12 original checkpoints + 17 feature checkpoints — every commit tracked, every feature shipped.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <span class="stat-pill"><span class="num">29</span> Checkpoints</span>
+        <span class="stat-pill"><span class="num">3</span> Developers</span>
+        <span class="stat-pill"><span class="num">2</span> Weeks</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="px-6 pb-12">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-xl font-bold text-white text-center mb-6">The team</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4">
+          <div class="avatar avatar-kevin">KB</div>
+          <div>
+            <div class="text-white font-semibold">Kevin</div>
+            <div class="text-zinc-400 text-sm">AI Lead</div>
+            <div class="text-zinc-500 text-xs mt-1">11 checkpoints</div>
+          </div>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4">
+          <div class="avatar avatar-kayden">KY</div>
+          <div>
+            <div class="text-white font-semibold">Kayden</div>
+            <div class="text-zinc-400 text-sm">Backend & Architecture Lead</div>
+            <div class="text-zinc-500 text-xs mt-1">12 checkpoints</div>
+          </div>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4">
+          <div class="avatar avatar-nolan">NL</div>
+          <div>
+            <div class="text-white font-semibold">Nolan</div>
+            <div class="text-zinc-400 text-sm">Frontend UI Lead</div>
+            <div class="text-zinc-500 text-xs mt-1">6 checkpoints</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="px-6 pb-20">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-white text-center mb-2">Checkpoint timeline</h2>
+      <p class="text-zinc-400 text-center text-sm mb-8">Every milestone, grouped by phase.</p>
+      <div id="timeline"></div>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <section class="px-6 pb-20">
+    <div class="max-w-3xl mx-auto">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-10 text-center">
+        <h2 class="text-3xl font-bold text-white mb-3">Want to try it yourself?</h2>
+        <p class="text-zinc-400 mb-6">Spendly is free forever — no credit card needed.</p>
+        <a href="/index.html" class="inline-block bg-white text-zinc-950 hover:bg-zinc-200 font-semibold px-6 py-3 rounded-xl transition-colors text-sm">
+          Sign up free →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-zinc-800 py-8 px-6 text-center text-zinc-600 text-xs">
+    © 2025 Spendly — your money's smarter friend
+  </footer>
+
+  <script>
+    const phases = [
+      {
+        name: 'Foundation',
+        items: [
+          { cp: 'CP01', name: 'Project Architecture',  owner: 'Kayden', desc: 'Set up Express server, JSON schemas, and Replit configuration. Established the foundation for the entire app.' },
+          { cp: 'CP02', name: 'Core Authentication',   owner: 'Kayden', desc: 'Built register and login with bcrypt password hashing and session management.' },
+          { cp: 'CP03', name: 'Extended Profile',      owner: 'Nolan',  desc: 'Created the profile page UI with all 9 fields, profile picture upload, and PATCH endpoint.' },
+          { cp: 'CP04', name: 'Expense & Goals CRUD',  owner: 'Kayden', desc: 'All backend routes for expenses and goals — POST, GET, PUT, DELETE fully working with session auth.' },
+          { cp: 'CP05', name: 'UI Shell & Navigation', owner: 'Nolan',  desc: 'Built all HTML pages, responsive Tailwind layout, and the shared sidebar navigation component.' },
+        ]
+      },
+      {
+        name: 'Core Features',
+        items: [
+          { cp: 'CP06', name: 'Data Analytics',     owner: 'Nolan',  desc: 'Integrated Chart.js for pie charts, line charts, weekly comparison, and goal progress bars.' },
+          { cp: 'CP07', name: 'AI Coach',           owner: 'Kevin',  desc: 'Groq SDK integration with context injection from user expense data and streaming chat responses.' },
+          { cp: 'CP08', name: 'AI Receipt Scanner', owner: 'Kevin',  desc: 'Multer image uploads with Groq Vision — scans receipts and auto-populates the expense form.' },
+          { cp: 'CP09', name: 'Admin Dashboard',    owner: 'Kayden', desc: 'God mode admin panel with feature toggles, message of the day, and secret keystroke admin registration.' },
+          { cp: 'CP10', name: 'Checkpoints Page',   owner: 'Nolan',  desc: 'Public reflection page listing all checkpoints with owners, dates, and reflections.' },
+        ]
+      },
+      {
+        name: 'Design & Intelligence',
+        items: [
+          { cp: 'CP13',   name: 'Design System + Theme Toggle', owner: 'Kevin',          desc: 'Full design token system, dark/light mode toggle with localStorage persistence.' },
+          { cp: 'CP14',   name: 'Onboarding Quiz',              owner: 'Kevin + Kayden', desc: 'Simple financial onboarding flow capturing income, bills, and budget preferences.' },
+          { cp: 'CP-S01', name: 'Survey Data Schema',           owner: 'Kayden',         desc: 'Added financialProfile object with 14 fields to users.json for the full survey feature.' },
+          { cp: 'CP-S02', name: 'Survey UI Flow',               owner: 'Kevin',          desc: 'Multi-screen 13-question survey with conditional logic, progress bar, and completion screen.' },
+          { cp: 'CP-S03', name: 'Survey Save Endpoint',         owner: 'Kayden',         desc: 'POST /api/auth/survey saves financialProfile, sets surveyCompletedAt, auto-creates savings goal.' },
+          { cp: 'CP-S04', name: 'AI Profile Wiring',            owner: 'Kevin',          desc: 'Injected full financialProfile into every Groq system prompt for truly personalized AI responses.' },
+        ]
+      },
+      {
+        name: 'Advanced Features',
+        items: [
+          { cp: 'CP-R01', name: 'Recurring Detection Endpoint',  owner: 'Kayden', desc: 'GET /api/expenses/recurring detects merchants appearing in 2+ months with confidence levels.' },
+          { cp: 'CP-R02', name: 'Recurring Page UI',             owner: 'Nolan',  desc: 'Built recurring.html with detection list, cancellation links, mark-as-cancelled flow, and summary card.' },
+          { cp: 'CP-R03', name: 'Coach Recurring Context',       owner: 'Kevin',  desc: 'Injected recurring subscription list into AI Coach prompts and wired localStorage prefill.' },
+          { cp: 'CP-F01', name: 'Family Data Schema',            owner: 'Kayden', desc: 'Added familyGroup, allowance, and allocation fields to JSON data models.' },
+          { cp: 'CP-F02', name: 'Family Backend Routes',         owner: 'Kayden', desc: 'POST /api/family/group, /invite, /allowance, /allocate, GET /api/family/dashboard endpoints.' },
+          { cp: 'CP-F03', name: 'Family UI Screens',             owner: 'Kevin',  desc: 'Parent dashboard, child allocation screen with sliders, allowance modal, notes UI.' },
+          { cp: 'CP-F04', name: 'Allowance & Allocation Logic',  owner: 'Kayden', desc: 'Recurring allowance scheduler using native setInterval, pending allocation state, bucket flow.' },
+          { cp: 'CP-F05', name: 'AI Grading Integration',        owner: 'Kevin',  desc: "Groq grades child's Save/Spend/Give split A-F with child-appropriate feedback. Blocks C/D/F." },
+          { cp: 'CP-F06', name: 'AI Auto-Suggestion',            owner: 'Kevin',  desc: 'AI pre-fills suggested allocation when child opens screen. Full end-to-end family flow tested.' },
+          { cp: 'CP11',   name: 'Final Polish',                  owner: 'Kevin leads', desc: 'Bug fixes, UI consistency, receipt scanner fix, demo accounts, admin improvements.' },
+        ]
+      },
+    ];
+
+    function ownerClass(owner) {
+      const o = owner.toLowerCase();
+      if (o.includes('+') || o.includes('leads')) return 'joint';
+      if (o.startsWith('kevin'))  return 'kevin';
+      if (o.startsWith('kayden')) return 'kayden';
+      if (o.startsWith('nolan'))  return 'nolan';
+      return 'joint';
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    const checkSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="check-icon" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+      </svg>
+    `;
+
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = phases.map((phase, i) => {
+      const phaseNum = i + 1;
+      const cards = phase.items.map(item => {
+        const klass = ownerClass(item.owner);
+        return `
+          <div class="cp-card">
+            <span class="cp-tag cp-tag-${klass}">${escapeHTML(item.cp)}</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="text-white font-semibold">${escapeHTML(item.name)}</span>
+                <span class="owner-pill owner-${klass}">${escapeHTML(item.owner)}</span>
+              </div>
+              <div class="text-zinc-400 text-sm leading-relaxed">${escapeHTML(item.desc)}</div>
+            </div>
+            ${checkSvg}
+          </div>
+        `;
+      }).join('');
+      return `
+        <div class="phase-header">
+          <div class="flex items-center gap-3">
+            <span class="text-zinc-500 text-xs font-bold uppercase tracking-wider">Phase ${phaseNum}</span>
+            <span class="text-white font-bold text-lg">${escapeHTML(phase.name)}</span>
+          </div>
+          <span class="text-zinc-500 text-xs">${phase.items.length} checkpoints</span>
+        </div>
+        ${cards}
+      `;
+    }).join('');
+  </script>
+</body>
+</html>
