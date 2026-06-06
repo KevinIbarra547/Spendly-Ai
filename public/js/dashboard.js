@@ -82,15 +82,14 @@
   } catch (e) { /* leave empty */ }
 
   // This Month calculations
-  const thisMonthExpenses = expenses.filter(e => {
-    const d = new Date(e.date);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
-  const prevMonthExpenses = expenses.filter(e => {
-    const d = new Date(e.date);
-    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    return d.getMonth() === prev.getMonth() && d.getFullYear() === prev.getFullYear();
-  });
+  // Compare YYYY-MM string prefixes; parsing "YYYY-MM-DD" via new Date() treats
+  // it as UTC midnight, which lands in the previous month in west-of-UTC zones.
+  const pad = n => String(n).padStart(2, '0');
+  const thisKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`;
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevKey = `${prev.getFullYear()}-${pad(prev.getMonth() + 1)}`;
+  const thisMonthExpenses = expenses.filter(e => typeof e.date === 'string' && e.date.startsWith(thisKey));
+  const prevMonthExpenses = expenses.filter(e => typeof e.date === 'string' && e.date.startsWith(prevKey));
 
   const monthSpent = thisMonthExpenses.reduce((s, e) => s + parseFloat(e.amount), 0);
   const prevSpent  = prevMonthExpenses.reduce((s, e) => s + parseFloat(e.amount), 0);
